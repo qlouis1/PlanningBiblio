@@ -3209,7 +3209,6 @@ class StatisticController extends BaseController
                                 $agents[$elem['perso_id']] = array($elem['perso_id'], $elem['nom'], $elem['prenom'], 0, "site" => $elem['site']);
                             }
                             $agents[$elem['perso_id']][3] = floatval($agents[$elem['perso_id']][3]) + diff_heures($elem['debut'], $elem['fin'], "decimal");
-                            $agents[$elem['perso_id']][3] = heure4($agents[$elem['perso_id']][3]);
 
                             // On compte les heures de chaque site
                             if ($nbSites > 1) {
@@ -3228,7 +3227,6 @@ class StatisticController extends BaseController
                                 $services[$service] = array("nom"=>$service,"heures"=>0);
                             }
                             $services[$service]["heures"] = floatval($services[$service]["heures"]) + diff_heures($elem['debut'], $elem['fin'], "decimal");
-                            $services[$service]["heures"] = heure4($services[$service]["heures"]);
 
                             // On créé un tableau par statut
                             if (array_key_exists($elem['perso_id'], $agents_infos)) {
@@ -3239,7 +3237,6 @@ class StatisticController extends BaseController
                                 $statuts[$statut] = array("nom" => $statut, "heures" => 0);
                             }
                             $statuts[$statut]["heures"] = floatval($statuts[$statut]["heures"]) + diff_heures($elem['debut'], $elem['fin'], "decimal");
-                            $statuts[$statut]["heures"] = heure4($statuts[$statut]["heures"]);
 
                             // On met dans tab tous les éléments (infos postes + agents + heures du poste)
                             $tab[$poste] = array($poste_tab, $agents, $heures, "services" => $services, "statuts" => $statuts, "sites" => $sites);
@@ -3275,7 +3272,6 @@ class StatisticController extends BaseController
                         }
                     }
                 }
-                $tab[$key][2] = heure4($tab[$key][2]);
                 if ($tab[$key][0][2]) {
                     $siteEtage[] = $tab[$key][0][2];
                 }
@@ -3284,7 +3280,7 @@ class StatisticController extends BaseController
                 } else {
                     $siteEtage=null;
                 }
-                $jour = heure4($tab[$key][2])/$nbJours;
+                $jour = $tab[$key][2] / $nbJours;
                 $hebdo = $jour*$joursParSemaine;
                 $av_jour = null;
                 $av_hebdo = null;
@@ -3298,8 +3294,8 @@ class StatisticController extends BaseController
                     }
                 }
 
-                $tab[$key]["jour"] = heure4($jour);
-                $tab[$key]["hebdo"] = heure4($hebdo);
+                $tab[$key]["jour"] = $jour;
+                $tab[$key]["hebdo"] = $hebdo;
                 $tab[$key]["av_hebdo"] = $av_hebdo;
                 $tab[$key]["av_jour"] = $av_jour;
                 $tab[$key]["siteEtage"] = $siteEtage;
