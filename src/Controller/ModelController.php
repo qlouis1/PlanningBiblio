@@ -221,7 +221,9 @@ class ModelController extends BaseController
           // Model_id
           $db = new \db();
           $db->query('select MAX(`model_id`) AS `model` FROM `pl_poste_modeles_tab`;');
-          $model = $db->result ? $db->result[0]['model'] + 1 : 1;
+
+          $last_id = $db->result[0]['model'] ? $db->result[0]['model'] : 0;
+          $model = $last_id + 1;
 
           $values = array();
           foreach ($select->result as $elem) {
