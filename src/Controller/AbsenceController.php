@@ -934,6 +934,11 @@ class AbsenceController extends BaseController
         $rrule = $request->get('rrule');
         $recurrenceModif = $request->get('recurrence-modif');
 
+        if ($request->get('allday')) {
+            $hre_debut = '00:00:00';
+            $hre_fin = '23:59:59';
+        }
+
         $hre_debut = $hre_debut ? $hre_debut : '00:00:00';
         $hre_fin = $hre_fin ? $hre_fin : '23:59:59';
 
