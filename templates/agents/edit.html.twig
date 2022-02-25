@@ -35,23 +35,47 @@
     $(document).ready(function(){
       $("#reset-password-form").dialog({
         autoOpen: false,
-        height: 240,
+        height: 280,
         width: 580,
         modal: true,
         buttons: {
           Enregistrer: function() {
             $('#password-dont-match').hide();
             $('#password-empty').hide();
+            $('#password-too-weak').hide();
+            $('#password-check-error').hide();
 
             password = $('#new_password').val();
             confirm_password = $('#confirm_new_password').val();
+            password_check = false;
+
+            $.ajax({
+                url: url('ajax/check-password'),
+                type: "POST",
+                dataType: "html",
+                async: false,
+                data: {password: password},
+                success: function(result){
+                    console.log(result);
+                    if (result == "ok") {
+                        password_check = true;
+                    } else {
+                        console.log("show message");
+                        $('#password-too-weak').show();
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError){
+                  $('#password-check-error').show();
+                }
+              });
+
 
             if (password != confirm_password) {
               $('#password-dont-match').show();
             }
             else if (password == '') {
               $('#password-empty').show();
-            } else {
+            } else if (password_check == true) {
               agent_id = $('input[name="id"]').val();
               save_password(agent_id, password);
             }
