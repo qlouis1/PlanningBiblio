@@ -1057,14 +1057,8 @@ class AgentController extends BaseController
         }
     }
 
-    /**
-     * @Route("/ajax/change-own-password", name="ajax.changeownpassword", methods={"POST"})
-     */
-    public function changeOwnPassword(Request $request)
-    {
-        $password = $request->get('password');
+    private function changeAgentPassword(Request $request, $agent_id, $password) {
 
-        $agent_id = $_SESSION['login_id'];
         $agent = $this->entityManager->find(Agent::class, $agent_id);
 
         $response = new Response();
@@ -1101,6 +1095,17 @@ class AgentController extends BaseController
     }
 
     /**
+     * @Route("/ajax/change-own-password", name="ajax.changeownpassword", methods={"POST"})
+     */
+    public function changeOwnPassword(Request $request)
+    {
+        $agent_id = $_SESSION['login_id'];
+        $password = $request->get('password');
+
+        return $this->changeAgentPassword($request, $agent_id, $password);
+    }
+
+    /**
      * @Route("/ajax/change-password", name="ajax.changepassword", methods={"POST"})
      */
     public function changePassword(Request $request)
@@ -1108,39 +1113,7 @@ class AgentController extends BaseController
         $agent_id = $request->get('id');
         $password = $request->get('password');
 
-        $agent = $this->entityManager->find(Agent::class, $agent_id);
-
-        $response = new Response();
-        if (!$agent) {
-            $response->setContent('Agent not found');
-            $response->setStatusCode(404);
-
-            return $response;
-        }
-
-        if (!$password) {
-            $response->setContent('Missing password');
-            $response->setStatusCode(400);
-
-            return $response;
-        }
-
-        if (!$this->check_password_complexity($password)) {
-            $response->setContent('Password too weak');
-            $response->setStatusCode(400);
-
-            return $response;
-        }
-
-        $password = password_hash($password, PASSWORD_BCRYPT);
-        $agent->password($password);
-        $this->entityManager->persist($agent);
-        $this->entityManager->flush();
-
-        $response->setContent('Password successfully changed');
-        $response->setStatusCode(200);
-
-        return $response;
+        return $this->changeAgentPassword($request, $agent_id, $password);
     }
 
    /**
