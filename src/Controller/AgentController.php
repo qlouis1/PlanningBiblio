@@ -1058,6 +1058,49 @@ class AgentController extends BaseController
     }
 
     /**
+     * @Route("/ajax/change-own-password", name="ajax.changeownpassword", methods={"POST"})
+     */
+    public function changeOwnPassword(Request $request)
+    {
+        $password = $request->get('password');
+
+        $agent_id = $_SESSION['login_id'];
+        $agent = $this->entityManager->find(Agent::class, $agent_id);
+
+        $response = new Response();
+        if (!$agent) {
+            $response->setContent('Agent not found');
+            $response->setStatusCode(404);
+
+            return $response;
+        }
+
+        if (!$password) {
+            $response->setContent('Missing password');
+            $response->setStatusCode(400);
+
+            return $response;
+        }
+
+        if (!$this->check_password_complexity($password)) {
+            $response->setContent('Password too weak');
+            $response->setStatusCode(400);
+
+            return $response;
+        }
+
+        $password = password_hash($password, PASSWORD_BCRYPT);
+        $agent->password($password);
+        $this->entityManager->persist($agent);
+        $this->entityManager->flush();
+
+        $response->setContent('Password successfully changed');
+        $response->setStatusCode(200);
+
+        return $response;
+    }
+
+    /**
      * @Route("/ajax/change-password", name="ajax.changepassword", methods={"POST"})
      */
     public function changePassword(Request $request)

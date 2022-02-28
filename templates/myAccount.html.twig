@@ -3,6 +3,91 @@
 {% extends 'base.html.twig' %}
 
 {% block page %}
+  <style>
+    .password-input {
+      position: absolute;
+      left: 300px;
+    }
+    .password-error {
+      color: red;
+      display: none;
+    }
+  </style>
+  <script type='text/JavaScript'>
+    function save_password(password) {
+      $.ajax({
+        url: url('ajax/change-own-password'),
+        type: "POST",
+        dataType: "html",
+        data: {password: password},
+        success: function(){
+            $("#reset-password-form").dialog( "close" );
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+          alert("Erreur lors de la modification du mot de passe");
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      $("#reset-password-form").dialog({
+        autoOpen: false,
+        height: 280,
+        width: 580,
+        modal: true,
+        buttons: {
+          Enregistrer: function() {
+            $('#password-dont-match').hide();
+            $('#password-empty').hide();
+            $('#password-too-weak').hide();
+            $('#password-check-error').hide();
+
+            password = $('#new_password').val();
+            confirm_password = $('#confirm_new_password').val();
+            password_check = false;
+
+            $.ajax({
+                url: url('ajax/check-password'),
+                type: "POST",
+                dataType: "html",
+                async: false,
+                data: {password: password},
+                success: function(result){
+                    console.log(result);
+                    if (result == "ok") {
+                        password_check = true;
+                    } else {
+                        console.log("show message");
+                        $('#password-too-weak').show();
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError){
+                  $('#password-check-error').show();
+                }
+              });
+
+
+            if (password != confirm_password) {
+              $('#password-dont-match').show();
+            }
+            else if (password == '') {
+              $('#password-empty').show();
+            } else if (password_check == true) {
+              save_password(password);
+            }
+          },
+          Annuler: function() {
+            $(this).dialog( "close" );
+          },
+        },
+      });
+
+      $('#change-password-link').on('click', function() {
+        $("#reset-password-form").dialog( "open" );
+      });
+
+    });
+  </script>
   <!--	Menu	-->
   <h3>Mon Compte</h3>
 
@@ -133,37 +218,41 @@
         Vous utilisez une version de démonstration.<br/>
         Votre mot de passe ne peut pas être modifié.<br/>
       {% elseif auth_mode == "SQL" %}
-        <h3>Modification du mot de passe</h3>
-        <h4>{{ login.surname }} {{ login.name }}</h4>
-        <form name='form' method='get' action="{{ asset('index.php') }}">
-          <input type='hidden' name='page' value='personnel/password.php' />
-          <table class='tableauFiches'>
-            <tr>
-              <td>Ancien mot de passe : </td>
-              <td>
-                <input type='password' name='ancien' class='ui-widget-content ui-corner-all'/>
-              </td>
-            </tr>
-            <tr>
-              <td> Nouveau mot de passe : </td>
-              <td>
-                <input type='password' name='nouveau' class='ui-widget-content ui-corner-all'/>
-              </td>
-            </tr>
-            <tr>
-              <td>  Confirmer le nouveau mot de passe : </td>
-              <td>
-                <input type='password' name='confirm' class='ui-widget-content ui-corner-all'/>
-              </td>
-            </tr>
-            <tr>
-              <td colspan='2' style='text-align:center;'>
-                <br/><input type='button' value='Annuler' onclick="location.href={{ asset('index.php') }};" class='ui-button'/>
-                <input type='submit' value='Modifier' class='ui-button' style='margin-left:30px;'/>
-              </td>
-            </tr>
-          </table>
-        </form>
+       <a id="change-password-link" href="javascript:void(0)">Changer mon mot de passe</a></td>
+       <div id="reset-password-form" title="Réinitialisation du mot de passe" class='noprint' style='display:none;'>
+          <form>
+            <div>
+              <label for="new_password">Nouveau mot de passe</label>
+              <input class="password-input" type='password' id="new_password" name="new_password"/>
+            </div>
+
+            <br />
+
+            <div>
+              <label for="confirm_new_password">Confirmez le nouveau mot de passe</label>
+              <input class="password-input" type='password' id="confirm_new_password" name="confirm_new_password"/>
+            </div>
+
+            <br />
+
+            <div class="password-error" id="password-dont-match">
+                Les mots de passe ne sont pas identiques.
+            </div>
+            <div class="password-error" id="password-empty">
+                Le mot de passe ne peut pas être vide.
+            </div>
+            <div class="password-error" id="password-too-weak">
+                Le mot de passe est trop faible. Le mot de passe doit faire au minimum 8 caractères, et contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.
+                Les caractères spéciaux sont les suivants: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+            </div>
+            <div class="password-error" id="password-check-error">
+                Impossible de vérifier la robustesse du mot de passe. Veuillez contacter votre administrateur.
+            </div>
+
+
+          </form>
+        </div>
+
       {% else %}
         <h3>Modification du mot de passe</h3>
         Vous utilisez un système d'authentification centralisé.<br/>
