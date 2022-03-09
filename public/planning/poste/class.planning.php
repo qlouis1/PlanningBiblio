@@ -265,7 +265,7 @@ class planning
                 // UR1: Change display to Name + first letter of Surname
                 $nom = $elem['nom'];
                 if ($elem['prenom']) {
-                    $nom.=$elem['prenom'] ." ".substr($elem['nom'], 0, 1).". ";
+                    $nom = $elem['prenom'] ." ".substr($elem['nom'], 0, 1).". ";
                 }
 
                 // Si sans repas, on ajoute (SR) à l'affichage
