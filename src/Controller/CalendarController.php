@@ -194,6 +194,7 @@ class CalendarController extends BaseController
 
             $current_abs = array();
             if (is_array($absences)) {
+                usort($absences, 'cmp_debut_fin_nom'); // UR1: Sort by starting hours
                 foreach ($absences as $elem) {
                     $abs_deb = substr($elem['debut'], 0, 10);
                     $abs_fin = substr($elem['fin'], 0, 10);
