@@ -751,8 +751,15 @@ EOD;
                 $nonValidee = " (non valid&eacute;e)";
             }
         }
+        // UR1: Customize display with comments
+        $cl = 80; // Number of char to print
+        $motifAffiche = $elem['motif'];
+        if ( $elem['commentaires'] != '' ) {
+            $motifAffiche .= " (".substr($elem['commentaires'],0,$cl).")";
+        }
+        $motifAffiche = str_replace('\n', ' ', $motifAffiche);
 
-        echo "<tr class='$class $bold'><td>{$elem['nom']} {$elem['prenom']}</td><td style='padding-left:15px;'>{$elem['motif']}{$heures}{$nonValidee}</td></tr>\n";
+        echo "<tr class='$class $bold'><td>{$elem['nom']} {$elem['prenom']}</td><td style='padding-left:15px;'>{$motifAffiche}{$heures}{$nonValidee}</td></tr>\n";
     }
     echo "</table>\n";
     echo "</td></tr>\n";
