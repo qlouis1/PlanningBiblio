@@ -237,11 +237,29 @@ class CJICS
                 $add = true;
 
             // If only confirmed events are accepted
-            } elseif ($elem['STATUS']=="CONFIRMED") {
-                // Check if it is an invitation from someone else (or including attendees)
-                // And check if the owner of this calendar accepted it
-                if (!empty($elem['ATTENDEE'])) {
-                    $attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+        } elseif ($elem['STATUS']=="CONFIRMED") {
+            // Check if it is an invitation from someone else (or including attendees)
+            // And check if the owner of this calendar accepted it
+            if (!empty($elem['ATTENDEE'])) {
+                // UR1: if agent is organizer, import event
+                if (strpos($elem['ORGANIZER'], $email)) {
+                    $add = true;
+                } else {
+                    // UR1: The ATTENDEE value is sometime badly created and contains only the mailto value of attendees even if the ATTENDEE_array of $event is complete
+                    // We rebuild an ATTENDEE string: rebuiltAttendee from ATTENDEE_array
+                    // A real fix should be in the parser but issue seems to be local to ur1 / Partage (?)
+                    $rebuiltAttendee = '';
+                    foreach ($elem['ATTENDEE_array'] as $temp) {
+                        if (is_array($temp)){
+                            foreach($temp as $k=>$v){
+                                $rebuiltAttendee .= $k.'='.$v.';';
+                            }
+                        } else {
+                            $rebuiltAttendee .= trim($temp);
+                        }
+                    }
+                    //$attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+                    $attendees = explode('CN=', $rebuiltAttendee); // UR1: Specific to ur1 / Partage
                     foreach ($attendees as $attendee) {
                         if (!empty($attendee) and strpos($attendee, $email)) {
                             if (strpos($attendee, 'PARTSTAT=ACCEPTED')) {
@@ -249,6 +267,8 @@ class CJICS
                             }
                         }
                     }
+                }
+
 
                 // If event created by calendar's owner and STATUS=CONFIRMED
                 } else {
