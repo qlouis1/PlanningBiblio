@@ -755,7 +755,11 @@ EOD;
         $cl = 80; // Number of char to print
         $motifAffiche = $elem['motif'];
         if ( $elem['commentaires'] != '' ) {
-            $motifAffiche .= " (".substr($elem['commentaires'],0,$cl).")";
+            $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
+            if (strlen($elem['commentaires']) >= $cl){
+                $motifAffiche .= "[...]";
+            }
+            $motifAffiche .= ")";
         }
         $motifAffiche = str_replace('\n', ' ', $motifAffiche);
 

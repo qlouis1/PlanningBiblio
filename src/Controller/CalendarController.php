@@ -220,7 +220,11 @@ class CalendarController extends BaseController
             foreach ($current_abs as $elem) {
                 $motifAffiche = $elem['motif'];
                 if ( $elem['commentaires'] != '' ) {
-                    $motifAffiche .= " (".substr($elem['commentaires'],0,$cl).")";
+                    $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
+                    if (strlen($elem['commentaires']) >= $cl){
+                        $motifAffiche .= "[...]";
+                    }
+                    $motifAffiche .= ")";
                 }
                 $motifAffiche = str_replace('\n',' ',$motifAffiche);
                 if ($elem['debut'] <= $current." 00:00:00" and $elem['fin'] >= $current." 23:59:59") {
