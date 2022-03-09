@@ -252,6 +252,7 @@ if (isset($planning)) {
         $ical[]="CLASS:PUBLIC";
         $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY";
         $ical[]="TRANSP:OPAQUE";
+        $ical[]="X-PLANNING-BILBIO:EXPORTED-EVENT"; // UR1: Custom attribute to filter back on import
         $ical[]="LAST-MODIFIED:$validation";
         $ical[]="DTSTAMP:$validation";
         $ical[]="BEGIN:VALARM";

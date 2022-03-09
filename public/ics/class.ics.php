@@ -185,6 +185,11 @@ class CJICS
 
         $events=array();
         foreach ($tmp as $elem) {
+            // UR1: Filter exported events on custom attribute
+            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+                continue;
+            }
+
             // Ne traite pas les événéments ayant le status X-MICROSOFT-CDO-INTENDEDSTATUS différent de BUSY (si le paramètre X-MICROSOFT-CDO-INTENDEDSTATUS existe)
             if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
                 continue;
