@@ -594,7 +594,7 @@ EOD;
             $absences_id[] = $elem['perso_id'];
         }
 
-        usort($absences_planning, 'cmp_nom_prenom_debut_fin');
+        usort($absences_planning, 'cmp_debut_fin_nom'); // UR1: Sort by starting hours
 
         switch ($config['Absences-planning']) {
       case "1":
