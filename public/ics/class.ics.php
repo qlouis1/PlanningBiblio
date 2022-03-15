@@ -372,10 +372,10 @@ class CJICS
                 } else {
                     $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
                     if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        $commentaires .= "<br/>\n";
+                        //$commentaires .= "<br/>\n"; //UR1: don't import descriptions
                     }
                     if (!empty($elem["DESCRIPTION"])) {
-                        $commentaires .= $elem['DESCRIPTION'];
+                        //$commentaires .= $elem['DESCRIPTION']; //UR1: don't import descriptions
                     }
                 }
 
