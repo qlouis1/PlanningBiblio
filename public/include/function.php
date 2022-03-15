@@ -698,6 +698,18 @@ function cmp_nom_prenom_debut_fin($a, $b)
     return strtolower($a['nom']) > strtolower($b['nom']);
 }
 
+function cmp_site_nom($a, $b)
+{
+    $a['nom']=html_entity_decode($a['nom'], ENT_QUOTES|ENT_IGNORE, "utf-8");
+    $b['nom']=html_entity_decode($b['nom'], ENT_QUOTES|ENT_IGNORE, "utf-8");
+    $a['site']=html_entity_decode($a['site'], ENT_QUOTES|ENT_IGNORE, "utf-8");
+    $b['site']=html_entity_decode($b['site'], ENT_QUOTES|ENT_IGNORE, "utf-8");
+    if (strtolower($a['site']) == strtolower($b['site'])) {
+        return strtolower($a['nom']) > strtolower($b['nom']);
+    }
+    return strtolower($a['site']) > strtolower($b['site']);
+}
+
 function cmp_ordre($a, $b)
 {
     return $a['ordre'] > $b['ordre'];

@@ -694,6 +694,7 @@ EOD;
 
     $presentset = new PresentSet($dateSQL, $d, $absents, $db);
     $presents = $presentset->all();
+    usort($presents, 'cmp_site_nom'); // UR1: Sort by site then by name
 
     echo "<table class='tableauStandard'>\n";
     echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>Liste des présents</h3></td>\n";
