@@ -56,10 +56,10 @@ do
 done
 
 echo ""
-echo "DB User [planningbiblio] (will be overwritten if exists) :"
+echo "DB User [planningbiblio] :"
 read planningbdbuser
 
-echo "DB Pass [$planningbdbpass_default] (will be overwritten if exists) :"
+echo "DB Pass [$planningbdbpass_default] :"
 prompt=''
 while IFS= read -p "$prompt" -r -s -n 1 char
 do
@@ -72,7 +72,7 @@ do
 done
 
 echo ""
-echo "DB Name [planningbiblio] (will be overwritten if exists) :"
+echo "DB Name [planningbiblio] :"
 read planningbdbname
 
 # DB Prefix : does not work by loading the sql file
@@ -99,6 +99,10 @@ do
     prompt='*'
     planningbadminpass+="$char"
 done
+
+echo ""
+echo "Install composer [no] :"
+read installcomposer
 
 echo ""
 echo "Update composer dependencies [no] :"
@@ -143,6 +147,11 @@ fi
 
 if [[ $planningbadminpass = '' ]]; then
     planningbadminpass=$planningbadminpass_default
+fi
+
+installcomposer=$(echo $installcomposer | tr '[:upper:]' '[:lower:]');
+if [[ $installcomposer = '' ]]; then
+    installcomposer='no'
 fi
 
 updatecomposer=$(echo $updatecomposer | tr '[:upper:]' '[:lower:]');
@@ -193,44 +202,47 @@ if [[ ! -d public/themes/light_blue ]]; then
     git clone https://github.com/planningbiblio/theme_light_blue public/themes/light_blue
 fi
 
+if [[ $installcomposer = 'yes' ]]; then
+    # Download composer
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');"
 
-# Download composer
-# UR1: composer install is done locally beforehand
-#php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-#php composer-setup.php
-#php -r "unlink('composer-setup.php');"
+    # Update dependencies ?
+    if [[ $updatecomposer = 'yes' && -f composer.lock ]]; then
+        echo "Removing composer.lock"
+        rm composer.lock
+        if [[ -d vendor ]];then
+            echo "Removing vendor folder"
+            rm -r vendor
+        fi
+    fi
 
-# Update dependencies ?
-#if [[ $updatecomposer = 'yes' && -f composer.lock ]]; then
-    #echo "Removing composer.lock"
-    #rm composer.lock
-    #if [[ -d vendor ]];then
-        #echo "Removing vendor folder"
-        #rm -r vendor
-    #fi
-#fi
+    # Run composer install
+    php composer.phar install -vvv
+    if [[ $? -eq 2 ]]; then
+        if [[ -d vendor ]];then
+            echo "Removing vendor folder"
+            rm -r vendor
+        fi
+        if [[ -e composer.lock ]];then
+            echo "Removing composer.lock"
+            rm composer.lock
+        fi
+        php composer.phar update -vvv
+    fi
 
-# Run composer install
-#php composer.phar install
-#if [[ $? -eq 2 ]]; then
-    #if [[ -d vendor ]];then
-        #echo "Removing vendor folder"
-        #rm -r vendor
-    #fi
-    #if [[ -e composer.lock ]];then
-        #echo "Removing composer.lock"
-        #rm composer.lock
-    #fi
-    #php composer.phar update
-#fi
+    if [[ $? > 0 ]]; then
+        exit;
+    fi
 
-if [[ $? > 0 ]]; then
-    exit;
+    # Remove composer.phar
+    php -r "unlink('composer.phar');"
+else
+    echo ""
+    echo "Make sure var and vendor folder have been copied before continuing:"
+    read cont
 fi
-
-# Remove composer.phar
-#php -r "unlink('composer.phar');"
-
 # Run database update
 grep "\$version=\"$version\";" init/init.php
 if [[ $? != 0 ]]; then
