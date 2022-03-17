@@ -755,7 +755,7 @@ EOD;
         // UR1: Customize display with comments
         $cl = 80; // Number of char to print
         $motifAffiche = $elem['motif'];
-        if ( $elem['commentaires'] != '' ) {
+        if ( $elem['commentaires'] != '' && $autorisationN2) {
             $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
             if (strlen($elem['commentaires']) >= $cl){
                 $motifAffiche .= "[...]";
