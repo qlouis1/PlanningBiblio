@@ -250,8 +250,9 @@ if (isset($planning)) {
         $ical[]="LOCATION:{$site}{$etage}";
         $ical[]="STATUS:CONFIRMED";
         $ical[]="CLASS:PUBLIC";
-        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY";
-        $ical[]="TRANSP:OPAQUE";
+        // UR1: export "non bloquant" events as free
+        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:".($postes[$elem['poste']]['bloquant'] == 1 ? 'BUSY' : 'FREE');
+        $ical[]="TRANSP:".($postes[$elem['poste']]['bloquant'] == 1 ? 'OPAQUE' : 'TRANSPARENT');
         $ical[]="X-PLANNING-BILBIO:EXPORTED-EVENT"; // UR1: Custom attribute to filter back on import
         $ical[]="LAST-MODIFIED:$validation";
         $ical[]="DTSTAMP:$validation";
