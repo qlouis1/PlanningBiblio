@@ -59,7 +59,7 @@ echo ""
 echo "DB User [planningbiblio] :"
 read planningbdbuser
 
-echo "DB Pass [$planningbdbpass_default] :"
+echo "DB Pass :"
 prompt=''
 while IFS= read -p "$prompt" -r -s -n 1 char
 do
@@ -88,7 +88,7 @@ read planningbadminfirstname
 echo "Planning Biblio admin's e-mail address [admin@example.com] :"
 read planningbadminemail
 
-echo "Planning Biblio admin's password [$planningbadminpass_default] :"
+echo "Planning Biblio admin's password :"
 prompt=''
 while IFS= read -p "$prompt" -r -s -n 1 char
 do
@@ -251,5 +251,5 @@ fi
 
 echo ""
 echo -e "One more step, run : \e[1m\033[32msudo chmod -R 777 var\e[0m";
-echo "Then, the installation will be completed and you will be able to use Planning Biblio in your web browser with these cretentials : admin / $planningbadminpass";
+echo "Then, the installation will be completed and you will be able to use Planning Biblio in your web browser";
 echo ""

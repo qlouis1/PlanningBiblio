@@ -698,6 +698,7 @@ function cmp_nom_prenom_debut_fin($a, $b)
     return strtolower($a['nom']) > strtolower($b['nom']);
 }
 
+// UR1: Custom sort function, by site name then by agent name
 function cmp_site_nom($a, $b)
 {
     $a['nom']=html_entity_decode($a['nom'], ENT_QUOTES|ENT_IGNORE, "utf-8");
