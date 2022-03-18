@@ -604,16 +604,11 @@ class planning
 
             // UR1: refresh user calendars
             // Script is in exploitationPartage dir outside of Planning Biblio install
-            $curdir = substr(shell_exec('pwd'), 0, -1).'/';
             $tardir = '../../../../exploitationPartage/';
             $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
-            $script = '';
-            $script .= 'cd '.$tardir .' ; ';
-            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ; ';
-            $script .= 'cd '.$curdir;
-            error_log(date("[Y-m-d G:i:s]")."====Validation planning: shell_exec(".$script."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-            $res = shell_exec($script);
-            error_log(date("[Y-m-d G:i:s]")."==|result: ".$res."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+            $script = 'cd '.$tardir .' ; ';
+            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
+            shell_exec($script);
 
         }
     }
