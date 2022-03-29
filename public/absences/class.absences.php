@@ -788,10 +788,6 @@ class absences
 
         // UR1: don't consider imported absences
 		if ($partage == true) {
-error_log(date("[Y-m-d G:i:s]")."====don't consider imported absences\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|$partage\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-
-
             $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
         }
         // Sort
