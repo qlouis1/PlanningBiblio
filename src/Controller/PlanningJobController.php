@@ -282,12 +282,13 @@ class PlanningJobController extends BaseController
         $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
         // UR1: keep imported absences data to pass it later to js script
         $absentPartage = Array();
+
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: treat imported absences as possible disponibility
                     if ($elem['motif'] == "Agenda Partage") {
-                        $absentPartage[$elem['perso_id']]=$elem['commentaires'];
+                        $absentPartage[$elem['perso_id']][]=$elem['commentaires'];
                     } else {
                         $tab_exclus[]=$elem['perso_id'];
                         $absents[]=$elem['perso_id'];
@@ -552,9 +553,10 @@ class PlanningJobController extends BaseController
                     }
                     // UR1: Pass absences data to js script in an Array
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
-                        $motifExclusion[$elem['id']][]=["partage",$absentPartage[$elem['id']]];
+                        foreach($absentPartage[$elem['id']] as $k=>$e) {
+                            $motifExclusion[$elem['id']][]=["partage",$e];
+                        }
                     }
-
                 }
             }
         }
