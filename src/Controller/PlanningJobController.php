@@ -279,13 +279,19 @@ class PlanningJobController extends BaseController
             $teleworking_exception = (!empty($teleworking_reasons) and is_array($teleworking_reasons)) ? "AND `motif` NOT IN ('" . implode("','", $teleworking_reasons) . "')" : null;
         }
 
-        $db->select('absences', 'perso_id,valide', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
-
+        $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
+        // UR1: keep imported absences data to pass it later to js script
+        $absentPartage = Array();
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
-                    $tab_exclus[]=$elem['perso_id'];
-                    $absents[]=$elem['perso_id'];
+                    // UR1: treat imported absences as possible disponibility
+                    if ($elem['motif'] == "Agenda Partage") {
+                        $absentPartage[$elem['perso_id']]=$elem['commentaires'];
+                    } else {
+                        $tab_exclus[]=$elem['perso_id'];
+                        $absents[]=$elem['perso_id'];
+                    }
                 } elseif ($this->config('Absences-non-validees')) {
                     $absences_non_validees[] = $elem['perso_id'];
                 }
@@ -506,6 +512,13 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
+                // UR1: treat imported absences as possible disponibility
+                if (isset($absentPartage[$elem['id']])){
+                    $exclusion[$elem['id']][] = 'agenda_partage';
+                }
+
+
+
                 // If no exclusion for this agent,
                 // put it in the availables list.
                 if (empty($exclusion[$elem['id']])) {
@@ -537,6 +550,11 @@ class PlanningJobController extends BaseController
                         }
 
                     }
+                    // UR1: Pass absences data to js script in an Array
+                    if (in_array('agenda_partage', $exclusion[$elem['id']])) {
+                        $motifExclusion[$elem['id']][]=["partage",$absentPartage[$elem['id']]];
+                    }
+
                 }
             }
         }

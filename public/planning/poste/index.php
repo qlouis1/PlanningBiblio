@@ -369,7 +369,7 @@ if (!$verrou and !$autorisationN1) {
     $a->valide=false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date);
+    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true); // UR1: don't cross agent if absence is imported
     $absences=$a->elements;
     global $absences;
   

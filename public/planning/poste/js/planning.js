@@ -590,7 +590,7 @@ function ContextMenu2agents(data, agent) {
 
       if (e == 'times') {
         title_attr = "Les horaires de l'agent ne lui permettent pas d'occuper ce poste";
-        content = 'Horaires';
+        content += 'Horaires';
       }
 
       if (e == 'break') {
@@ -621,6 +621,14 @@ function ContextMenu2agents(data, agent) {
       if (e == 'wrong_cat') {
         title_attr = "L'agent n'appartient pas à la catégorie requise" + data.category + " pour occuper ce poste";
         content += 'Catégorie';
+      }
+
+      // UR1: treat imported absences as possible disponibility and display absence data
+      if (Array.isArray(e)){
+        if (e[0] == 'partage') {
+          title_attr = e[1];
+          content += 'Agenda Partage (' + e[1].substring(0,20)+ ')';
+        }
       }
 
       exclusion = $('<span>').attr({
