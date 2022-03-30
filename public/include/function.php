@@ -239,7 +239,7 @@ class CJMail
         $this->message = $message;
     }
 
-    // UR1: add parameter $site to customize sender for different sites
+    // UR1: Add parameter $site to customize sender for different sites
     public function send($site=0)
     {
         if ($this->prepare()===false) {
@@ -262,20 +262,20 @@ class CJMail
         $mail->SMTPAuth =$GLOBALS['config']['Mail-SMTPAuth'];
         $mail->Username =$GLOBALS['config']['Mail-Username'];
         $mail->Password =decrypt($GLOBALS['config']['Mail-Password']);
-//      $mail->Sender =$GLOBALS['config']['Mail-From'];
-//      $mail->From =$GLOBALS['config']['Mail-From'];
+        //$mail->Sender =$GLOBALS['config']['Mail-From'];
+        //$mail->From =$GLOBALS['config']['Mail-From'];
         $mail->FromName =$GLOBALS['config']['Mail-FromName'];
 
-        // UR1: Set email->From and Sender to the first email in each site's planning team
+        // UR1: Set $mail->From and $mail->Sender to the first email found in each site's planning team
         $tmp=false;
         if (isset($GLOBALS['config']['Multisites-site'.$site.'-mail'])){
             $tmp = filter_var(trim(explode(";", $GLOBALS['config']['Multisites-site'.$site.'-mail'])[0]),FILTER_VALIDATE_EMAIL);
         }
-        // if we can't get a usable email, use default one
+        // If we can't get a usable email, use default one
         $mail->Sender =$tmp ? $tmp : $GLOBALS['config']['Mail-From'];
         $mail->From =$tmp ? $tmp : $GLOBALS['config']['Mail-From'];
 
-
+        // UR1: Mail builder logs
 error_log(date("[Y-m-d G:i:s]")."====function.php:send()\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
 error_log(date("[Y-m-d G:i:s]")."==|site is $site\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
 error_log(date("[Y-m-d G:i:s]")."==|Sender is ".$mail->Sender."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
@@ -326,7 +326,7 @@ error_log(date("[Y-m-d G:i:s]")."==|From is ".$mail->From."\n",3, "/data/htdocs/
             // Liste des destinataires pour qui l'envoi a fonctionné (en cas de succès total)
             $this->successAddresses=$this->to;
         }
-// UR1: more logs
+// UR1: Mail success logs
 error_log(date("[Y-m-d G:i:s]")."====Success \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
 error_log(date("[Y-m-d G:i:s]")."==|\n".print_r($this->successAddresses,true)."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
 error_log(date("[Y-m-d G:i:s]")."====Fail \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
@@ -719,7 +719,7 @@ function cmp_nom_prenom_debut_fin($a, $b)
     return strtolower($a['nom']) > strtolower($b['nom']);
 }
 
-// UR1: Custom sort function, by site name then by agent name
+// UR1: Custom sort function, by site name then by agent name. Used in Planning present agents display
 function cmp_site_nom($a, $b)
 {
     $a['nom']=html_entity_decode($a['nom'], ENT_QUOTES|ENT_IGNORE, "utf-8");

@@ -585,7 +585,7 @@ class planning
                 $m->subject=$sujet;
                 $m->message=$message;
                 $m->to=$tab[$elem]['mail'];
-                $m->send($site); // UR1:
+                $m->send($site); // UR1: Custom Mail-From by site
 
             // S'il n'y a pas d'éléments, on écrit "Vous n'êtes plus dans le planning ..."
             } else {
@@ -602,7 +602,7 @@ class planning
                 $m->send();
             }
 
-            // UR1: refresh user calendars
+            // UR1: Refresh user calendars each time the planning is validated
             // Script is in exploitationPartage dir outside of Planning Biblio install
             $tardir = '../../../../exploitationPartage/';
             $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];

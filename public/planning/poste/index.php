@@ -369,7 +369,8 @@ if (!$verrou and !$autorisationN1) {
     $a->valide=false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true); // UR1: don't cross agent if absence is imported
+    // UR1: Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
+    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
     $absences=$a->elements;
     global $absences;
   
@@ -606,12 +607,13 @@ EOD;
             if ($elem['valide'] <= 0 and $config['Absences-non-validees'] == 0) {
                 continue;
             }
-            // UR1: display only long absences
+            // UR1: Custom display, as we are looking for all day and half day absences, filter on duration
+            $filter = 180; // Filter duration
             $d1 = new DateTime($elem['debut']);
             $d2 = new DateTime($elem['fin']);
             $diff = $d2->diff($d1);
             $cal = $diff->d*24*60 + $diff->h*60 + $diff->i;
-            $displayAbsence = $cal > 180 ? true : false; // UR1: only display all day absences
+            $displayAbsence = $cal > $filter ? true : false;
             if (!$displayAbsence){
                 continue;
             }
@@ -647,7 +649,7 @@ EOD;
             }
 
             // UR1: Customize display with comments
-            $cl = 200; // Number of char to print
+            $cl = 200; // Number of characters to print
             $motifAffiche = $elem['motif'];
             if ( $elem['commentaires'] != '' && $autorisationN2) {
                 $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
@@ -689,7 +691,7 @@ EOD;
                 }
             }
             // UR1: Customize display with comments
-            $cl = 80; // Number of char to print
+            $cl = 80; // Number of characters to print
             $motifAffiche = $elem['motif'];
             if ( $elem['commentaires'] != '' && $autorisationN2) {
                 $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
@@ -787,7 +789,7 @@ EOD;
             }
         }
         // UR1: Customize display with comments
-        $cl = 80; // Number of char to print
+        $cl = 80; // Number of characters to print
         $motifAffiche = $elem['motif'];
         if ( $elem['commentaires'] != '' && $autorisationN2) {
             $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);

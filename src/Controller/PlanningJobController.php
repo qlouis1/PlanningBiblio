@@ -280,13 +280,13 @@ class PlanningJobController extends BaseController
         }
 
         $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
-        // UR1: keep imported absences data to pass it later to js script
+        // UR1: Keep imported absences data to pass it later to js script
         $absentPartage = Array();
 
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
-                    // UR1: treat imported absences as possible disponibility
+                    // UR1: Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
                         $absentPartage[$elem['perso_id']][]=$elem['commentaires'];
                     } else {
@@ -513,7 +513,7 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
-                // UR1: treat imported absences as possible disponibility
+                // UR1: Tag imported absences to treat them like other unavailablilities
                 if (isset($absentPartage[$elem['id']])){
                     $exclusion[$elem['id']][] = 'agenda_partage';
                 }
@@ -714,7 +714,7 @@ class PlanningJobController extends BaseController
             foreach ($agents_dispo as $a) {
                 $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             }
-            // UR1: call unavailable agents too
+            // UR1: Add unavailable agents as well
             foreach ($autres_agents as $a) {
                 $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             }

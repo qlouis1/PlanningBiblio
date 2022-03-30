@@ -742,7 +742,7 @@ class absences
             rmdir($absenceDocument->upload_dir() . $this->id);
         }
     }
-
+    // UR1: Add custom parameter $partage to ignore imported absences
     public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=false)
     {
         $entityManager = $GLOBALS['entityManager'];
@@ -786,7 +786,7 @@ class absences
         $deletedAgents=implode("','", $this->agents_supprimes);
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
 
-        // UR1: don't consider imported absences
+        // UR1: Ignore imported absences
 		if ($partage == true) {
             $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
         }

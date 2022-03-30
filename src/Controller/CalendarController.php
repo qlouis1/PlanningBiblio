@@ -216,8 +216,7 @@ class CalendarController extends BaseController
             $absences_affichage = array();
 
             // UR1: Customize display with comments
-            $cl = 80; // Number of char to print
-
+            $cl = 80; // Number of characters to print
             foreach ($current_abs as $elem) {
                 $motifAffiche = $elem['motif'];
                 if ( $elem['commentaires'] != '' ) {

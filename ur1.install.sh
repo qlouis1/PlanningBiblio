@@ -171,7 +171,7 @@ planningbdatas=data/planningb_2104.sql.gz
 planningbsecret=$(head /dev/urandom|tr -dc "a-f0-9"|fold -w 32|head -n 1)
 
 # Create the database
-# UR1: the database and users are already created
+# UR1: The database and users are already created and we don't want to delete them
 #mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP USER IF EXISTS '$planningbdbuser'@'$planningdbuserhost';"
 #mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP DATABASE IF EXISTS $planningbdbname;"
 

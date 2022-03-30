@@ -246,7 +246,7 @@ class CJICS
             // Check if it is an invitation from someone else (or including attendees)
             // And check if the owner of this calendar accepted it
             if (!empty($elem['ATTENDEE'])) {
-                // UR1: if agent is organizer, import event
+                // UR1: If agent is organizer, import this event
                 if (strpos($elem['ORGANIZER'], $email)) {
                     $add = true;
                 } else {
@@ -263,7 +263,7 @@ class CJICS
                             $rebuiltAttendee .= trim($temp);
                         }
                     }
-                    //$attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+                    //$attendees = explode('CUTYPE=', $elem['ATTENDEE']); // Partage doesn't use CUTYPE
                     $attendees = explode('CN=', $rebuiltAttendee); // UR1: Specific to ur1 / Partage
                     foreach ($attendees as $attendee) {
                         if (!empty($attendee) and strpos($attendee, $email)) {
@@ -372,10 +372,11 @@ class CJICS
                 } else {
                     $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
                     if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        //$commentaires .= "<br/>\n"; //UR1: don't import descriptions
+                        // UR1: As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                        //$commentaires .= "<br/>\n";
                     }
                     if (!empty($elem["DESCRIPTION"])) {
-                        //$commentaires .= $elem['DESCRIPTION']; //UR1: don't import descriptions
+                        //$commentaires .= $elem['DESCRIPTION'];
                     }
                 }
 

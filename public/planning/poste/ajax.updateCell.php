@@ -204,7 +204,8 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true); // UR1: don't consider imported absences
+// UR1: Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true);
 
 $absences=$a->elements;
 

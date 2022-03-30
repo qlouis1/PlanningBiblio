@@ -623,11 +623,11 @@ function ContextMenu2agents(data, agent) {
         content += 'Catégorie';
       }
 
-      // UR1: treat imported absences as possible disponibility and display absence data
+      // UR1: Consider imported absences as possible availability and display absence data
       if (Array.isArray(e)){
         if (e[0] == 'partage') {
           title_attr = e[1];
-          content += 'AP (' + e[1].substring(0,20)+ ')';
+          content += 'AP (' + e[1].substring(0,24)+ ')';
         }
       }
 
@@ -1169,7 +1169,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,site,tout,
 
         var title = result[i]["nom"] + ' ' + result[i]["prenom"];
         
-        //UR1: Change display to Name + first letter of Surname
+        // UR1: Change display to Name + first letter of Surname
         var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 
