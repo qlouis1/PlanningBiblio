@@ -627,7 +627,7 @@ function ContextMenu2agents(data, agent) {
       if (Array.isArray(e)){
         if (e[0] == 'partage') {
           title_attr = e[1];
-          content += 'Agenda Partage (' + e[1].substring(0,20)+ ')';
+          content += 'AP (' + e[1].substring(0,20)+ ')';
         }
       }
 

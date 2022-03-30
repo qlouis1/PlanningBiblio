@@ -606,6 +606,15 @@ EOD;
             if ($elem['valide'] <= 0 and $config['Absences-non-validees'] == 0) {
                 continue;
             }
+            // UR1: display only long absences
+            $d1 = new DateTime($elem['debut']);
+            $d2 = new DateTime($elem['fin']);
+            $diff = $d2->diff($d1);
+            $cal = $diff->d*24*60 + $diff->h*60 + $diff->i;
+            $displayAbsence = $cal > 180 ? true : false; // UR1: only display all day absences
+            if (!$displayAbsence){
+                continue;
+            }
 
             $heures=null;
             $debut=null;
@@ -615,6 +624,9 @@ EOD;
             }
             if ($elem['fin']<"$date 23:59:59") {
                 $fin=substr($elem['fin'], -8);
+            }
+            if ($elem['debut']=="$date 00:00:00" and $elem['fin']=="$date 23:59:59") {
+                $heures=" toute la journée";
             }
             if ($debut and $fin) {
                 $heures=" de ".heure2($debut)." à ".heure2($fin);
@@ -634,8 +646,20 @@ EOD;
                 }
             }
 
+            // UR1: Customize display with comments
+            $cl = 200; // Number of char to print
+            $motifAffiche = $elem['motif'];
+            if ( $elem['commentaires'] != '' && $autorisationN2) {
+                $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
+                if (strlen($elem['commentaires']) >= $cl){
+                    $motifAffiche .= "[...]";
+                }
+                $motifAffiche .= ")";
+            }
+            $motifAffiche = ' - ' . str_replace('\n', ' ', $motifAffiche);
+
             $class=$class=="tr1"?"tr2":"tr1";
-            echo "<tr class='$class $bold'><td style='text-align:left;'>{$elem['nom']} {$elem['prenom']}{$heures}{$nonValidee}</td></tr>\n";
+            echo "<tr class='$class $bold'><td style='text-align:left;'>{$elem['nom']} {$elem['prenom']}{$heures}{$nonValidee}{$motifAffiche}</td></tr>\n";
         }
         echo "</table>\n";
     }
