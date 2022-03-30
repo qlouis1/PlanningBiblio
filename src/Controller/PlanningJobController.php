@@ -714,6 +714,10 @@ class PlanningJobController extends BaseController
             foreach ($agents_dispo as $a) {
                 $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             }
+            // UR1: call unavailable agents too
+            foreach ($autres_agents as $a) {
+                $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
+            }
             $agents_appel_dispo = json_encode($agents_appel_dispo);
             $agents_appel_dispo = htmlentities($agents_appel_dispo, ENT_QUOTES|ENT_IGNORE, 'UTF-8', false);
 
