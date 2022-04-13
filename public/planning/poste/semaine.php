@@ -265,7 +265,7 @@ for ($j=0;$j<=$fin;$j++) {
         // $cellules will be used in the cellule_poste function. Using a global variable will avoid multiple access to the database and enhance performances
         $a=new absences();
         $a->valide=true;
-        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date);
+        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
         $absences=$a->elements;
         global $absences;
 
