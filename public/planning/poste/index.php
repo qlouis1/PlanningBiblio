@@ -806,6 +806,16 @@ EOD;
     echo "</td></tr>\n";
     echo "</table>\n";
     break;
+      case "4":
+    // UR1: Custom display
+    echo "<table class='tableauStandard'>\n";
+    echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>Liste des présents</h3></td>\n";
+    $a = "UR1 Custom display";
+    $b = "( °)<";
+    echo "<tr class='$class $bold'><td>{$a} {$b}</td></tr>\n";
+    echo "</table>\n";
+
+    break;
 
     }
     }
