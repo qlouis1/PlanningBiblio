@@ -595,7 +595,7 @@ EOD;
             $absences_id[] = $elem['perso_id'];
         }
 
-        usort($absences_planning, 'cmp_debut_fin_nom'); // UR1: Sort by starting hours
+        usort($absences_planning, 'cmp_nom_prenom_debut_fin');
 
         switch ($config['Absences-planning']) {
       case "1":
@@ -607,16 +607,6 @@ EOD;
             if ($elem['valide'] <= 0 and $config['Absences-non-validees'] == 0) {
                 continue;
             }
-            // UR1: Custom display, as we are looking for all day and half day absences, filter on duration
-            $filter = 180; // Filter duration
-            $d1 = new DateTime($elem['debut']);
-            $d2 = new DateTime($elem['fin']);
-            $diff = $d2->diff($d1);
-            $cal = $diff->d*24*60 + $diff->h*60 + $diff->i;
-            $displayAbsence = $cal > $filter ? true : false;
-            if (!$displayAbsence){
-                continue;
-            }
 
             $heures=null;
             $debut=null;
@@ -626,9 +616,6 @@ EOD;
             }
             if ($elem['fin']<"$date 23:59:59") {
                 $fin=substr($elem['fin'], -8);
-            }
-            if ($elem['debut']=="$date 00:00:00" and $elem['fin']=="$date 23:59:59") {
-                $heures=" toute la journée";
             }
             if ($debut and $fin) {
                 $heures=" de ".heure2($debut)." à ".heure2($fin);
@@ -648,20 +635,8 @@ EOD;
                 }
             }
 
-            // UR1: Customize display with comments
-            $cl = 200; // Number of characters to print
-            $motifAffiche = $elem['motif'];
-            if ( $elem['commentaires'] != '' && $autorisationN2) {
-                $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
-                if (strlen($elem['commentaires']) >= $cl){
-                    $motifAffiche .= "[...]";
-                }
-                $motifAffiche .= ")";
-            }
-            $motifAffiche = ' - ' . str_replace('\n', ' ', $motifAffiche);
-
             $class=$class=="tr1"?"tr2":"tr1";
-            echo "<tr class='$class $bold'><td style='text-align:left;'>{$elem['nom']} {$elem['prenom']}{$heures}{$nonValidee}{$motifAffiche}</td></tr>\n";
+            echo "<tr class='$class $bold'><td style='text-align:left;'>{$elem['nom']} {$elem['prenom']}{$heures}{$nonValidee}</td></tr>\n";
         }
         echo "</table>\n";
     }
@@ -690,20 +665,9 @@ EOD;
                     $nonValidee = " (non valid&eacute;e)";
                 }
             }
-            // UR1: Customize display with comments
-            $cl = 80; // Number of characters to print
-            $motifAffiche = $elem['motif'];
-            if ( $elem['commentaires'] != '' && $autorisationN2) {
-                $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
-                if (strlen($elem['commentaires']) >= $cl){
-                    $motifAffiche .= "[...]";
-                }
-                $motifAffiche .= ")";
-            }
-            $motifAffiche = str_replace('\n', ' ', $motifAffiche);
             echo "<tr class='$bold'><td>{$elem['nom']}</td><td>{$elem['prenom']}</td>";
             echo "<td>{$elem['debutAff']}</td><td>{$elem['finAff']}</td>";
-            echo "<td>{$motifAffiche}{$nonValidee}</td></tr>\n";
+            echo "<td>{$elem['motif']}{$nonValidee}</td></tr>\n";
         }
         echo "</tbody></table>\n";
     }
@@ -730,7 +694,6 @@ EOD;
 
     $presentset = new PresentSet($dateSQL, $d, $absents, $db);
     $presents = $presentset->all();
-    usort($presents, 'cmp_site_nom'); // UR1: Sort by site then by name
 
     echo "<table class='tableauStandard'>\n";
     echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>Liste des présents</h3></td>\n";
@@ -788,19 +751,8 @@ EOD;
                 $nonValidee = " (non valid&eacute;e)";
             }
         }
-        // UR1: Customize display with comments
-        $cl = 80; // Number of characters to print
-        $motifAffiche = $elem['motif'];
-        if ( $elem['commentaires'] != '' && $autorisationN2) {
-            $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
-            if (strlen($elem['commentaires']) >= $cl){
-                $motifAffiche .= "[...]";
-            }
-            $motifAffiche .= ")";
-        }
-        $motifAffiche = str_replace('\n', ' ', $motifAffiche);
 
-        echo "<tr class='$class $bold'><td>{$elem['nom']} {$elem['prenom']}</td><td style='padding-left:15px;'>{$motifAffiche}{$heures}{$nonValidee}</td></tr>\n";
+        echo "<tr class='$class $bold'><td>{$elem['nom']} {$elem['prenom']}</td><td style='padding-left:15px;'>{$elem['motif']}{$heures}{$nonValidee}</td></tr>\n";
     }
     echo "</table>\n";
     echo "</td></tr>\n";
@@ -809,9 +761,9 @@ EOD;
       case "4":
     // UR1: Custom display
     echo "<table class='tableauStandard'>\n";
-    echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>Liste des présents</h3></td>\n";
-    $a = "UR1 Custom display";
-    $b = "( °)<";
+    echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>UR1 Custom display</h3></td>\n";
+    $a = "col1";
+    $b = "col2";
     echo "<tr class='$class $bold'><td>{$a} {$b}</td></tr>\n";
     echo "</table>\n";
 
