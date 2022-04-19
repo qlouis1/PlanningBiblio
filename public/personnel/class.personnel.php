@@ -277,7 +277,7 @@ class personnel
         $url = "/ics/calendar.php?id=$id";
         if ($GLOBALS['config']['ICS-Code']) {
             $code = $this->getICSCode($id);
-            $url .= "&amp;code=$code";
+            $url .= "&code=$code";
         }
         return $url;
     }
