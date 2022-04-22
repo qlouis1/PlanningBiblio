@@ -139,7 +139,8 @@ if ($db->result) {
 // Recherche des absences
 $a=new absences();
 $a->valide=true;
-$a->fetch("`debut`,`fin`", $id, '0000-00-00 00:00:00', date('Y-m-d', strtotime(date('Y-m-d').' + 2 years')));
+// UR1: Use $partage=true to export public service events even when an imported absence is at the same time
+$a->fetch("`debut`,`fin`", $id, '0000-00-00 00:00:00', date('Y-m-d', strtotime(date('Y-m-d').' + 2 years')) ,null ,true);
 $absences=$a->elements;
 
 // Recherche des congés (si le module est activé)

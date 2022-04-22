@@ -15,6 +15,7 @@ Cette page est appelée par la function JavaScript "bataille_navale" utilisé pa
 */
 
 use App\Model\Position;
+use Symfony\Component\Validator\Constraints\IsNull;
 
 ini_set("display_errors", 0);
 
@@ -43,6 +44,8 @@ $perso_id_origine=filter_input(INPUT_POST, "perso_id_origine", FILTER_SANITIZE_N
 $poste=filter_input(INPUT_POST, "poste", FILTER_SANITIZE_NUMBER_INT);
 $site=filter_input(INPUT_POST, "site", FILTER_SANITIZE_NUMBER_INT);
 $tout=filter_input(INPUT_POST, "tout", FILTER_CALLBACK, array("options"=>"sanitize_on"));
+// UR1: Added "absent" param to score off agents at insert
+$absent=filter_input(INPUT_POST, "absent", FILTER_SANITIZE_NUMBER_INT);
 
 $login_id=$_SESSION['login_id'];
 $now=date("Y-m-d H:i:s");
@@ -53,6 +56,8 @@ $now=date("Y-m-d H:i:s");
 if (is_numeric($perso_id) and $perso_id == 0) {
     // Tout barrer
     if ($barrer and $tout) {
+        error_log(date("[Y-m-d G:i:s]")."==|1\n",3, "/var/www/ur1-test-planning-biblio/var/log/t1.log");
+
         $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site);
         $db=new db();
@@ -94,20 +99,22 @@ else {
         if (is_numeric($perso_id)) {
             // Insertion des nouveaux éléments
             $p = new planning();
-            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken);
+            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken, $absent);
         } else {
             $tab = json_decode($perso_id);
             if (is_array($tab) and !empty($tab)) {
                 foreach ($tab as $elem) {
                     // Insertion des nouveaux éléments
                     $p = new planning();
-                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken);
+                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken, $absent);
                 }
             }
         }
     }
     // Si barrer : on barre l'ancien et ajoute le nouveau
     elseif ($barrer) {
+        error_log(date("[Y-m-d G:i:s]")."==|6\n",3, "/var/www/ur1-test-planning-biblio/var/log/t1.log");
+
         // On barre l'ancien
         $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
@@ -117,7 +124,7 @@ else {
     
         // On ajoute le nouveau
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now);
+      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
@@ -125,7 +132,7 @@ else {
     // Si Ajouter, on garde l'ancien et ajoute le nouveau
     elseif ($ajouter) {
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now);
+      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
@@ -204,7 +211,7 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin);
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true); // UR1: don't consider imported absences
 
 $absences=$a->elements;
 

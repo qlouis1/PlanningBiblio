@@ -638,7 +638,7 @@ class planning
         }
     }
 
-    public function update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken)
+    public function update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken, $absent="0")
     {
         $insert = array(
             "date" => $date,
@@ -648,7 +648,8 @@ class planning
             "site" => $site,
             "perso_id" => $perso_id,
             "chgt_login" => $login_id,
-            "chgt_time" => date("Y-m-d H:i:s")
+            "chgt_time" => date("Y-m-d H:i:s"),
+            "absent" => $absent
         );
 
         $db = new db();
