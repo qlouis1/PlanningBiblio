@@ -1161,7 +1161,8 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,site,tout,
 
         var title = result[i]["nom"] + ' ' + result[i]["prenom"];
         
-        var agent=result[i]["nom"]+" "+result[i]["prenom"].substr(0,1)+".";
+        // UR1: Change display to Name + first letter of Surname
+        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 
         // classes : A définir en fonction du statut, du service et des absences
@@ -1200,7 +1201,8 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,site,tout,
         // Qualifications (activités) de l'agent
         classes+=' '+result[i]['activites'];
 
-        var agent=result[i]["nom"]+" "+result[i]["prenom"].substr(0,1)+".";
+        // UR1: Change display to Name + first letter of Surname
+        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 
         // Sans Repas

@@ -195,6 +195,7 @@ class CalendarController extends BaseController
 
             $current_abs = array();
             if (is_array($absences)) {
+                usort($absences, 'cmp_debut_fin'); // UR1: Sort by starting hours
                 foreach ($absences as $elem) {
                     $abs_deb = substr($elem['debut'], 0, 10);
                     $abs_fin = substr($elem['fin'], 0, 10);
@@ -215,24 +216,37 @@ class CalendarController extends BaseController
             $absent = false;
             $absences_affichage = array();
 
+            // UR1: Customize display with comments
+            $cl = 80; // Number of characters to print
+
             foreach ($current_abs as $elem) {
+                $motifAffiche = $elem['motif'];
+                if ( $elem['commentaires'] != '' ) {
+                    $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
+                    if (strlen($elem['commentaires']) >= $cl){
+                        $motifAffiche .= "[...]";
+                    }
+                    $motifAffiche .= ")";
+                }
+                $motifAffiche = str_replace('\n',' ',$motifAffiche);
                 if ($elem['debut'] <= $current." 00:00:00" and $elem['fin'] >= $current." 23:59:59") {
                     $absent = true;
-                    $absences_affichage[] = "Toute la journée : ".$elem['motif'];
+                    $absences_affichage[] = "Toute la journée : ".$motifAffiche;
                 } elseif (substr($elem['debut'], 0, 10) == $current and substr($elem['fin'], 0, 10)==$current) {
                     $deb = heure2(substr($elem['debut'], -8));
                     $fi = heure2(substr($elem['fin'], -8));
-                    $absences_affichage[] = "De $deb &agrave; $fi : ".$elem['motif'];
+                    $absences_affichage[] = "De $deb &agrave; $fi : ".$motifAffiche;;
                 } elseif (substr($elem['debut'], 0, 10) == $current and $elem['fin'] >= $current." 23:59:59") {
                     $deb = heure2(substr($elem['debut'], -8));
-                    $absences_affichage[]="&Agrave; partir de $deb : ".$elem['motif'];
+                    $absences_affichage[]="&Agrave; partir de $deb : ".$motifAffiche;;
                 } elseif ($elem['debut'] <= $current." 00:00:00" and substr($elem['fin'], 0, 10)==$current) {
                     $fi = heure2(substr($elem['fin'], -8));
-                    $absences_affichage[] = "Jusqu'&agrave; $fi : ".$elem['motif'];
+                    $absences_affichage[] = "Jusqu'&agrave; $fi : ".$motifAffiche;;
                 } else {
                     $absences_affichage[] = "{$elem['debut']} &rarr; {$elem['fin']} : {$elem['motif']}";
                 }
             }
+
             // Intégration des congés
             if ($this->config('Conges-Enable')) {
                 include_once __DIR__."/../../public/conges/class.conges.php";

@@ -664,7 +664,6 @@ EOD;
                     $nonValidee = " (non valid&eacute;e)";
                 }
             }
-            
             echo "<tr class='$bold'><td>{$elem['nom']}</td><td>{$elem['prenom']}</td>";
             echo "<td>{$elem['debutAff']}</td><td>{$elem['finAff']}</td>";
             echo "<td>{$elem['motif']}{$nonValidee}</td></tr>\n";
@@ -757,6 +756,16 @@ EOD;
     echo "</table>\n";
     echo "</td></tr>\n";
     echo "</table>\n";
+    break;
+      case "4":
+    // UR1: Custom display
+    echo "<table class='tableauStandard'>\n";
+    echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>UR1 Custom display</h3></td>\n";
+    $a = "col1";
+    $b = "col2";
+    echo "<tr class='$class $bold'><td>{$a} {$b}</td></tr>\n";
+    echo "</table>\n";
+
     break;
 
     }

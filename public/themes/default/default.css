@@ -709,7 +709,7 @@ div#tabsemaine1{
 
 .menudiv-heures{
   width:100%;
-  text-align:right;
+  text-align:left;
   white-space:nowrap;
   font-style: italic;
   font-size: 0.95em;
