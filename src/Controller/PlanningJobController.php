@@ -691,7 +691,12 @@ class PlanningJobController extends BaseController
             }
 
             $agents_appel_dispo = array();
-            foreach ($agents_dispo as $a) {
+            // UR1: Don't include available agents
+            //foreach ($agents_dispo as $a) {
+            //    $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
+            //}
+            // UR1: Add unavailable agents as well
+            foreach ($autres_agents as $a) {
                 $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             }
             $agents_appel_dispo = json_encode($agents_appel_dispo);

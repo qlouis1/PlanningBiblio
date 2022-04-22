@@ -589,7 +589,7 @@ class planning
                 $m->subject=$sujet;
                 $m->message=$message;
                 $m->to=$tab[$elem]['mail'];
-                $m->send();
+                $m->send($site); // UR1: Custom Mail-From by site
 
             // S'il n'y a pas d'éléments, on écrit "Vous n'êtes plus dans le planning ..."
             } else {
