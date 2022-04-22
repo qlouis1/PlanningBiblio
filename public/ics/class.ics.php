@@ -200,6 +200,11 @@ class CJICS
 
         $events=array();
         foreach ($tmp as $elem) {
+            // UR1: Filter exported events on custom attribute
+            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+                continue;
+            }
+
             // Ne traite pas les événéments ayant le status X-MICROSOFT-CDO-INTENDEDSTATUS différent de BUSY (si le paramètre X-MICROSOFT-CDO-INTENDEDSTATUS existe)
             if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
                 continue;
@@ -262,11 +267,30 @@ class CJICS
                 $add = true;
 
             // If only confirmed events are accepted
-            } elseif ($elem['STATUS']=="CONFIRMED") {
-                // Check if it is an invitation from someone else (or including attendees)
-                // And check if the owner of this calendar accepted it
-                if (!empty($elem['ATTENDEE'])) {
-                    $attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+        } elseif ($elem['STATUS']=="CONFIRMED") {
+            // Check if it is an invitation from someone else (or including attendees)
+            // And check if the owner of this calendar accepted it
+            if (!empty($elem['ATTENDEE'])) {
+                // UR1: If agent is organizer, import event
+                if (strpos($elem['ORGANIZER'], $email)) {
+                    $add = true;
+                } else {
+                    // UR1: The ATTENDEE value is sometime badly created and contains only the mailto value of attendees even if the ATTENDEE_array of $event is complete
+                    // We rebuild an ATTENDEE string: rebuiltAttendee from ATTENDEE_array
+                    // A real fix should be in the parser but issue seems to be local to ur1 / Partage (?)
+                    $rebuiltAttendee = '';
+                    foreach ($elem['ATTENDEE_array'] as $temp) {
+                        if (is_array($temp)){
+                            foreach($temp as $k=>$v){
+                                $rebuiltAttendee .= $k.'='.$v.';';
+                            }
+                        } else {
+                            $rebuiltAttendee .= trim($temp);
+                        }
+                    }
+                    // UR1: Partage doesn't use CUTYPE but CN
+                    //$attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+                    $attendees = explode('CN=', $rebuiltAttendee);
                     foreach ($attendees as $attendee) {
                         if (!empty($attendee) and strpos($attendee, $email)) {
                             if (strpos($attendee, 'PARTSTAT=ACCEPTED')) {
@@ -274,6 +298,8 @@ class CJICS
                             }
                         }
                     }
+                }
+
 
                 // If event created by calendar's owner and STATUS=CONFIRMED
                 } else {
@@ -372,10 +398,11 @@ class CJICS
                 } else {
                     $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
                     if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        $commentaires .= "<br/>\n";
+                        // UR1: As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                        //$commentaires .= "<br/>\n"; //UR1: don't import descriptions
                     }
                     if (!empty($elem["DESCRIPTION"])) {
-                        $commentaires .= $elem['DESCRIPTION'];
+                        //$commentaires .= $elem['DESCRIPTION']; //UR1: don't import descriptions
                     }
                 }
 

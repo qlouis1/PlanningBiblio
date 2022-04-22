@@ -250,8 +250,12 @@ if (isset($planning)) {
         $ical[]="LOCATION:{$site}{$etage}";
         $ical[]="STATUS:CONFIRMED";
         $ical[]="CLASS:PUBLIC";
-        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY";
-        $ical[]="TRANSP:OPAQUE";
+        // UR1: Export "non bloquant" events as free
+        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:".($postes[$elem['poste']]['bloquant'] == 1 ? 'BUSY' : 'FREE');
+        $ical[]="TRANSP:".($postes[$elem['poste']]['bloquant'] == 1 ? 'OPAQUE' : 'TRANSPARENT');
+        // UR1: Custom attribute to filter back on import. 
+        // Attribute is conserved if user copy/paste the event in Partage as long as mail client handles X-MICROSOFT tags
+        $ical[]="X-PLANNING-BILBIO:EXPORTED-EVENT";
         $ical[]="LAST-MODIFIED:$validation";
         $ical[]="DTSTAMP:$validation";
         $ical[]="BEGIN:VALARM";

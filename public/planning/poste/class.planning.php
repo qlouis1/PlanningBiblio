@@ -371,7 +371,7 @@ class planning
     * @param string $this->date , date au format YYYY-MM-DD
     * Envoie des notifications en cas de validation ou changement de planning aux agents concernés
     */
-    public function notifications()
+    public function notifications($envoieMail)
     {
         $version="ajax";
         require_once "../../personnel/class.personnel.php";
@@ -422,12 +422,13 @@ class planning
         if (!$db->result) {
             $notificationType="nouveauPlanning";
 
+            if($envoieMail){
             // Enregistrement des infos dans la table BDD
             $insert=array("date"=>$date, "site"=>$site, "data"=>json_encode((array)$tab));
             $db2=new db();
             $db2->CSRFToken = $this->CSRFToken;
             $db2->insert("pl_notifications", $insert);
-
+            }
             // Enregistre les agents qui doivent être notifiés
             $perso_ids=array_keys($tab);
         }
@@ -480,11 +481,13 @@ class planning
                 }
             }
 
+            if($envoieMail){
             // Modification des infos dans la BDD
             $update=array("data"=>json_encode((array)$tab));
             $db=new db();
             $db->CSRFToken = $this->CSRFToken;
             $db->update("pl_notifications", $update, array("date"=>$date, "site"=>$site));
+            }
         }
 
         /*
@@ -496,6 +499,7 @@ class planning
         // Envoi du mail
         $sujet=$notificationType=="nouveauPlanning"?"Validation du planning du ".dateFr($date):"Modification du planning du ".dateFr($date);
 
+        if($envoieMail){
         // Tous les agents qui doivent être notifiés.
         foreach ($perso_ids as $elem) {
             // Création du message avec date et nom de l'agent
@@ -601,8 +605,18 @@ class planning
                 $m->send();
             }
         }
+        }
+        foreach ($perso_ids as $elem) {
+            // UR1: Refresh user calendars each time the planning is validated
+            // Script is in exploitationPartage dir outside of Planning Biblio install
+            $tardir = '../../../../exploitationPartage/';
+            $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
+            $script = 'cd '.$tardir .' ; ';
+            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
+            shell_exec($script);
+        }
     }
-  
+
     // Notes
     // Récupère les notes (en bas des plannings)
     public function getNotes()

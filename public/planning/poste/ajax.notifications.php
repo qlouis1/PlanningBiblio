@@ -27,11 +27,9 @@ $date=filter_input(INPUT_GET, "date", FILTER_CALLBACK, array("options"=>"sanitiz
 $site=filter_input(INPUT_GET, "site", FILTER_SANITIZE_NUMBER_INT);
 
 // Envoi des notification
-if ($config['Planning-Notifications']) {
     $p=new planning();
     $p->date=$date;
     $p->site=$site;
     $p->CSRFToken = $CSRFToken;
-    $p->notifications();
-}
+    $p->notifications($config['Planning-Notifications']);
 echo json_encode("ok");
