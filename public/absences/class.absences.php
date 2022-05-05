@@ -713,7 +713,8 @@ class absences
             $fin.=" 23:59:59";
         }
 
-        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut");
+		// UR1: Don't consider imported absences
+        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut", "motif"=>"NOT LIKE Agenda Partage");
     
         if ($valide==true or $GLOBALS['config']['Absences-validation']==0) {
             $filter["valide"]=">0";
