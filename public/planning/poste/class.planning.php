@@ -610,8 +610,16 @@ class planning
         foreach ($perso_ids as $elem) {
             // UR1: Refresh user calendars each time the planning is validated
             // Script is in exploitationPartage dir outside of Planning Biblio install
+error_log(date("[Y-m-d G:i:s]")."====REFRESH\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+error_log(date("[Y-m-d G:i:s]")."==|elem[mail] is " . $tab[$elem]['mail'] . "\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+error_log(date("[Y-m-d G:i:s]")."==|oldelem[mail] is " . $oldData[$elem]['mail'] . "\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+error_log(date("[Y-m-d G:i:s]")."==|elem is " . print_r($elem, true)  . "\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+
+
             $tardir = '../../../../exploitationPartage/';
             $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
+error_log(date("[Y-m-d G:i:s]")."==|final mail is " . $mail . "\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+
             $script = 'cd '.$tardir .' ; ';
             $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
             shell_exec($script);
