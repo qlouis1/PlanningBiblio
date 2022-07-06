@@ -19,8 +19,7 @@ fi
 
 # Prompt user for information
 echo "You are about to install Planning Biblio";
-echo "You will be asking for information to create the database.";
-echo "A database and a user will be created with given information. WARNING: if the database and the user already exist, they will be overwritten";
+echo "You will be asked for information about the database.";
 echo "We strongly recommend that you back up your databases before starting this installation";
 echo "Do you want to proceed ? [yes/no]"
 read proceed 
@@ -57,10 +56,10 @@ do
 done
 
 echo ""
-echo "DB User [planningbiblio] (will be overwritten if exists) :"
+echo "DB User :"
 read planningbdbuser
 
-echo "DB Pass [$planningbdbpass_default] (will be overwritten if exists) :"
+echo "DB Pass :"
 prompt=''
 while IFS= read -p "$prompt" -r -s -n 1 char
 do
@@ -73,7 +72,7 @@ do
 done
 
 echo ""
-echo "DB Name [planningbiblio] (will be overwritten if exists) :"
+echo "DB Name :"
 read planningbdbname
 
 # DB Prefix : does not work by loading the sql file
@@ -89,7 +88,7 @@ read planningbadminfirstname
 echo "Planning Biblio admin's e-mail address [admin@example.com] :"
 read planningbadminemail
 
-echo "Planning Biblio admin's password [$planningbadminpass_default] :"
+echo "Planning Biblio admin's password :"
 prompt=''
 while IFS= read -p "$prompt" -r -s -n 1 char
 do
@@ -102,8 +101,19 @@ do
 done
 
 echo ""
-echo "Update composer dependencies [no] :"
-read updatecomposer
+echo "Install composer [no] :"
+read installcomposer
+
+installcomposer=$(echo $installcomposer | tr '[:upper:]' '[:lower:]');
+if [[ $installcomposer = '' ]]; then
+    installcomposer='no'
+fi
+
+if [[ $installcomposer != 'no' ]]; then
+    echo ""
+    echo "Update composer dependencies [no] :"
+    read updatecomposer
+fi
 
 # Set defaults
 if [[ $planningdbhost = '' ]]; then
@@ -162,16 +172,16 @@ fi
 planningbdatas=data/planningb_2104.sql.gz
 planningbsecret=$(head /dev/urandom|tr -dc "a-f0-9"|fold -w 32|head -n 1)
 
-# Create the database
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP USER IF EXISTS '$planningbdbuser'@'$planningdbuserhost';"
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP DATABASE IF EXISTS $planningbdbname;"
+# UR1: The database and users are already created and we don't want to delete them
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP USER IF EXISTS '$planningbdbuser'@'$planningdbuserhost';"
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP DATABASE IF EXISTS $planningbdbname;"
 
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "CREATE DATABASE IF NOT EXISTS $planningbdbname CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "CREATE DATABASE IF NOT EXISTS $planningbdbname CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
 
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "CREATE USER '$planningbdbuser'@'$planningdbuserhost' IDENTIFIED BY '$planningbdbpass';"
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "GRANT ALL PRIVILEGES ON $planningbdbname.* TO '$planningbdbuser'@'$planningdbuserhost' IDENTIFIED BY '$planningbdbpass'"
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "CREATE USER '$planningbdbuser'@'$planningdbuserhost' IDENTIFIED BY '$planningbdbpass';"
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "GRANT ALL PRIVILEGES ON $planningbdbname.* TO '$planningbdbuser'@'$planningdbuserhost' IDENTIFIED BY '$planningbdbpass'"
 
-mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "FLUSH PRIVILEGES"
+#mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "FLUSH PRIVILEGES"
 zcat $planningbdatas | mysql -h $planningdbhost -u $dbroot --password=$dbpass $planningbdbname
 mysql --defaults-file=/dev/null -h $planningdbhost -u $planningbdbuser --password=$planningbdbpass -e "UPDATE $planningbdbname.\`personnel\` SET \`nom\`='$planningbadminlastname', \`prenom\`='$planningbadminfirstname', \`mail\`='$planningbadminemail', \`password\`=MD5('$planningbadminpass') WHERE \`id\` = 1;"
 
@@ -190,42 +200,48 @@ sed -i "s/APP_ENV=dev/APP_ENV=prod/g" .env.local
 # Set the default theme
 mysql -h $planningdbhost -u $planningbdbuser --password=$planningbdbpass -e "UPDATE $planningbdbname.\`config\` SET \`valeur\` = 'default' WHERE \`nom\` = 'Affichage-theme';"
 
+if [[ $installcomposer != 'no' ]]; then
 # Download composer
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');"
 
-# Update dependencies ?
-if [[ $updatecomposer = 'yes' && -f composer.lock ]]; then
-    echo "Removing composer.lock"
-    rm composer.lock
-    if [[ -d vendor ]];then
-        echo "Removing vendor folder"
-        rm -r vendor
-    fi
-fi
-
-# Run composer install
-php composer.phar install
-if [[ $? -eq 2 ]]; then
-    if [[ -d vendor ]];then
-        echo "Removing vendor folder"
-        rm -r vendor
-    fi
-    if [[ -e composer.lock ]];then
+    # Update dependencies ?
+    if [[ $updatecomposer = 'yes' && -f composer.lock ]]; then
         echo "Removing composer.lock"
         rm composer.lock
+        if [[ -d vendor ]];then
+            echo "Removing vendor folder"
+            rm -r vendor
+        fi
     fi
-    php composer.phar update
+
+    # Run composer install
+    php composer.phar install
+    if [[ $? -eq 2 ]]; then
+        if [[ -d vendor ]];then
+            echo "Removing vendor folder"
+            rm -r vendor
+        fi
+        if [[ -e composer.lock ]];then
+            echo "Removing composer.lock"
+            rm composer.lock
+        fi
+        php composer.phar update
+    fi
+
+    if [[ $? > 0 ]]; then
+        exit;
+    fi
+
+    # Remove composer.phar
+    php -r "unlink('composer.phar');"
+else
+    # UR1: if we don't install composer during install, var and vendor folders must be copied from a local install
+    echo ""
+    echo "Make sure var and vendor folder have been copied before continuing:"
+    read cont
 fi
-
-if [[ $? > 0 ]]; then
-    exit;
-fi
-
-# Remove composer.phar
-php -r "unlink('composer.phar');"
-
 # Run database update
 grep "\$version=\"$version\";" init/init.php
 if [[ $? != 0 ]]; then
@@ -234,5 +250,5 @@ fi
 
 echo ""
 echo -e "One more step, run : \e[1m\033[32msudo chmod -R 777 var\e[0m";
-echo "Then, the installation will be completed and you will be able to use Planning Biblio in your web browser with these cretentials : admin / $planningbadminpass";
+echo "Then, the installation will be completed and you will be able to use Planning Biblio in your web browser";
 echo ""
