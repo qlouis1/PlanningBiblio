@@ -138,9 +138,9 @@ if ($db->result) {
 
 // Recherche des absences
 $a=new absences();
-$a->valide=true;
-// UR1: Use $partage=true to export public service events even when an imported absence is at the same time
-$a->fetch("`debut`,`fin`", $id, '0000-00-00 00:00:00', date('Y-m-d', strtotime(date('Y-m-d').' + 2 years')) ,null ,true);
+$a->valide = true;
+$a->documents = false;
+$a->fetch("`debut`,`fin`", $id, '0000-00-00 00:00:00', date('Y-m-d', strtotime(date('Y-m-d').' + 2 years')));
 $absences=$a->elements;
 
 // Recherche des congés (si le module est activé)
@@ -206,6 +206,10 @@ if (isset($planning)) {
             }
         }
     
+        if ($elem['absent'] == 1) {
+            continue;
+        }
+
         // Regroupe les plages de SP qui se suivent sur le même poste
         if (isset($tab[$i-1])
             and $tab[$i-1]['date'] == $elem['date']
@@ -251,12 +255,8 @@ if (isset($planning)) {
         $ical[]="LOCATION:{$site}{$etage}";
         $ical[]="STATUS:CONFIRMED";
         $ical[]="CLASS:PUBLIC";
-        // UR1: Export "non bloquant" events as free
-        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:".($postes[$elem['poste']]['bloquant'] == 1 ? 'BUSY' : 'FREE');
-        $ical[]="TRANSP:".($postes[$elem['poste']]['bloquant'] == 1 ? 'OPAQUE' : 'TRANSPARENT');
-        // UR1: Custom attribute to filter back on import. 
-        // Attribute is conserved if user copy/paste the event in Partage as long as mail client handles X-MICROSOFT tags
-        $ical[]="X-PLANNING-BILBIO:EXPORTED-EVENT";
+        $ical[]="X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY";
+        $ical[]="TRANSP:OPAQUE";
         $ical[]="LAST-MODIFIED:$validation";
         $ical[]="DTSTAMP:$validation";
         $ical[]="BEGIN:VALARM";

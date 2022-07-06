@@ -43,6 +43,7 @@ class absences
     public $cal_name;
     public $commentaires=null;
     public $debut=null;
+    public $documents = true;
     public $dtstamp=null;
     public $edt=array();
     public $elements=array();
@@ -162,7 +163,6 @@ class absences
                 $workflow = 'A';
             }
         }
-        $notifications = "-$workflow$notifications";
 
         // Formatage des dates/heures de début/fin pour les requêtes SQL
         $debut_sql = $debutSQL.' '.$hre_debut;
@@ -258,7 +258,7 @@ class absences
                 $destinataires = $a->recipients;
             } else {
                 $a = new absences();
-                $a->getRecipients($notifications, $responsables, $agent);
+                $a->getRecipients("-$workflow$notifications", $responsables, $agent);
                 $destinataires = $a->recipients;
             }
 
@@ -713,8 +713,7 @@ class absences
             $fin.=" 23:59:59";
         }
 
-		// UR1: Don't consider imported absences
-        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut", "motif"=>"NOT LIKE Agenda Partage");
+        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut");
     
         if ($valide==true or $GLOBALS['config']['Absences-validation']==0) {
             $filter["valide"]=">0";
@@ -728,24 +727,7 @@ class absences
         return false;
     }
 
-    public function deleteAllDocuments() {
-        if (!$this->id) return;
-        $entityManager = $GLOBALS['entityManager'];
-        $absdocs = $entityManager->getRepository(AbsenceDocument::class)->findBy(['absence_id' => $this->id]);
-        foreach ($absdocs as $absdoc) {
-            $absdoc->deleteFile();
-            $entityManager->remove($absdoc);
-        }
-        $entityManager->flush();
-
-        $absenceDocument = new AbsenceDocument();
-        if (is_dir($absenceDocument->upload_dir() . $this->id)) {
-            rmdir($absenceDocument->upload_dir() . $this->id);
-        }
-    }
-
-    // UR1: Add custom parameter $partage to ignore imported absences
-    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=false)
+    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null)
     {
         $entityManager = $GLOBALS['entityManager'];
 
@@ -788,10 +770,6 @@ class absences
         $deletedAgents=implode("','", $this->agents_supprimes);
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
 
-        // UR1: Ignore imported absences
-		if ($partage == true) {
-            $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
-        }
         // Sort
         $sort=$sort?$sort:"`debut`,`fin`,`nom`,`prenom`";
 
@@ -845,7 +823,14 @@ class absences
                     }
                 }
 
-                $elem['absdocs'] = $entityManager->getRepository(AbsenceDocument::class)->findBy(['absence_id' => $elem['id']]);
+                $elem['absdocs'] = null;
+
+                // Set $absence->documents to false
+                // to prevent loading documents
+                if ($this->documents) {
+                    $elem['absdocs'] = $entityManager->getRepository(AbsenceDocument::class)
+                        ->findBy(['absence_id' => $elem['id']]);
+                }
 
                 // Gestion des groupes : ajout des infos sur les autres agents et affichage d'une seule ligne si $this->groupe=true
                 $groupe = null;
@@ -873,9 +858,16 @@ class absences
                         if ($groupe2 == $groupe) {
                             $perso_ids[]=$elem2['perso_id'];
                             $agents[]=$elem2['nom']." ".$elem2['prenom'];
-                            $absdocs = $entityManager->getRepository(AbsenceDocument::class)->findBy(['absence_id' => $elem2['id']]);
-                            if ($absdocs) {
-                                $elem['absdocs'] = array_merge($absdocs, $elem['absdocs']);
+
+                            // Set $absence->documents to false
+                            // to prevent loading documents
+                            if ($this->documents) {
+                                $absdocs = $entityManager->getRepository(AbsenceDocument::class)
+                                    ->findBy(['absence_id' => $elem2['id']]);
+
+                                if ($absdocs) {
+                                    $elem['absdocs'] = array_merge($absdocs, $elem['absdocs']);
+                                }
                             }
                         }
                     }

@@ -6,6 +6,9 @@ use App\Controller\BaseController;
 use App\PlanningBiblio\Event\OnTransformLeaveDays;
 use App\PlanningBiblio\Event\OnTransformLeaveHours;
 use App\PlanningBiblio\Helper\HolidayHelper;
+use App\PlanningBiblio\Helper\HourHelper;
+
+use App\Model\Agent;
 
 use App\Model\Agent;
 
@@ -799,9 +802,9 @@ class AgentController extends BaseController
         $postes = $params['postes'];
         $prenom = trim($params['prenom']);
         $recup = isset($params['recup']) ? trim($params['recup']) : null;
-        $service = htmlentities($params['service'], ENT_QUOTES|ENT_IGNORE, 'UTF-8', false);
+        $service = $params['service'];
         $sites = array_key_exists("sites", $params) ? $params['sites'] : null;
-        $statut = htmlentities($params['statut'], ENT_QUOTES|ENT_IGNORE, 'UTF-8', false);
+        $statut = $params['statut'];
         $temps = array_key_exists("temps", $params) ? $params['temps'] : null;
 
         // Modification du choix des emplois du temps avec l'option EDTSamedi == 1 (EDT différent les semaines avec samedi travaillé)
@@ -819,6 +822,14 @@ class AgentController extends BaseController
 
         $premierLundi = array_key_exists("premierLundi", $params) ? $params['premierLundi'] : null;
         $dernierLundi = array_key_exists("dernierLundi", $params) ? $params['dernierLundi'] : null;
+
+        if (is_array($temps)) {
+            foreach ($temps as $day => $hours) {
+                foreach ($hours as $i => $hour) {
+                    $temps[$day][$i] = HourHelper::toHis($hour);
+                }
+            }
+        }
 
         $droits = $droits ? $droits : array();
         $postes = $postes ? json_encode(explode(",", $postes)) : null;
@@ -869,21 +880,20 @@ class AgentController extends BaseController
                 $mdp = gen_trivial_password();
                 $mdp_crypt = password_hash($mdp, PASSWORD_BCRYPT);
 
-                // Envoi du mail
-                $message = "Votre compte Planning Biblio a &eacute;t&eacute; cr&eacute;&eacute; :";
-                $message.= "<ul><li>Login : $login</li><li>Mot de passe : $mdp</li></ul>";
-
-                $m = new \CJMail();
-                $m->subject = "Création de compte";
-                $m->message = $message;
-                $m->to = $mail;
-                $m->send();
+                $notifier = $this->notifier;
+                $notifier->setRecipients($mail)
+                         ->setMessageCode('create_account')
+                         ->setMessageParameters(array(
+                             'login' => $login,
+                             'password' => $mdp
+                         ));
+                $notifier->send();
 
                 // Si erreur d'envoi de mail, affichage de l'erreur
                 $msg = null;
                 $msgType = null;
-                if ($m->error) {
-                    $msg = $m->error_CJInfo;
+                if ($notifier->getError()) {
+                    $msg = $notifier->getError();
                     $msgType = "error";
                 }
             }

@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Controller\BaseController;
 use App\Model\AbsenceDocument;
+use App\Model\Absence;
+use App\Model\AbsenceReason;
 use App\Model\Agent;
 
 use App\PlanningBiblio\Helper\HourHelper;
@@ -492,7 +494,7 @@ class AbsenceController extends BaseController
         $agents_tous = array();
         if ($agents_multiples) {
             $db_perso=new \db();
-            $db_perso->select2("personnel", "*", array("supprime"=>0,"id"=>"<>2"), "order by nom,prenom");
+            $db_perso->select2("personnel", "*", array("id"=>"<>2"), "order by nom,prenom");
             $agents_tous=$db_perso->result?$db_perso->result:array();
         }
 
@@ -532,6 +534,7 @@ class AbsenceController extends BaseController
      */
     public function delete_absence(Request $request)
     {
+
         $CSRFToken = $request->get('CSRFToken');
         $id = $request->get('id');
         $recurrent = $request->get('rec');
@@ -592,7 +595,7 @@ class AbsenceController extends BaseController
             return $this->json($json_response);
         }
 
-        $a->deleteAllDocuments();
+        $this->entityManager->getRepository(Absence::class)->deleteAllDocuments($id);
 
         // Send an email to agent and in charge.
         $message="<b><u/>Suppression d'une absence</u></b> : \n";
@@ -645,6 +648,13 @@ class AbsenceController extends BaseController
             $a->getRecipients2(null, $agents, 2, 500, $debut, $fin);
             $destinataires = $a->recipients;
         } else {
+            // Get the selected notification workflow in absence reason.
+            $workflow = 'A';
+            $reason = $this->entityManager->getRepository(AbsenceReason::class)->findoneBy(['valeur' => $motif]);
+            if ($reason) {
+                $workflow = $reason->notification_workflow();
+            }
+
             // Foreach agent, search for agents in charge of absences.
             $responsables=array();
             foreach ($agents as $agent) {
@@ -660,7 +670,7 @@ class AbsenceController extends BaseController
             $destinataires=array();
             foreach ($staff_members as $member) {
                 $a=new \absences();
-                $a->getRecipients('-A2', $responsables, $member);
+                $a->getRecipients("-$workflow" . 2, $responsables, $member);
                 $destinataires=array_merge($destinataires, $a->recipients);
             }
 

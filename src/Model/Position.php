@@ -5,7 +5,7 @@ namespace App\Model;
 use Doctrine\ORM\Mapping\{Entity, Table, Id, Column, GeneratedValue};
 
 /**
- * @Entity @Table(name="postes")
+ * @Entity(repositoryClass="App\Repository\PositionRepository") @Table(name="postes")
  **/
 class Position extends PLBEntity
 {
@@ -27,7 +27,7 @@ class Position extends PLBEntity
     /** @Column(type="text")**/
     protected $etage;
 
-    /** @Column(type="json_array")**/
+    /** @Column(type="json")**/
     protected $activites;
 
     /** @Column(type="text", columnDefinition="ENUM('0','1')") )**/
@@ -42,7 +42,7 @@ class Position extends PLBEntity
     /** @Column(type="integer", length=1)**/
     protected $site;
 
-    /** @Column(type="json_array")**/
+    /** @Column(type="json")**/
     protected $categories;
 
     /** @Column(type="datetime")**/

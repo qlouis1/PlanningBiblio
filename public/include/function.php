@@ -15,6 +15,7 @@ Page appelée par les fichiers index.php, setup/index.php et planning/poste/menu
 
 use App\Model\Agent;
 use App\PlanningBiblio\WorkingHours;
+use App\PlanningBiblio\NotificationTransporter\NotificationTransporterInterface;
 
 // Contrôle si ce script est appelé directement, dans ce cas, affiche Accès Refusé et quitte
 if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
@@ -33,6 +34,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 class datePl
 {
     public $dates = null;
+    public $date = null;
     public $jour = null;
     public $jour_complet = null;
     public $sam = null;
@@ -44,6 +46,7 @@ class datePl
   
     public function __construct($date, $nb_semaine = null)
     {
+        $this->date = $date;
         $yyyy = (int) substr($date, 0, 4);
         $mm = (int) substr($date, 5, 2);
         $dd = (int) substr($date, 8, 2);
@@ -74,43 +77,40 @@ class datePl
     
         $this->dates=array($j1,$j2,$j3,$j4,$j5,$j6,$j7);
 
+        $this->semaine3 = $this->weekId($this->nb_semaine);
+    }
 
-        switch ($this->nb_semaine) {
-            // Calcul du numéro de la semaine pour l'utilisation d'un seul planning hebdomadaire : toujours 1
-            case 1:
-                $this->semaine3 = 1;
-                break;
+    private function weekId($nb_semaine) {
 
-            // Calcul du numéro de la semaine pour l'utilisation de 2 plannings hebdomadaires
-            case 2:
-                $this->semaine3 = $this->semaine % 2 ? 1 : 2;
-                break;
-
-            // Calcul du numéro de la semaine pour l'utilisation de 3 plannings hebdomadaires
-            case 3:
-                $interval = $this->getNumberOfWeeksSinceStartDate($date);
-                if (!($interval%3)) {
-                    $this->semaine3=1;
-                }
-                if (!(($interval+2)%3)) {
-                    $this->semaine3=2;
-                }
-                if (!(($interval+1)%3)) {
-                    $this->semaine3=3;
-                }
-                # Or: $this->semaine3 = $this->getCycleNumber($interval, 3);
-                # (can be moved in default case then)
-                break;
-
-            // Calcul du numéro de la semaine pour l'utilisation de 4 plannings hebdomadaires
-            case 4:
-               $this->semaine3 = $this->getCycleNumber($this->semaine, 4);
-
-            default:
-                $interval = $this->getNumberOfWeeksSinceStartDate($date);
-                $this->semaine3 = $this->getCycleNumber($this->semaine, $this->nb_semaine);
-                break;
+        if ($nb_semaine == 1) {
+            return 1;
         }
+
+        if ($nb_semaine == 2) {
+            return $this->semaine % 2 ? 1 : 2;
+        }
+
+        $interval = $this->getNumberOfWeeksSinceStartDate($this->date);
+        if ($nb_semaine == 3) {
+            $week_id = null;
+            if (!($interval % 3)) {
+                $week_id = 1;
+            }
+            if (!(($interval + 2) % 3)) {
+                $week_id = 2;
+            }
+            if (!(($interval + 1) % 3)) {
+                $week_id = 3;
+            }
+
+            return $week_id;
+        }
+
+        if ($nb_semaine == 4) {
+           return $this->getCycleNumber($this->semaine, 4);
+        }
+
+        return $this->getCycleNumber($this->semaine, $nb_semaine);
     }
 
     private function getCycleNumber($weeknumber, $cycles) {
@@ -143,11 +143,10 @@ class datePl
         return $interval;
     }
 
-    public function planning_day_index_for($agent_id)
+    public function planning_day_index_for($agent_id, $week_number = 0)
     {
         $config = $GLOBALS['config'];
-        $semaine = $this->semaine;
-        $semaine3 = $this->semaine3;
+        $semaine3 = $week_number ? $this->weekId($week_number) : $this->semaine3;
 
         // Day of week. Mon = 0 ,Sun = 6
         $day = $this->position - 1;
@@ -156,7 +155,7 @@ class datePl
         }
 
         // Using a schedule with Saturday and one without.
-        if ($config['EDTSamedi']) {
+        if ($config['EDTSamedi'] and !$config['PlanningHebdo']) {
             // Check if the current week has Saturday.
             $p=new personnel();
             $p->fetchEDTSamedi($agent_id, $this->dates[0], $this->dates[0]);
@@ -168,7 +167,7 @@ class datePl
     }
 }
 
-class CJMail
+class CJMail implements NotificationTransporterInterface
 {
     public $message=null;
     public $to=null;
@@ -183,6 +182,26 @@ class CJMail
     {
     }
 
+    public function setSubject($subject)
+    {
+        $this->subject = $subject;
+
+        return $this;
+    }
+
+    public function setBody($body)
+    {
+        $this->message = $body;
+
+        return $this;
+    }
+
+    public function setRecipients($recipients)
+    {
+        $this->to = $recipients;
+
+        return $this;
+    }
 
     private function prepare()
     {
@@ -239,48 +258,34 @@ class CJMail
         $this->message = $message;
     }
 
-    // UR1: Add parameter $site to customize sender for different sites
-    public function send($site=0)
+  
+    public function send()
     {
-        if ($this->prepare()===false) {
+        if ($this->prepare() === false) {
             return false;
         }
     
         $mail = new PHPMailer();
         $mail->setLanguage('fr');
+        $mail->CharSet="utf-8";
+        $mail->WordWrap = 50;
+        $mail->Hostname = $GLOBALS['config']['Mail-Hostname'];
+
         if ($GLOBALS['config']['Mail-IsMail-IsSMTP']=="IsMail") {
             $mail->IsMail();
         } else {
             $mail->IsSMTP();
+            $mail->Host = $GLOBALS['config']['Mail-Host'];
+            $mail->Port = $GLOBALS['config']['Mail-Port'];
+            $mail->SMTPSecure = $GLOBALS['config']['Mail-SMTPSecure'];
+            $mail->SMTPAuth = $GLOBALS['config']['Mail-SMTPAuth'];
+            $mail->Username = $GLOBALS['config']['Mail-Username'];
+            $mail->Password = decrypt($GLOBALS['config']['Mail-Password']);
         }
-        $mail->CharSet="utf-8";
-        $mail->WordWrap = 50;
-        $mail->Hostname =$GLOBALS['config']['Mail-Hostname'];
-        $mail->Host =$GLOBALS['config']['Mail-Host'];
-        $mail->Port =$GLOBALS['config']['Mail-Port'];
-        $mail->SMTPSecure = $GLOBALS['config']['Mail-SMTPSecure'];
-        $mail->SMTPAuth =$GLOBALS['config']['Mail-SMTPAuth'];
-        $mail->Username =$GLOBALS['config']['Mail-Username'];
-        $mail->Password =decrypt($GLOBALS['config']['Mail-Password']);
-        //$mail->Sender =$GLOBALS['config']['Mail-From'];
-        //$mail->From =$GLOBALS['config']['Mail-From'];
-        $mail->FromName =$GLOBALS['config']['Mail-FromName'];
 
-        // UR1: Set $mail->From and $mail->Sender to the first email found in each site's planning team
-        $tmp=false;
-        if (isset($GLOBALS['config']['Multisites-site'.$site.'-mail'])){
-            $tmp = filter_var(trim(explode(";", $GLOBALS['config']['Multisites-site'.$site.'-mail'])[0]),FILTER_VALIDATE_EMAIL);
-        }
-        // UR1: If we can't get a usable email, use default one
-        $mail->Sender =$tmp ? $tmp : $GLOBALS['config']['Mail-From'];
-        $mail->From =$tmp ? $tmp : $GLOBALS['config']['Mail-From'];
-
-        // UR1: Mail builder logs
-error_log(date("[Y-m-d G:i:s]")."====function.php:send()\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|site is $site\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|Sender is ".$mail->Sender."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|From is ".$mail->From."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-
+        $mail->Sender = $GLOBALS['config']['Mail-From'];
+        $mail->From = $GLOBALS['config']['Mail-From'];
+        $mail->FromName = $GLOBALS['config']['Mail-FromName'];
         $mail->IsHTML();
     
         $mail->Body = $this->message;
@@ -326,12 +331,7 @@ error_log(date("[Y-m-d G:i:s]")."==|From is ".$mail->From."\n",3, "/data/htdocs/
             // Liste des destinataires pour qui l'envoi a fonctionné (en cas de succès total)
             $this->successAddresses=$this->to;
         }
-// UR1: Mail success logs
-error_log(date("[Y-m-d G:i:s]")."====Success \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|\n".print_r($this->successAddresses,true)."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."====Fail \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|\n".print_r($this->failedAddresses,true)."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-
+    
         return true;
     }
 }
@@ -599,18 +599,6 @@ function calculSiPresent($debut, $fin, $temps, $jour)
     $wh = new WorkingHours($temps);
     $tab = $wh->hoursOf($jour);
 
-    // If workinghour are on 2 digits
-    // convert start and end on 2 digits.
-	if (isset($tab[0])){
-    if (!\DateTime::createFromFormat('H:i:s', $tab[0][0])) {
-        // convert variable from H:i:s to H:i
-        // to avoid comparison between 13:00:00 and 13:00
-        $start_dt = DateTime::createFromFormat('H:i:s', $debut);
-        $debut = $start_dt->format('H:i');
-        $end_dt = DateTime::createFromFormat('H:i:s', $fin);
-        $fin = $end_dt->format('H:i');
-    }
-}
     // Confrontation du créneau de service public aux tableaux
     foreach ($tab as $elem) {
         if (($elem[0] <= $debut) and ($elem[1] >= $fin)) {
@@ -1234,7 +1222,6 @@ function nom($id, $format="nom p", $agents=array())
     switch ($format) {
     case "nom prenom": $nom="$nom $prenom";	break;
     case "prenom nom": $nom="$prenom $nom";	break;
-    case "prenom n": $nom="$prenom ".substr($nom, 0, 1); break;
     default: $nom="$nom ".substr($prenom, 0, 1);	break;
   }
     return $nom;

@@ -2,14 +2,16 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\PlanningBiblio\Notifier;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Psr\Log\LoggerInterface;
 
-class BaseController extends Controller
+class BaseController extends AbstractController
 {
     protected $entityManager;
 
@@ -20,6 +22,8 @@ class BaseController extends Controller
     private $config = array();
 
     private $logger;
+
+    protected $notifier;
 
     public function __construct(RequestStack $requestStack, LoggerInterface $logger)
     {
@@ -34,6 +38,10 @@ class BaseController extends Controller
         $this->config = $GLOBALS['config'];
 
         $this->logger = $logger;
+    }
+
+    public function setNotifier(Notifier $notifier) {
+        $this->notifier = $notifier;
     }
 
     protected function templateParams( array $params = array() )

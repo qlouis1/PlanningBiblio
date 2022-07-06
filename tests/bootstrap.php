@@ -12,7 +12,10 @@ if (!file_exists(__DIR__ . "/../.env.test.local")) {
     die("Unable to find the .env.test.local file\n");
 }
 
-$dotenv = new Dotenv();
+global $base_url;
+$base_url = 'http://test.planno';
+
+$dotenv = new Dotenv(false);
 $dotenv->load(__DIR__ . "/../.env.test.local");
 $database_url = $_ENV['DATABASE_URL'];
 

@@ -4,12 +4,14 @@ namespace App\Model;
 
 use Doctrine\ORM\Mapping\{Entity, Table, Id, Column, GeneratedValue};
 require_once(__DIR__ . '/../../public/absences/class.absences.php');
+require_once(__DIR__ . '/../../public/conges/class.conges.php');
 require_once(__DIR__ . '/../../public/include/db.php');
 
 /**
- * @Entity @Table(name="personnel")
+ * @Entity(repositoryClass="App\Repository\AgentRepository") @Table(name="personnel")
  **/
-class Agent extends PLBEntity {
+class Agent extends PLBEntity
+{
     /** @Id @Column(type="integer") @GeneratedValue **/
     protected $id;
 
@@ -43,7 +45,7 @@ class Agent extends PLBEntity {
     /** @Column(type="string") **/
     protected $actif;
 
-    /** @Column(type="json_array") **/
+    /** @Column(type="json") **/
     protected $droits;
 
     /** @Column(type="string") **/
