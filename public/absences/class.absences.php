@@ -713,8 +713,9 @@ class absences
             $fin.=" 23:59:59";
         }
 
-        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut");
-    
+   		// UR1: Don't consider imported absences
+        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut", "motif"=>"NOT LIKE Agenda Partage");
+     
         if ($valide==true or $GLOBALS['config']['Absences-validation']==0) {
             $filter["valide"]=">0";
         }
@@ -727,7 +728,8 @@ class absences
         return false;
     }
 
-    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null)
+    // UR1: Add custom parameter $partage to ignore imported absences
+    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=false)
     {
         $entityManager = $GLOBALS['entityManager'];
 
@@ -769,6 +771,11 @@ class absences
         // Affiche les absences des agents supprimés si précisé : $this->agents_supprimes=array(0,1) ou array(0,1,2)
         $deletedAgents=implode("','", $this->agents_supprimes);
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
+
+        // UR1: Ignore imported absences
+		if ($partage == true) {
+            $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
+        }
 
         // Sort
         $sort=$sort?$sort:"`debut`,`fin`,`nom`,`prenom`";
