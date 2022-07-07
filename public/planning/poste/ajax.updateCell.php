@@ -56,8 +56,6 @@ $now=date("Y-m-d H:i:s");
 if (is_numeric($perso_id) and $perso_id == 0) {
     // Tout barrer
     if ($barrer and $tout) {
-        error_log(date("[Y-m-d G:i:s]")."==|1\n",3, "/var/www/ur1-test-planning-biblio/var/log/t1.log");
-
         $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site);
         $db=new db();
@@ -113,8 +111,6 @@ else {
     }
     // Si barrer : on barre l'ancien et ajoute le nouveau
     elseif ($barrer) {
-        error_log(date("[Y-m-d G:i:s]")."==|6\n",3, "/var/www/ur1-test-planning-biblio/var/log/t1.log");
-
         // On barre l'ancien
         $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
