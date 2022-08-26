@@ -167,7 +167,8 @@ class PlanningJobController extends BaseController
                 $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($finSQL)));
 
                 if ($this->config('Multisites-nombre') > 1) {
-                    $req = "SELECT `{$dbprefix}pl_poste`.`perso_id` AS `perso_id` "
+                    // UR1 : Select poste to ultimately display it in menu
+                    $req = "SELECT `{$dbprefix}pl_poste`.`perso_id` AS `perso_id` , `{$dbprefix}pl_poste`.`site` AS `site` "
                         . "FROM `{$dbprefix}pl_poste` "
                         . "INNER JOIN `{$dbprefix}postes` ON `{$dbprefix}pl_poste`.`poste`=`{$dbprefix}postes`.`id` "
                         . "WHERE `{$dbprefix}pl_poste`.`debut`<'$end_with_journey' AND `{$dbprefix}pl_poste`.`fin`>'$start_with_journey' "
@@ -178,7 +179,10 @@ class PlanningJobController extends BaseController
                     $db->query($req);
                     if ($db->result) {
                         foreach ($db->result as $elem) {
-                            $journey[] = $elem['perso_id'];
+                            // UR1 : easily keep both id and poste data
+                            //$journey[$elem['perso_id']] = $elem['site'];
+                            $journey[$elem['perso_id']] = $this->config("Multisites-site".$elem['site']);
+
                         }
                     }
                 }

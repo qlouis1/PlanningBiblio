@@ -293,9 +293,10 @@ class planning
                     }
                 }
 
+                // UR1 : As we changed data to [id] => [site name] in PlanningJobController, we now have to test on keys
                 $elem['journey'] = 0;
-                if (in_array($elem['id'], $journey)) {
-                    $elem['journey'] = 1;
+                if (array_key_exists($elem['id'], $journey)) {
+                    $elem['journey'] = $journey[$elem['id']];
                 }
 
                 $elem['time_limit'] = 0;
