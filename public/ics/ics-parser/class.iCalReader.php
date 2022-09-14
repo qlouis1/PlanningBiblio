@@ -65,7 +65,7 @@ class ICal
         if ($weekStart) {
             $this->default_weekStart = $weekStart;
         }
-        
+error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/prod.log");
         return $this->initLines($lines);
     }
 
@@ -114,6 +114,7 @@ class ICal
         if (!is_array($lines)) {
             return false;
         }
+error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/prod.log");
 
         if (stristr($lines[0], 'BEGIN:VCALENDAR') === false) {
             return false;
@@ -419,6 +420,9 @@ class ICal
     {
         $array = $this->cal;
         $events = $array['VEVENT'];
+
+error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/prod.log");
+
         if (empty($events))
             return false;
         foreach ($array['VEVENT'] as $anEvent) {
@@ -455,14 +459,17 @@ class ICal
                     $weekdays = array('SU' => 'sunday', 'MO' => 'monday', 'TU' => 'tuesday', 'WE' => 'wednesday', 'TH' => 'thursday', 'FR' => 'friday', 'SA' => 'saturday');
                 }
 
+                // UR1 : use until_default as a limit to 8 month
                 $until_default = date_create('now');
-                $until_default->modify($this->default_span . ' year');
+                $until_default->modify('+8 month');
                 $until_default->setTime(23, 59, 59); // End of the day
                 $until_default = date_format($until_default, 'Ymd\THis');
 
                 if (isset($rrules['UNTIL'])) {
                     // Get Until
-                    $until = strtotime($rrules['UNTIL']);
+                    // UR1 : Limit until to until_default, set to 8 month
+                    $until = min(strtotime($rrules['UNTIL']),strtotime($until_default));
+                    //$until = strtotime($rrules['UNTIL']);
                 } else if (isset($rrules['COUNT'])) {
                     $frequency_conversion = array('DAILY' => 'day', 'WEEKLY' => 'week', 'MONTHLY' => 'month', 'YEARLY' => 'year');
                     $count_orig = (is_numeric($rrules['COUNT']) && $rrules['COUNT'] > 1) ? $rrules['COUNT'] : 0;
@@ -470,7 +477,9 @@ class ICal
                     $count += ($count > 0) ? $count * ($interval - 1) : 0;
                     $count_nb = 1;
                     $offset = "+$count " . $frequency_conversion[$frequency];
-                    $until = strtotime($offset, $start_timestamp);
+                    // UR1 : Limit until to until_default, set to 8 month
+                    $until = min(strtotime($offset, $start_timestamp),strtotime($until_default));
+                    //$until = strtotime($offset, $start_timestamp);
 
                     if (in_array($frequency, array('MONTHLY', 'YEARLY')) && isset($rrules['BYDAY']) && $rrules['BYDAY'] != '') {
                         $dtstart = date_create($anEvent['DTSTART']);
@@ -741,6 +750,8 @@ class ICal
                 }
             }
         }
+error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/prod.log");
+
         $this->cal['VEVENT'] = $events;
     }
 
