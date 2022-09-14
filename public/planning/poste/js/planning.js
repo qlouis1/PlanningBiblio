@@ -585,12 +585,13 @@ function ContextMenu2agents(data, agent) {
   }
 
   // Journey time too short
+  // UR1 : Display previous site data coming from PlanningJobController
   if (agent.journey) {
     font.append('&nbsp;');
     journey = $('<span>').attr({
       class: 'red bold',
       title: "Temps de trajet insuffisant pour rejoindre le poste"
-    }).html('(T)');
+    }).html('(T:'+agent.journey+')');
     font.append(journey);
   }
 

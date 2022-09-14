@@ -31,10 +31,13 @@ chdir(__DIR__ . '/../../../public/');
 require_once __DIR__ . '/../../../public/include/config.php';
 require_once __DIR__ . '/../../../public/ics/class.ics.php';
 require_once __DIR__ . '/../../../public/personnel/class.personnel.php';
+// UR1 : include function.php to access byte formating function
+require_once __DIR__ . '/../../../public/include/function.php';
 
 $CSRFToken = CSRFToken();
 
 logs("Début d'importation des fichiers ICS", "ICS", $CSRFToken);
+error_log(date("\n\n\n[Y-m-d G:i:s]")."====DEBUT IMPORT\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
 
 // Créé un fichier .lock dans le dossier temporaire qui sera supprimé à la fin de l'execution du script, pour éviter que le script ne soit lancé s'il est déjà en cours d'execution
 $tmp_dir=sys_get_temp_dir();
@@ -136,6 +139,15 @@ foreach ($agents as $agent) {
             $url = $agent['url_ics'];
         }
 
+        // UR1 : Limit import with Partage REST param to limit file size and number of treated events
+        //         start: start date in UNIX ms
+        //         end: end date in UNIX ms
+
+        $timestamp_start = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
+        $timestamp_start .= "000"; // seconds to milliseconds as the Partage REST param wants ms
+        $timestamp_end = mktime(0, 0, 0, date("m")+8, date("d"), date("Y"));
+        $timestamp_end .= "000";
+
         if (empty(json_decode($agent['check_ics'])[$i-1])) {
             logs("Agent #{$agent['id']} : Check ICS $i is disabled", "ICS", $CSRFToken);
             continue;
@@ -144,7 +156,11 @@ foreach ($agents as $agent) {
         if (!$url) {
             logs("Agent #{$agent['id']} : Impossible de constituer une URL valide", "ICS", $CSRFToken);
             continue;
+        } else {
+            // UR1 : add the REST params to url. As our timestamps are in seconds
+            $url.="?start=" . $timestamp_start . "&end=" . $timestamp_end;
         }
+
     
         // Test si le fichier existe
         if (substr($url, 0, 1) == '/' and !file_exists($url)) {
@@ -173,7 +189,7 @@ foreach ($agents as $agent) {
             $ics->purge();
             continue;
         }
-    
+
         logs("Agent #{$agent['id']} : Importation du fichier $url", "ICS", $CSRFToken);
 
         $ics=new CJICS();
@@ -188,6 +204,10 @@ foreach ($agents as $agent) {
         $ics->updateTable();
     }
 }
+error_log(date("[Y-m-d G:i:s]")."====FIN IMPORT\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+error_log(date("[Y-m-d G:i:s]")."==|MAXMEM:" . formatBytes(strval(memory_get_peak_usage())) . "\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+logs("Max memory usage: " . formatBytes(strval(memory_get_peak_usage())). ".", "ICS", $CSRFToken);
+
 
 // Unlock
 unlink($lockFile);

@@ -1332,3 +1332,11 @@ function verifmail($texte)
 {
     return preg_match("/^[^@ ]+@[^@ ]+\.[^@ \.]+$/", $texte);
 }
+
+function formatBytes($size, $precision = 2)
+{
+    $base = log($size, 1024);
+    $suffixes = array('b', 'Kb', 'Mb', 'Gb', 'Tb');
+
+    return round(pow(1024, $base - floor($base)), $precision) .''. $suffixes[floor($base)];
+}
