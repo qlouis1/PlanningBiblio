@@ -143,9 +143,9 @@ foreach ($agents as $agent) {
         //         start: start date in UNIX ms
         //         end: end date in UNIX ms
 
-        $timestamp_start = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
+        $timestamp_start = mktime(0, 0, 0, date("m"), date("d"), date("Y")-1);
         $timestamp_start .= "000"; // seconds to milliseconds as the Partage REST param wants ms
-        $timestamp_end = mktime(0, 0, 0, date("m")+8, date("d"), date("Y"));
+        $timestamp_end = mktime(0, 0, 0, date("m"), date("d"), date("Y")+1);
         $timestamp_end .= "000";
 
         if (empty(json_decode($agent['check_ics'])[$i-1])) {

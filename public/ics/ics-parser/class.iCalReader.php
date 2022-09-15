@@ -114,6 +114,7 @@ error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, "/data/
         if (!is_array($lines)) {
             return false;
         }
+
 error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
 
         if (stristr($lines[0], 'BEGIN:VCALENDAR') === false) {
@@ -459,9 +460,9 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
                     $weekdays = array('SU' => 'sunday', 'MO' => 'monday', 'TU' => 'tuesday', 'WE' => 'wednesday', 'TH' => 'thursday', 'FR' => 'friday', 'SA' => 'saturday');
                 }
 
-                // UR1 : use until_default as a limit to 8 month
+                // UR1 : use until_default as a limit to one year
                 $until_default = date_create('now');
-                $until_default->modify('+8 month');
+                $until_default->modify('+1 year');
                 $until_default->setTime(23, 59, 59); // End of the day
                 $until_default = date_format($until_default, 'Ymd\THis');
 
