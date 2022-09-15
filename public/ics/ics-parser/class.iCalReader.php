@@ -459,9 +459,9 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
                     $weekdays = array('SU' => 'sunday', 'MO' => 'monday', 'TU' => 'tuesday', 'WE' => 'wednesday', 'TH' => 'thursday', 'FR' => 'friday', 'SA' => 'saturday');
                 }
 
-                // UR1 : use until_default as a limit to 8 month
+                // UR1 : use until_default as a limit to one year
                 $until_default = date_create('now');
-                $until_default->modify('+8 month');
+                $until_default->modify('+1 year');
                 $until_default->setTime(23, 59, 59); // End of the day
                 $until_default = date_format($until_default, 'Ymd\THis');
 
