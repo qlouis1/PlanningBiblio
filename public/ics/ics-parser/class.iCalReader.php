@@ -65,7 +65,7 @@ class ICal
         if ($weekStart) {
             $this->default_weekStart = $weekStart;
         }
-error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+        error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, $_ENV['CL']);
         return $this->initLines($lines);
     }
 
@@ -114,7 +114,7 @@ error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, "/data/
         if (!is_array($lines)) {
             return false;
         }
-error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+        error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, $_ENV['CL']);
 
         if (stristr($lines[0], 'BEGIN:VCALENDAR') === false) {
             return false;
@@ -421,7 +421,7 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, "/data/
         $array = $this->cal;
         $events = $array['VEVENT'];
 
-error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+        error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
 
         if (empty($events))
             return false;
@@ -430,13 +430,13 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
             if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
                 continue;
             }
-            if (isset($elem['TRANSP']) && $elem['TRANSP'] != "OPAQUE") {
+            if (isset($anEvent['TRANSP']) && $anEvent['TRANSP'] != "OPAQUE") {
                 continue;
             }
-            if ($elem['STATUS'] == 'CANCELLED') {
+            if ($anEvent['STATUS'] == 'CANCELLED') {
                 continue;
             }
-            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+            if (isset($anEvent['X-PLANNING-BILBIO']) and $anEvent['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
                 continue;
             }
             // end UR1
@@ -765,7 +765,7 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
                 }
             }
         }
-error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, "/data/htdocs/sites/planno/planno.univ-rennes1.fr/var/log/prod.log");
+        error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, $_ENV['CL']);
 
         $this->cal['VEVENT'] = $events;
     }
