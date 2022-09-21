@@ -426,6 +426,21 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
         if (empty($events))
             return false;
         foreach ($array['VEVENT'] as $anEvent) {
+            // UR1 : We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
+            if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
+                continue;
+            }
+            if (isset($elem['TRANSP']) && $elem['TRANSP'] != "OPAQUE") {
+                continue;
+            }
+            if ($elem['STATUS'] == 'CANCELLED') {
+                continue;
+            }
+            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+                continue;
+            }
+            // end UR1
+
             if (isset($anEvent['RRULE']) && $anEvent['RRULE'] != '') {
                 // Recurring event, parse RRULE and add appropriate duplicate events
                 $rrules = array();
