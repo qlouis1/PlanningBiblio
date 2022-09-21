@@ -49,9 +49,9 @@ foreach ($agents as $elem) {
     $destinataires[]=$elem['mail'];
 }
 // UR1: Call to availability mail list logs
-error_log(date("[Y-m-d G:i:s]")."====Ajax.dispomail\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|site is $site \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
-error_log(date("[Y-m-d G:i:s]")."==|destinataires are".print_r($destinataires,true)." \n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/dev.log");
+error_log(date("[Y-m-d G:i:s]")."====Ajax.dispomail\n",3, $_ENV['CL']);
+error_log(date("[Y-m-d G:i:s]")."==|site is $site \n",3, $_ENV['CL']);
+error_log(date("[Y-m-d G:i:s]")."==|destinataires are".print_r($destinataires,true)." \n",3, $_ENV['CL']);
 
 
 // Envoi du mail
