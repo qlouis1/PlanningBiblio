@@ -269,8 +269,16 @@ class planningHebdo
         // Recherche des services
         $p=new personnel();
         $p->fetch();
-        foreach ($p->elements as $elem) {
+        // UR1 : Display sites instead of services
+        // fetch already gets everything from db so we have the site data available
+        // There is also a change in template/workinghour/index.html.twig l57 but idk if I can put comments there
+        /*foreach ($p->elements as $elem) {
             $services[$elem['id']]=$elem['service'];
+        }*/
+        foreach ($p->elements as $elem) {
+            foreach($elem['sites'] as $s){
+                $sites[$elem['id']][] = $GLOBALS['config']["Multisites-site$s"];
+            }
         }
 
         // Filtre de recherche
@@ -336,7 +344,6 @@ class planningHebdo
 
         $db=new db();
         $db->select("planning_hebdo", "*", $filter, "ORDER BY debut,fin,saisie");
-    
         $p=new personnel();
         $p->supprime = array(0,1,2);
         $p->fetch();
@@ -348,7 +355,9 @@ class planningHebdo
                 $elem['temps'] = json_decode(html_entity_decode($elem['temps'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['breaktime'] = json_decode(html_entity_decode($elem['breaktime'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['nom'] = nom($elem['perso_id'], 'nom p', $agents);
-                $elem['service']=$services[$elem['perso_id']];
+                // UR1 : Display sites instead of services
+                //$elem['service']=$services[$elem['perso_id']];
+                $elem['sites']=implode(", ",$sites[$elem['perso_id']]);
                 $this->elements[]=$elem;
             }
         }

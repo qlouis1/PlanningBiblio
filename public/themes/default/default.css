@@ -43,7 +43,8 @@ input,select,textarea {
 
 /* fond de tous le site avec image par transparance */
 body {
-  background:url("images/background.png") repeat-y top rgba(240, 240, 240, 1);
+  /*background:url("images/background.png") repeat-y top rgba(240, 240, 240, 1);*/
+  background:url("images/background_test.png") repeat-y right top rgba(240, 240, 240, 1);
 	margin: 0px 0px 0px 0px;
 }
 

@@ -95,6 +95,7 @@ $agents = $p->elements;
 
 // Pour chaque agent, on créé les URL des fichiers ICS et on importe les événements
 foreach ($agents as $agent) {
+//error_log(date("[Y-m-d G:i:s]")."==AGENT: " . $agent['id'] . "\n",3, "/data/htdocs/sites/planning-biblio/planning-biblio-test.univ-rennes1.fr/var/log/prod.log");
 
   // Pour les URL N°1, N°2 et url de la fiche agent (N°3)
     // Si le paramètre ICS-Server3 est activé, on recherche également une URL personnalisée dans la fiche des agents (champ url_ics).
