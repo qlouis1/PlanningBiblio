@@ -430,13 +430,13 @@ error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, "/dat
             if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
                 continue;
             }
-            if (isset($elem['TRANSP']) && $elem['TRANSP'] != "OPAQUE") {
+            if (isset($anEvent['TRANSP']) && $anEvent['TRANSP'] != "OPAQUE") {
                 continue;
             }
-            if ($elem['STATUS'] == 'CANCELLED') {
+            if ($anEvent['STATUS'] == 'CANCELLED') {
                 continue;
             }
-            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+            if (isset($anEvent['X-PLANNING-BILBIO']) and $anEvent['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
                 continue;
             }
             // end UR1
