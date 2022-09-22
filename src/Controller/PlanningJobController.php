@@ -181,8 +181,7 @@ class PlanningJobController extends BaseController
                         foreach ($db->result as $elem) {
                             // UR1 : easily keep both id and poste data
                             //$journey[$elem['perso_id']] = $elem['site'];
-                            $journey[$elem['perso_id']] = $this->config("Multisites-site".$elem['site']);
-
+                            $journey[$elem['perso_id']] = $this->config("Multisites-site" . $elem['site']);
                         }
                     }
                 }
@@ -246,6 +245,55 @@ class PlanningJobController extends BaseController
             }
         }
 
+        // UR1 : Custom exclusion for journey time after imported absence
+        $exclJourneyPartage = array();
+        if ($this->config('Journey-time-for-imported-absences') > 0) {
+
+            $j_time = $this->config('Journey-time-for-imported-absences');
+            $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debutSQL)));
+            $end_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($finSQL)));
+
+            error_log(date("[Y-m-d G:i:s]") . "====DB WAY\n", 3, $_ENV['CL']);
+
+            $db = new \db();
+
+            error_log(date("[Y-m-d G:i:s]") . "==|" . "`fin` >'$dateSQL $start_with_journey'"   . "\n", 3, $_ENV['CL']);
+            $db->select('absences', 'perso_id,valide,motif,localisation,commentaires', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
+            if ($db->result) {
+                foreach ($db->result as $elem) {
+                    error_log(date("[Y-m-d G:i:s]") . "==|ELEM" . print_r($elem,true)  . "\n", 3, $_ENV['CL']);
+                    if ($elem['motif'] == "Agenda Partage") {
+                        // UR1 :
+                        // si on a la loca dans l'event importé
+                        if($elem['localisation']){
+                            error_log(date("[Y-m-d G:i:s]") . "==|on a une loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
+                            $m = matchSite($elem['localisation']);
+                        } else {
+                            error_log(date("[Y-m-d G:i:s]") . "==|on a pas de loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
+                            //on a pas la loca, il faut prendre le site par défaut
+                            $pers = new \personnel();
+                            $pers->fetchById($elem['perso_id']);
+                            // UR1 : on prend le sites[0] comme site par défaut, évolution possible
+                            $s = $pers->elements[0]['sites'][0];
+                            error_log(date("[Y-m-d G:i:s]") . "==|on prend le sites[0] de la pers: " . $s ."\n", 3, $_ENV['CL']);
+                            $l = $this->config("Multisites-site$s");
+                            error_log(date("[Y-m-d G:i:s]") . "==|on prend la loca par défaut: " . $l ."\n", 3, $_ENV['CL']);
+                            $m = matchSite($l);
+                        }
+
+                        error_log(date("[Y-m-d G:i:s]") . "==|MACTH:" . $m."\n", 3, $_ENV['CL']);
+                        error_log(date("[Y-m-d G:i:s]") . "==|CFIG:" . print_r($this->config("Multisites-site$m"),true) ."\n", 3, $_ENV['CL']);
+
+                        if($m != $site){
+                            $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
+                        }
+                    }
+                }
+            } else {
+                error_log(date("[Y-m-d G:i:s]") . "==|NO DB:" . $db->result."\n", 3, $_ENV['CL']);
+
+            }
+        }
         // Count day hours for all agent.
         $day_hours = array();
         if ($break_countdown) {
@@ -287,17 +335,17 @@ class PlanningJobController extends BaseController
 
         $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
         // UR1: Keep imported absences data to pass it later to js script
-        $absentPartage = Array();
+        $absentPartage = array();
 
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
-                        $absentPartage[$elem['perso_id']][]=$elem['commentaires'];
+                        $absentPartage[$elem['perso_id']][] = $elem['commentaires'];
                     } else {
-                        $tab_exclus[]=$elem['perso_id'];
-                        $absents[]=$elem['perso_id'];
+                        $tab_exclus[] = $elem['perso_id'];
+                        $absents[] = $elem['perso_id'];
                     }
                 } elseif ($this->config('Absences-non-validees')) {
                     $absences_non_validees[] = $elem['perso_id'];
@@ -486,6 +534,10 @@ class PlanningJobController extends BaseController
         $agents_tmp = $db->result;
 
         if ($agents_tmp) {
+            // UR1 : debug
+            //error_log(date("[Y-m-d G:i:s]")."====Agents\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."==|".print_r($agents_tmp,true)."\n",3, $_ENV['CL']);
+
             foreach ($agents_tmp as $elem) {
                 // Remove agents without requested skills.
                 if (is_array($activites)) {
@@ -521,12 +573,15 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
-                // UR1: Tag imported absences to treat them like other unavailablilities
-                if (isset($absentPartage[$elem['id']])){
+                // UR1 : Tag imported absences to treat them like other unavailablilities
+                if (isset($absentPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'agenda_partage';
                 }
 
-
+                // UR1 : Search agents with an imported Partage absence within journey time of this hour
+                if (isset($exclJourneyPartage[$elem['id']])) {
+                    $exclusion[$elem['id']][] = 'journey_partage';
+                }
 
                 // If no exclusion for this agent,
                 // put it in the availables list.
@@ -561,10 +616,20 @@ class PlanningJobController extends BaseController
                     }
                     // UR1: Pass absences data to js script in an Array
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
-                        foreach($absentPartage[$elem['id']] as $k=>$e) {
-                            $motifExclusion[$elem['id']][]=["partage",$e];
+                        foreach ($absentPartage[$elem['id']] as $e) {
+                            $motifExclusion[$elem['id']][] = ["partage", $e];
                         }
                     }
+
+                    // UR1 : Pass Journey data to js script in Array
+                    if (in_array('journey_partage', $exclusion[$elem['id']])) {
+                        foreach ($exclJourneyPartage[$elem['id']] as $e) {
+                            //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($exclJourneyPartage, true) . "\n", 3, $_ENV['CL']);
+                            //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($e, true) . "\n", 3, $_ENV['CL']);
+                            $motifExclusion[$elem['id']][] = ["partageJourney", $e];
+                        }
+                    }
+
                 }
             }
         }
