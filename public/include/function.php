@@ -1350,12 +1350,16 @@ function formatBytes($size, $precision = 2)
  * returns the id of matched site, 0 if no match
  */
 function matchSite($loca){
-    error_log(date("[Y-m-d G:i:s]") . "========LMATCHSITE\n", 3, $_ENV['CL']);
+    error_log(date("[Y-m-d G:i:s]") . "======== Matchsite: $loca\n", 3, $_ENV['CL']);
     if($loca){
         for ($i=1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
             //error_log(date("[Y-m-d G:i:s]") . "======|ms$i" . print_r($GLOBALS['config']["Multisites-site$i"],true)  . "\n", 3, $_ENV['CL']);
-            $keywords = explode(';',$GLOBALS['config']["Multisites-site$i-keywords"]);
+            $keywords = array();
+            if($GLOBALS['config']["Multisites-site$i-keywords"]){
+                $keywords = explode(';',$GLOBALS['config']["Multisites-site$i-keywords"]);
+            }
             $keywords[] = $GLOBALS['config']["Multisites-site$i"];
+            //error_log(date("[Y-m-d G:i:s]") . "======| keywords: ".print_r($keywords,true)."\n", 3, $_ENV['CL']);
             //error_log(date("[Y-m-d G:i:s]") . "======|kw" . print_r($keywords,true)  . "\n", 3, $_ENV['CL']);
             foreach ($keywords as $kw) {
                 error_log(date("[Y-m-d G:i:s]") . "======| comparing $loca with " . print_r($kw,true) . "\n", 3, $_ENV['CL']);
