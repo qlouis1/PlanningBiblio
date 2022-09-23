@@ -1224,6 +1224,7 @@ function nom($id, $format="nom p", $agents=array())
     switch ($format) {
     case "nom prenom": $nom="$nom $prenom";	break;
     case "prenom nom": $nom="$prenom $nom";	break;
+    case "prenom n": $nom="$prenom ".substr($nom, 0, 1); break;
     default: $nom="$nom ".substr($prenom, 0, 1);	break;
   }
     return $nom;
