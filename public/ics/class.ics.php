@@ -206,7 +206,8 @@ class CJICS
             }
 
             // Ne traite pas les événéments ayant le status X-MICROSOFT-CDO-INTENDEDSTATUS différent de BUSY (si le paramètre X-MICROSOFT-CDO-INTENDEDSTATUS existe)
-            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
+            // UR1 : import Ouf Of Office events
+            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and ($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "OOF" && $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY")) {
                 continue;
             }
 

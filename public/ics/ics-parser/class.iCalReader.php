@@ -427,7 +427,8 @@ class ICal
             return false;
         foreach ($array['VEVENT'] as $anEvent) {
             // UR1 : We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
-            if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS']) and $anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY") {
+                        // UR1 : import Ouf Of Office events
+            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and ($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "OOF" && $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY")) {
                 continue;
             }
             if (isset($anEvent['TRANSP']) && $anEvent['TRANSP'] != "OPAQUE") {
