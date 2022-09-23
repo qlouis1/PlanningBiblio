@@ -649,12 +649,21 @@ function ContextMenu2agents(data, agent) {
         content += 'Catégorie';
       }
 
-      // UR1: Consider imported absences as possible availability and display absence data
       if (Array.isArray(e)){
+
+        // UR1: Consider imported absences as possible availability and display absence data
         if (e[0] == 'partage') {
-          title_attr = e[1];
+          title_attr = 'Absence importée de Partage: ' + e[1];
           content += '<font: style="color:red">' + 'AP (' + e[1].substring(0,20)+ ')' + '</font>';
         }
+
+        // UR1 : Custom exclusion to be used in journey from imported absences
+        if (e[0] == 'partageJourney') {
+          console.log(e);
+          title_attr = 'L\'agent doit arriver depuis: ' + e[1][1];
+          content += '<font: style="color:red">' + 'PJ (' + e[1][0].substring(0,20)+ ')' + '</font>';
+        }
+        console.log(e);
       }
 
       exclusion = $('<span>').attr({

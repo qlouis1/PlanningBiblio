@@ -637,12 +637,13 @@ class planning
             error_log(date("[Y-m-d G:i:s]")."==|oldelem[mail] is " . $oldData[$elem]['mail'] . "\n",3, $_ENV['CL']);
             error_log(date("[Y-m-d G:i:s]")."==|elem is " . print_r($elem, true)  . "\n",3, $_ENV['CL']);
 
+
             $tardir = '../../../../exploitationPartage/';
             $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
             error_log(date("[Y-m-d G:i:s]")."==|final mail is " . $mail . "\n",3, $_ENV['CL']);
 
             $script = 'cd '.$tardir .' ; ';
-            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planno.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
+            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
             shell_exec($script);
         }
     }
