@@ -356,9 +356,10 @@ class CJICS
         $nb=0;
         if (!empty($insert)) {
             $db=new dbh();
+            // UR1 : Added 'localisation' to insert
             $req = "INSERT INTO `{$GLOBALS['config']['dbprefix']}$table`
-                (`perso_id`, `debut`, `fin`, `demande`, `valide`, `validation`, `valide_n1`, `validation_n1`, `motif`, `motif_autre`, `commentaires`, `groupe`, `cal_name`, `ical_key`, `uid`, `rrule`, `id_origin`, `last_modified`)
-                VALUES (:perso_id, :debut, :fin, :demande, :valide, :validation, :valide_n1, :validation_n1, :motif, :motif_autre, :commentaires, :groupe, :cal_name, :ical_key, :uid, :rrule, :id_origin, :last_modified);";
+                (`perso_id`, `debut`, `fin`, `demande`, `valide`, `validation`, `valide_n1`, `validation_n1`, `motif`, `motif_autre`, `commentaires`, `localisation`, `groupe`, `cal_name`, `ical_key`, `uid`, `rrule`, `id_origin`, `last_modified`)
+                VALUES (:perso_id, :debut, :fin, :demande, :valide, :validation, :valide_n1, :validation_n1, :motif, :motif_autre, :commentaires, :localisation, :groupe, :cal_name, :ical_key, :uid, :rrule, :id_origin, :last_modified);";
             $db->CSRFToken = $CSRFToken;
             $db->prepare($req);
 
@@ -406,6 +407,9 @@ class CJICS
                         //$commentaires .= $elem['DESCRIPTION']; //UR1: don't import descriptions
                     }
                 }
+
+                // UR1 : import des localisations
+                $localisation = !empty($elem['LOCATION']) ? $elem['LOCATION'] : '';
 
                 // Utilisation du champ CATEGORIES pour la gestion des absences groupées (plusieurs agents), et des validations
                 $groupe = '';
@@ -471,6 +475,7 @@ class CJICS
                   ":motif" => $motif,
                   ":motif_autre" => $motif_autre,
                   ":commentaires" => $commentaires,
+                  ":localisation" => $localisation,
                   ":groupe" => $groupe,
                   ":cal_name" => $calName,
                   ":ical_key" => $elem['key'],
