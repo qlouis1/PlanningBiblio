@@ -248,50 +248,28 @@ class PlanningJobController extends BaseController
         // UR1 : Custom exclusion for journey time after imported absence
         $exclJourneyPartage = array();
         if ($this->config('Journey-time-for-imported-absences') > 0) {
-
             $j_time = $this->config('Journey-time-for-imported-absences');
             $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debutSQL)));
             $end_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($finSQL)));
-
-            error_log(date("[Y-m-d G:i:s]") . "====DB WAY\n", 3, $_ENV['CL']);
-
+            error_log(date("[Y-m-d G:i:s]") . "==== Journey time for imported absences\n", 3, $_ENV['CL']);
             $db = new \db();
-
-            error_log(date("[Y-m-d G:i:s]") . "==|" . "`fin` >'$dateSQL $start_with_journey'"   . "\n", 3, $_ENV['CL']);
             $db->select('absences', 'perso_id,valide,motif,localisation,commentaires', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
             if ($db->result) {
                 foreach ($db->result as $elem) {
-                    error_log(date("[Y-m-d G:i:s]") . "==|ELEM" . print_r($elem,true)  . "\n", 3, $_ENV['CL']);
                     if ($elem['motif'] == "Agenda Partage") {
                         // UR1 :
                         // si on a la loca dans l'event importé
+                        // si il n'y a pas de loca, on considère que l'absence importée est sur le site de l'agent et qu'il n'y a pas de temps de trajet
                         if($elem['localisation']){
                             error_log(date("[Y-m-d G:i:s]") . "==|on a une loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
                             $m = matchSite($elem['localisation']);
-                        } else {
-                            error_log(date("[Y-m-d G:i:s]") . "==|on a pas de loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
-                            //on a pas la loca, il faut prendre le site par défaut
-                            $pers = new \personnel();
-                            $pers->fetchById($elem['perso_id']);
-                            // UR1 : on prend le sites[0] comme site par défaut, évolution possible
-                            $s = $pers->elements[0]['sites'][0];
-                            error_log(date("[Y-m-d G:i:s]") . "==|on prend le sites[0] de la pers: " . $s ."\n", 3, $_ENV['CL']);
-                            $l = $this->config("Multisites-site$s");
-                            error_log(date("[Y-m-d G:i:s]") . "==|on prend la loca par défaut: " . $l ."\n", 3, $_ENV['CL']);
-                            $m = matchSite($l);
-                        }
-
-                        error_log(date("[Y-m-d G:i:s]") . "==|MACTH:" . $m."\n", 3, $_ENV['CL']);
-                        error_log(date("[Y-m-d G:i:s]") . "==|CFIG:" . print_r($this->config("Multisites-site$m"),true) ."\n", 3, $_ENV['CL']);
-
-                        if($m != $site){
-                            $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
+                            if($m != $site){
+                                // Keep both site and imported location to send it to js script
+                                $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
+                            }
                         }
                     }
                 }
-            } else {
-                error_log(date("[Y-m-d G:i:s]") . "==|NO DB:" . $db->result."\n", 3, $_ENV['CL']);
-
             }
         }
         // Count day hours for all agent.
