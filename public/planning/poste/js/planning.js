@@ -522,7 +522,7 @@ function fillContextMenuLevel2(data) {
   menu2.appendTo('#menudiv2');
 }
 
-  // UR1: Check if agent has an exclusion coming from an imported absence
+  // UR1: 03 Check if agent has an exclusion coming from an imported absence
 function checkAbs(agent){
   abs = "0";
   $.each(agent.exclusion, function(index, e) {
@@ -585,7 +585,7 @@ function ContextMenu2agents(data, agent) {
   }
 
   // Journey time too short
-  // UR1 : Display previous site data coming from PlanningJobController
+  // UR1: 01C Display previous site data coming from PlanningJobController
   if (agent.journey) {
     font.append('&nbsp;');
     journey = $('<span>').attr({
@@ -651,13 +651,13 @@ function ContextMenu2agents(data, agent) {
 
       if (Array.isArray(e)){
 
-        // UR1: Consider imported absences as possible availability and display absence data
+        // UR1: 03 Consider imported absences as possible availability and display absence data
         if (e[0] == 'partage') {
           title_attr = 'Absence importée de Partage: ' + e[1];
           content += '<font: style="color:red">' + 'AP (' + e[1].substring(0,20)+ ')' + '</font>';
         }
 
-        // UR1 : Custom exclusion to be used in journey from imported absences
+        // UR1: 06 Custom exclusion to be used in journey from imported absences
         if (e[0] == 'partageJourney') {
           console.log(e);
           title_attr = 'L\'agent doit arriver depuis: ' + e[1][1];
@@ -1167,7 +1167,7 @@ function appelDispo(site,siteNom,poste,posteNom,date,debut,fin,agents){
  * Les cellules sont identifiables, supprimables et modifiables indépendament des autres
  * Les infos service et statut sont utilisées pour la mise en forme des cellules : utilisation des classes service_ et statut_
  * 
- * UR1: Added "absent" param to score off agents at insert
+ * UR1: 03 Added "absent" param to score off agents at insert
  * 
  * @param int perso_id : Si 0 = griser la cellule, si 2 = Tout le monde
  */
@@ -1233,7 +1233,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
 
         var title = result[i]["nom"] + ' ' + result[i]["prenom"];
         
-        // UR1: Change display to Name + first letter of Surname
+        // UR1 : 01A Change display to Name + first letter of Surname
         var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 
@@ -1273,7 +1273,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         // Qualifications (activités) de l'agent
         classes+=' '+result[i]['activites'];
 
-        // UR1: Change display to Name + first letter of Surname
+        // UR1 : 01A Change display to Name + first letter of Surname
         var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 

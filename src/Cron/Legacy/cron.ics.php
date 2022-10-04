@@ -140,7 +140,7 @@ foreach ($agents as $agent) {
             $url = $agent['url_ics'];
         }
 
-        // UR1 : Limit import with Partage REST param to limit file size and number of treated events
+        // UR1: 05 Limit import with Partage REST param to limit file size and number of treated events
         //         start: start date in UNIX ms
         //         end: end date in UNIX ms
 
@@ -158,7 +158,7 @@ foreach ($agents as $agent) {
             logs("Agent #{$agent['id']} : Impossible de constituer une URL valide", "ICS", $CSRFToken);
             continue;
         } else {
-            // UR1 : add the REST params to url. As our timestamps are in seconds
+            // UR1: 05 add the REST params to url
             $url.="?start=" . $timestamp_start . "&end=" . $timestamp_end;
         }
 

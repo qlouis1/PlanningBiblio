@@ -92,7 +92,7 @@ $dbh->prepare("SELECT `id`,`perso_id`,`absent` FROM `{$dbprefix}pl_poste`
 
 
 // Pour chaque date et pour chaque site
-// UR1: date and site loops are inverted to split report mail for each site.
+// UR1: 07 date and site loops are inverted to split report mail for each site.
 foreach ($sites as $site) {
     foreach ($dates as $date) {
 
@@ -211,7 +211,7 @@ foreach ($sites as $site) {
     }
 }
 
-// UR1: send mail for each site
+// UR1: 07 send mail for each site
 foreach ($sites as $s){
     $msg[$s[0]] = "Voici l&apos;&eacute;tat des plannings du ".dateFr($dates[0])." au ".dateFr($dates[count($dates)-1])." pour le site ".$s[1];
     $msg[$s[0]] .= "<ul>\n";
@@ -236,7 +236,7 @@ foreach ($sites as $s){
     $msg[$s[0]].="</ul>\n";
 
 
-    // UR1: send the mail by site
+    // UR1: 07 send the mail by site
     $subject="Plannings du ".dateFr($dates[0])." au ".dateFr($dates[count($dates)-1]);
     $to=explode(";", $config['Multisites-site'.$s[0].'-mail']);
     $m=new CJMail();

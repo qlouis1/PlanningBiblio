@@ -100,6 +100,7 @@ do
     planningbadminpass+="$char"
 done
 
+# UR1: 02B Give user choice to install composer
 echo ""
 echo "Install composer [no] :"
 read installcomposer
@@ -172,7 +173,7 @@ fi
 planningbdatas=data/planningb_2104.sql.gz
 planningbsecret=$(head /dev/urandom|tr -dc "a-f0-9"|fold -w 32|head -n 1)
 
-# UR1: The database and users are already created and we don't want to delete them
+# UR1: 02A The database and users are already created and we don't want to delete them
 #mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP USER IF EXISTS '$planningbdbuser'@'$planningdbuserhost';"
 #mysql --defaults-file=/dev/null -h $planningdbhost -u $dbroot --password=$dbpass -e "DROP DATABASE IF EXISTS $planningbdbname;"
 
@@ -200,6 +201,7 @@ sed -i "s/APP_ENV=dev/APP_ENV=prod/g" .env.local
 # Set the default theme
 mysql -h $planningdbhost -u $planningbdbuser --password=$planningbdbpass -e "UPDATE $planningbdbname.\`config\` SET \`valeur\` = 'default' WHERE \`nom\` = 'Affichage-theme';"
 
+# UR1: 02B Give user choice to install composer
 if [[ $installcomposer != 'no' ]]; then
 # Download composer
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -237,7 +239,7 @@ if [[ $installcomposer != 'no' ]]; then
     # Remove composer.phar
     php -r "unlink('composer.phar');"
 else
-    # UR1: if we don't install composer during install, var and vendor folders must be copied from a local install
+    # UR1: 02B if we don't install composer during install, var and vendor folders must be copied from a local install
     echo ""
     echo "Make sure var and vendor folder have been copied before continuing:"
     read cont

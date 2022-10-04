@@ -245,7 +245,7 @@ class PlanningJobController extends BaseController
             }
         }
 
-        // UR1 : Custom exclusion for journey time after imported absence
+        // UR1: 06 Custom exclusion for journey time after imported absence
         $exclJourneyPartage = array();
         if ($this->config('Journey-time-for-imported-absences') > 0) {
             $j_time = $this->config('Journey-time-for-imported-absences');
@@ -257,7 +257,7 @@ class PlanningJobController extends BaseController
             if ($db->result) {
                 foreach ($db->result as $elem) {
                     if ($elem['motif'] == "Agenda Partage") {
-                        // UR1 :
+                        // UR1: 06
                         // si on a la loca dans l'event importé
                         // si il n'y a pas de loca, on considère que l'absence importée est sur le site de l'agent et qu'il n'y a pas de temps de trajet
                         if($elem['localisation']){
@@ -312,13 +312,13 @@ class PlanningJobController extends BaseController
         }
 
         $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
-        // UR1: Keep imported absences data to pass it later to js script
+        // UR1: 03 Keep imported absences data to pass it later to js script
         $absentPartage = array();
 
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
-                    // UR1: Consider imported absences as possible availability
+                    // UR1: 03 Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
                         $absentPartage[$elem['perso_id']][] = $elem['commentaires'];
                     } else {
@@ -551,12 +551,12 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
-                // UR1 : Tag imported absences to treat them like other unavailablilities
+                // UR1 : 03 Tag imported absences to treat them like other unavailablilities
                 if (isset($absentPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'agenda_partage';
                 }
 
-                // UR1 : Search agents with an imported Partage absence within journey time of this hour
+                // UR1 : 06 Search agents with an imported Partage absence within journey time of this hour
                 if (isset($exclJourneyPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'journey_partage';
                 }
@@ -592,14 +592,14 @@ class PlanningJobController extends BaseController
                         }
 
                     }
-                    // UR1: Pass absences data to js script in an Array
+                    // UR1: 03 Pass absences data to js script in an Array
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
                         foreach ($absentPartage[$elem['id']] as $e) {
                             $motifExclusion[$elem['id']][] = ["partage", $e];
                         }
                     }
 
-                    // UR1 : Pass Journey data to js script in Array
+                    // UR1 : 06 Pass Journey data to js script in Array
                     if (in_array('journey_partage', $exclusion[$elem['id']])) {
                         foreach ($exclJourneyPartage[$elem['id']] as $e) {
                             //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($exclJourneyPartage, true) . "\n", 3, $_ENV['CL']);
@@ -762,11 +762,11 @@ class PlanningJobController extends BaseController
             }
 
             $agents_appel_dispo = array();
-            // UR1: Don't include available agents
+            // UR1: 07 Don't include available agents
             //foreach ($agents_dispo as $a) {
             //    $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             //}
-            // UR1: Add unavailable agents as well
+            // UR1: 07 Add unavailable agents as well
             foreach ($autres_agents as $a) {
                 $agents_appel_dispo[] = array('id'=> $a['id'], 'nom'=> $a['nom'], 'prenom'=> $a['prenom'], 'mail' => $a['mail']);
             }

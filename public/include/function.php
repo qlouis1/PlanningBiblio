@@ -1345,7 +1345,7 @@ function formatBytes($size, $precision = 2)
 }
 
 /**
- * UR1 : Function used to match imported localisation with keywords detailed in config.
+ * UR1: 06B Function used to match imported localisation with keywords detailed in config.
  * Used in PlanningJobController
  * returns the id of matched site, 0 if no match
  */

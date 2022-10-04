@@ -200,13 +200,13 @@ class CJICS
 
         $events=array();
         foreach ($tmp as $elem) {
-            // UR1: Filter exported events on custom attribute
+            // UR1: 04C Filter exported events on custom attribute
             if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
                 continue;
             }
 
             // Ne traite pas les événéments ayant le status X-MICROSOFT-CDO-INTENDEDSTATUS différent de BUSY (si le paramètre X-MICROSOFT-CDO-INTENDEDSTATUS existe)
-            // UR1 : import Ouf Of Office events
+            // UR1: 04D import Ouf Of Office events
             if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and ($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "OOF" && $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY")) {
                 continue;
             }
@@ -272,11 +272,11 @@ class CJICS
             // Check if it is an invitation from someone else (or including attendees)
             // And check if the owner of this calendar accepted it
             if (!empty($elem['ATTENDEE'])) {
-                // UR1: If agent is organizer, import event
+                // UR1: 04A If agent is organizer, import event
                 if (strpos($elem['ORGANIZER'], $email)) {
                     $add = true;
                 } else {
-                    // UR1: The ATTENDEE value is sometime badly created and contains only the mailto value of attendees even if the ATTENDEE_array of $event is complete
+                    // UR1: 04A The ATTENDEE value is sometime badly created and contains only the mailto value of attendees even if the ATTENDEE_array of $event is complete
                     // We rebuild an ATTENDEE string: rebuiltAttendee from ATTENDEE_array
                     // A real fix should be in the parser but issue seems to be local to ur1 / Partage (?)
                     $rebuiltAttendee = '';
@@ -289,7 +289,7 @@ class CJICS
                             $rebuiltAttendee .= trim($temp);
                         }
                     }
-                    // UR1: Partage doesn't use CUTYPE but CN
+                    // UR1: 04A Partage doesn't use CUTYPE but CN
                     //$attendees = explode('CUTYPE=', $elem['ATTENDEE']);
                     $attendees = explode('CN=', $rebuiltAttendee);
                     foreach ($attendees as $attendee) {
@@ -356,7 +356,7 @@ class CJICS
         $nb=0;
         if (!empty($insert)) {
             $db=new dbh();
-            // UR1 : Added 'localisation' to insert
+            // UR1: 06A Added 'localisation' to insert
             $req = "INSERT INTO `{$GLOBALS['config']['dbprefix']}$table`
                 (`perso_id`, `debut`, `fin`, `demande`, `valide`, `validation`, `valide_n1`, `validation_n1`, `motif`, `motif_autre`, `commentaires`, `localisation`, `groupe`, `cal_name`, `ical_key`, `uid`, `rrule`, `id_origin`, `last_modified`)
                 VALUES (:perso_id, :debut, :fin, :demande, :valide, :validation, :valide_n1, :validation_n1, :motif, :motif_autre, :commentaires, :localisation, :groupe, :cal_name, :ical_key, :uid, :rrule, :id_origin, :last_modified);";
@@ -400,15 +400,15 @@ class CJICS
                 } else {
                     $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
                     if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        // UR1: As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
-                        //$commentaires .= "<br/>\n"; //UR1: don't import descriptions
+                        // UR1: 03 As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                        //$commentaires .= "<br/>\n"; //UR1: 03 don't import descriptions
                     }
                     if (!empty($elem["DESCRIPTION"])) {
-                        //$commentaires .= $elem['DESCRIPTION']; //UR1: don't import descriptions
+                        //$commentaires .= $elem['DESCRIPTION']; //UR1: 03 don't import descriptions
                     }
                 }
 
-                // UR1 : import des localisations
+                // UR1: 06A import locations
                 $localisation = !empty($elem['LOCATION']) ? $elem['LOCATION'] : '';
 
                 // Utilisation du champ CATEGORIES pour la gestion des absences groupées (plusieurs agents), et des validations
