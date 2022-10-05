@@ -263,9 +263,11 @@ class PlanningJobController extends BaseController
                         if($elem['localisation']){
                             error_log(date("[Y-m-d G:i:s]") . "==|on a une loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
                             $m = matchSite($elem['localisation']);
-                            if($m != $site){
+                            if($m != 0 && $m != $site){
                                 // Keep both site and imported location to send it to js script
                                 $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
+                                //error_log(date("[Y-m-d G:i:s]") . "==|exclJourneyPartage: " . print_r($exclJourneyPartage[$elem['perso_id']],true) ."\n", 3, $_ENV['CL']);
+
                             }
                         }
                     }
@@ -599,11 +601,11 @@ class PlanningJobController extends BaseController
                         }
                     }
 
-                    // UR1 : 06 Pass Journey data to js script in Array
+                    // UR1: 06 Pass Journey data to js script in Array
                     if (in_array('journey_partage', $exclusion[$elem['id']])) {
                         foreach ($exclJourneyPartage[$elem['id']] as $e) {
                             //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($exclJourneyPartage, true) . "\n", 3, $_ENV['CL']);
-                            //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($e, true) . "\n", 3, $_ENV['CL']);
+                            //error_log(date("[Y-m-d G:i:s]") . "=E=|" . print_r($e, true) . "\n", 3, $_ENV['CL']);
                             $motifExclusion[$elem['id']][] = ["partageJourney", $e];
                         }
                     }
