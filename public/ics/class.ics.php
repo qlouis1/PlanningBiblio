@@ -200,14 +200,27 @@ class CJICS
 
         $events=array();
         foreach ($tmp as $elem) {
-            // UR1: 04C Filter exported events on custom attribute
-            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+            // UR1: 04D Import Ouf Of Office events
+            // UR1: 04F Import free telework events
+            // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
+            // BUSY and OOF are both imported without condition
+            // TENTATIVE is filtered out without condition
+            // FREE is imported if the event status is in a pre determined set
+            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'])){
+                if($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE"){
+                    $ttr = "ttr ttp teletravail";
+                    if($elem['SUMMARY'] && stripos($ttr,$elem['SUMMARY']) === false){
+                        continue;
+                    }
+                }
+                if($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE"){
+                    continue;
+                }
+            }
+            if ($elem['STATUS'] == 'CANCELLED') {
                 continue;
             }
-
-            // Ne traite pas les événéments ayant le status X-MICROSOFT-CDO-INTENDEDSTATUS différent de BUSY (si le paramètre X-MICROSOFT-CDO-INTENDEDSTATUS existe)
-            // UR1: 04D import Ouf Of Office events
-            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and ($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "OOF" && $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY")) {
+            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
                 continue;
             }
 
@@ -237,7 +250,9 @@ class CJICS
 
             // Traite seulement les événéments ayant un status occupé TRANSP OPAQUE (TRANSP OPAQUE défini un status BUSY)
             if (isset($elem['TRANSP']) && $elem['TRANSP'] != "OPAQUE") {
-                continue;
+                // UR1: 04 TRANSP events are already filtered by X-MICROSOFT-CDO-INTENDEDSTATUS
+                // we would have to do the exact same tests than above
+                //continue;
             }
 
             // Ignore events with STATUS = CANCELLED
