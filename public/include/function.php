@@ -1348,29 +1348,33 @@ function formatBytes($size, $precision = 2)
  * UR1: 06B Function used to match imported localisation with keywords detailed in config.
  * Used in PlanningJobController
  * returns the id of matched site, 0 if no match
+ * UR1: 06D return -1 when mathcing "ext" keyword
  */
-function matchSite($loca){
+function matchSite($loca)
+{
     error_log(date("[Y-m-d G:i:s]") . "======== Matchsite: $loca\n", 3, $_ENV['CL']);
-    if($loca){
-        for ($i=1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
-            //error_log(date("[Y-m-d G:i:s]") . "======|ms$i" . print_r($GLOBALS['config']["Multisites-site$i"],true)  . "\n", 3, $_ENV['CL']);
-            $keywords = array();
-            if($GLOBALS['config']["Multisites-site$i-keywords"]){
-                $keywords = explode(';',$GLOBALS['config']["Multisites-site$i-keywords"]);
-            }
-            $keywords[] = $GLOBALS['config']["Multisites-site$i"];
-            //error_log(date("[Y-m-d G:i:s]") . "======| keywords: ".print_r($keywords,true)."\n", 3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]") . "======|kw" . print_r($keywords,true)  . "\n", 3, $_ENV['CL']);
-            foreach ($keywords as $kw) {
-                error_log(date("[Y-m-d G:i:s]") . "======| comparing $loca with " . print_r($kw,true) . "\n", 3, $_ENV['CL']);
-                if(strpos(strtolower($loca),strtolower($kw)) !== false){
-                    error_log(date("[Y-m-d G:i:s]") . "======| matched $loca with " . print_r($kw,true) . "\n", 3, $_ENV['CL']);
-                    return $i;
+    if ($loca) {
+        if (strcasecmp($loca, "ext") == 0) {
+            error_log(date("[Y-m-d G:i:s]") . "======| /!\ matched ext location\n", 3, $_ENV['CL']);
+            return -1;
+        } else {
+            for ($i = 1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
+                $keywords = array();
+                if ($GLOBALS['config']["Multisites-site$i-keywords"]) {
+                    $keywords = explode(';', $GLOBALS['config']["Multisites-site$i-keywords"]);
+                }
+                $keywords[] = $GLOBALS['config']["Multisites-site$i"];
+                foreach ($keywords as $kw) {
+                    error_log(date("[Y-m-d G:i:s]") . "======| comparing $loca with " . print_r($kw, true) . "\n", 3, $_ENV['CL']);
+                    if (strpos(strtolower($loca), strtolower($kw)) !== false) {
+                        error_log(date("[Y-m-d G:i:s]") . "======| matched $loca with " . print_r($kw, true) . "\n", 3, $_ENV['CL']);
+                        return $i;
+                    }
                 }
             }
+            error_log(date("[Y-m-d G:i:s]") . "======|NO MATCH\n", 3, $_ENV['CL']);
+            return 0;
         }
-        error_log(date("[Y-m-d G:i:s]") . "======|NO MATCH\n", 3, $_ENV['CL']);
-        return 0;
     } else {
         error_log(date("[Y-m-d G:i:s]") . "======|EMPTY LOCA\n", 3, $_ENV['CL']);
         return 0;

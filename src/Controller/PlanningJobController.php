@@ -257,17 +257,22 @@ class PlanningJobController extends BaseController
             if ($db->result) {
                 foreach ($db->result as $elem) {
                     if ($elem['motif'] == "Agenda Partage") {
-                        // UR1: 06
-                        // si on a la loca dans l'event importé
-                        // si il n'y a pas de loca, on considère que l'absence importée est sur le site de l'agent et qu'il n'y a pas de temps de trajet
+                        // UR1: 06B
+                        // If there is a location in the imported event, we try to match it with sites keywords specified in configuration
+                        // If there isn't, we consider the imported absence is on the agent default site and we don't have journey time
                         if($elem['localisation']){
                             error_log(date("[Y-m-d G:i:s]") . "==|on a une loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
                             $m = matchSite($elem['localisation']);
-                            if($m != 0 && $m != $site){
+                            if($m > 0 && $m != $site){
                                 // Keep both site and imported location to send it to js script
+                                error_log(date("[Y-m-d G:i:s]") . "==|on est sur le site $m\n", 3, $_ENV['CL']);
                                 $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
-                                //error_log(date("[Y-m-d G:i:s]") . "==|exclJourneyPartage: " . print_r($exclJourneyPartage[$elem['perso_id']],true) ."\n", 3, $_ENV['CL']);
 
+                            }
+                            // UR1: 06D If we match with the "ext" keyword, we consider there is always journey time
+                            if ($m == -1){
+                                error_log(date("[Y-m-d G:i:s]") . "==|on est a l'ext\n", 3, $_ENV['CL']);
+                                $exclJourneyPartage[$elem['perso_id']][] = array("Extérieur","extérieur");
                             }
                         }
                     }
