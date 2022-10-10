@@ -435,8 +435,8 @@ class ICal
             // FREE is imported if the event status is in a pre determined set
             if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'])){
                 if($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE"){
-                    $ttr = "ttr ttp teletravail";
-                    if($anEvent['SUMMARY'] && stripos($ttr,$anEvent['SUMMARY']) === false){
+                    $ttr = "ttr ttp";
+                    if(!$anEvent['SUMMARY'] || ($anEvent['SUMMARY'] && stripos($ttr,$anEvent['SUMMARY']) === false)){
                         continue;
                     }
                 }

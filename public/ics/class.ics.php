@@ -208,8 +208,8 @@ class CJICS
             // FREE is imported if the event status is in a pre determined set
             if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'])){
                 if($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE"){
-                    $ttr = "ttr ttp teletravail";
-                    if($elem['SUMMARY'] && stripos($ttr,$elem['SUMMARY']) === false){
+                    $ttr = "ttr ttp";
+                    if(!$elem['SUMMARY'] || ($elem['SUMMARY'] && stripos($ttr,$elem['SUMMARY']) === false)){
                         continue;
                     }
                 }
