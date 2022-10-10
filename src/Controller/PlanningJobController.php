@@ -318,7 +318,8 @@ class PlanningJobController extends BaseController
             $teleworking_exception = (!empty($teleworking_reasons) and is_array($teleworking_reasons)) ? "AND `motif` NOT IN ('" . implode("','", $teleworking_reasons) . "')" : null;
         }
 
-        $db->select('absences', 'perso_id,valide,motif,commentaires', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
+        // UR1: 03B Select localisation to eventually display it in planning
+        $db->select('absences', 'perso_id,valide,motif,commentaires,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
         // UR1: 03 Keep imported absences data to pass it later to js script
         $absentPartage = array();
 
@@ -327,7 +328,17 @@ class PlanningJobController extends BaseController
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03 Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
-                        $absentPartage[$elem['perso_id']][] = $elem['commentaires'];
+                        $e = array();
+                        $m = matchSite($elem['localisation']);
+                        if ($m > 0 && $m != $site) {
+                            $e[1] = "<i>[" . $this->config("Multisites-site$m") . "]</i> ";
+                        } else if ($m == -1) {
+                            $e[1] = "<i>[Ext]</i> ";
+                        } else {
+                            $e[1] = "";
+                        }
+                        $e[0] = $elem['commentaires'];
+                        $absentPartage[$elem['perso_id']][] = $e;
                     } else {
                         $tab_exclus[] = $elem['perso_id'];
                         $absents[] = $elem['perso_id'];

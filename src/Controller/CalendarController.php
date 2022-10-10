@@ -61,9 +61,12 @@ class CalendarController extends BaseController
         $db->query("SELECT * FROM `{$GLOBALS['dbprefix']}personnel` WHERE actif='Actif' AND id > 2 ORDER by `nom`,`prenom`;");
         $agents = $db->result;
 
+        // UR1: 03B Get the site number to later match it against imported absence data
+        $site=0;
         if(is_array($agents)){
             foreach ($agents as $elem){
                 if($elem['id'] == $perso_id){
+                    $site = json_decode(html_entity_decode($elem['sites'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true)[0];
                     $agent = $elem['nom']." ".$elem['prenom'];
                     break;
                 }
@@ -216,15 +219,21 @@ class CalendarController extends BaseController
             $absent = false;
             $absences_affichage = array();
 
-            // UR1: Customize display with comments
+            // UR1: 03 Customize display of imported absences with comments
+            // UR1: 03B Display site when different from agent default
             $cl = 80; // Number of characters to print
-
             foreach ($current_abs as $elem) {
                 $motifAffiche = $elem['motif'];
+                $m = matchSite($elem['localisation']);
+                if ($m > 0 && $m != $site) {
+                    $motifAffiche = " <i>[" . $this->config("Multisites-site$m") . "]</i> ";
+                } else if ($m == -1) {
+                    $motifAffiche = " <i>[Ext]</i> ";
+                }
                 if ( $elem['commentaires'] != '' ) {
                     $motifAffiche .= " (".substr($elem['commentaires'],0,$cl);
                     if (strlen($elem['commentaires']) >= $cl){
-                        $motifAffiche .= "[...]";
+                        $motifAffiche .= "...";
                     }
                     $motifAffiche .= ")";
                 }
