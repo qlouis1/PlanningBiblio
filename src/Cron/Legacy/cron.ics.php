@@ -31,13 +31,12 @@ chdir(__DIR__ . '/../../../public/');
 require_once __DIR__ . '/../../../public/include/config.php';
 require_once __DIR__ . '/../../../public/ics/class.ics.php';
 require_once __DIR__ . '/../../../public/personnel/class.personnel.php';
-// UR1 : include function.php to access byte formating function
+// UR1: include function.php to access byte formating function
 require_once __DIR__ . '/../../../public/include/function.php';
 
 $CSRFToken = CSRFToken();
 
 logs("Début d'importation des fichiers ICS", "ICS", $CSRFToken);
-error_log(date("\n\n\n[Y-m-d G:i:s]")."====DEBUT IMPORT\n",3, $_ENV['CL']);
 
 // Créé un fichier .lock dans le dossier temporaire qui sera supprimé à la fin de l'execution du script, pour éviter que le script ne soit lancé s'il est déjà en cours d'execution
 $tmp_dir=sys_get_temp_dir();
@@ -95,8 +94,6 @@ $agents = $p->elements;
 
 // Pour chaque agent, on créé les URL des fichiers ICS et on importe les événements
 foreach ($agents as $agent) {
-//error_log(date("[Y-m-d G:i:s]")."==AGENT: " . $agent['id'] . "\n",3, $_ENV['CL']);
-
   // Pour les URL N°1, N°2 et url de la fiche agent (N°3)
     // Si le paramètre ICS-Server3 est activé, on recherche également une URL personnalisée dans la fiche des agents (champ url_ics).
   
@@ -205,8 +202,6 @@ foreach ($agents as $agent) {
         $ics->updateTable();
     }
 }
-error_log(date("[Y-m-d G:i:s]")."====FIN IMPORT\n",3, $_ENV['CL']);
-error_log(date("[Y-m-d G:i:s]")."==|MAXMEM:" . formatBytes(strval(memory_get_peak_usage())) . "\n",3, $_ENV['CL']);
 logs("Max memory usage: " . formatBytes(strval(memory_get_peak_usage())). ".", "ICS", $CSRFToken);
 
 

@@ -37,7 +37,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
       
             if ($elem['poste']==$poste and $elem['debut']==$debut and $elem['fin']==$fin) {
                 //		Affichage du nom et du prénom
-                // UR1 : 01A Change display to Name + first letter of Surname
+                // UR1: 01A Change display to Name + first letter of Surname
                 $nom_affiche=$elem['nom'];
                 $title = $elem['nom'];
                 if ($elem['prenom']) {

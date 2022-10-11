@@ -1231,7 +1231,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
 
         var title = result[i]["nom"] + ' ' + result[i]["prenom"];
         
-        // UR1 : 01A Change display to Name + first letter of Surname
+        // UR1: 01A Change display to Name + first letter of Surname
         var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 
@@ -1271,7 +1271,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         // Qualifications (activités) de l'agent
         classes+=' '+result[i]['activites'];
 
-        // UR1 : 01A Change display to Name + first letter of Surname
+        // UR1: 01A Change display to Name + first letter of Surname
         var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
         var perso_id=result[i]["perso_id"];
 

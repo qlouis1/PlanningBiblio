@@ -265,7 +265,7 @@ class planning
 
                 $elem['name_title'] = $title;
 
-                // UR1 : 01A Change display to Name + first letter of Surname
+                // UR1: 01A Change display to Name + first letter of Surname
                 $nom = $elem['nom'];
                 if ($elem['prenom']) {
                     $nom = $elem['prenom'] ." ".substr($elem['nom'], 0, 1).". ";

@@ -269,7 +269,7 @@ class planningHebdo
         // Recherche des services
         $p=new personnel();
         $p->fetch();
-        // UR1 : 01B Display sites instead of services
+        // UR1: 01B Display sites instead of services
         // fetch already gets everything from db so we have the site data available
         // There is also a change in template/workinghour/index.html.twig l57 but idk if I can put comments there
         /*foreach ($p->elements as $elem) {
@@ -355,7 +355,7 @@ class planningHebdo
                 $elem['temps'] = json_decode(html_entity_decode($elem['temps'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['breaktime'] = json_decode(html_entity_decode($elem['breaktime'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['nom'] = nom($elem['perso_id'], 'nom p', $agents);
-                // UR1 : 01B Display sites instead of services
+                // UR1: 01B Display sites instead of services
                 //$elem['service']=$services[$elem['perso_id']];
                 $elem['sites']=implode(", ",$sites[$elem['perso_id']]);
                 $this->elements[]=$elem;

@@ -167,7 +167,7 @@ class PlanningJobController extends BaseController
                 $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($finSQL)));
 
                 if ($this->config('Multisites-nombre') > 1) {
-                    // UR1 : Select poste to ultimately display it in menu
+                    // UR1: 01C Select poste to ultimately display it in menu
                     $req = "SELECT `{$dbprefix}pl_poste`.`perso_id` AS `perso_id` , `{$dbprefix}pl_poste`.`site` AS `site` "
                         . "FROM `{$dbprefix}pl_poste` "
                         . "INNER JOIN `{$dbprefix}postes` ON `{$dbprefix}pl_poste`.`poste`=`{$dbprefix}postes`.`id` "
@@ -179,7 +179,7 @@ class PlanningJobController extends BaseController
                     $db->query($req);
                     if ($db->result) {
                         foreach ($db->result as $elem) {
-                            // UR1 : easily keep both id and poste data
+                            // UR1: 01C easily keep both id and poste data
                             //$journey[$elem['perso_id']] = $elem['site'];
                             $journey[$elem['perso_id']] = $this->config("Multisites-site" . $elem['site']);
                         }
@@ -530,10 +530,6 @@ class PlanningJobController extends BaseController
         $agents_tmp = $db->result;
 
         if ($agents_tmp) {
-            // UR1 : debug
-            //error_log(date("[Y-m-d G:i:s]")."====Agents\n",3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]")."==|".print_r($agents_tmp,true)."\n",3, $_ENV['CL']);
-
             foreach ($agents_tmp as $elem) {
                 // Remove agents without requested skills.
                 if (is_array($activites)) {
@@ -569,12 +565,12 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
-                // UR1 : 03 Tag imported absences to treat them like other unavailablilities
+                // UR1: 03 Tag imported absences to treat them like other unavailablilities
                 if (isset($absentPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'agenda_partage';
                 }
 
-                // UR1 : 06 Search agents with an imported Partage absence within journey time of this hour
+                // UR1: 06 Search agents with an imported Partage absence within journey time of this hour
                 if (isset($exclJourneyPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'journey_partage';
                 }
