@@ -250,10 +250,9 @@ class PlanningJobController extends BaseController
         if ($this->config('Journey-time-for-imported-absences') > 0) {
             $j_time = $this->config('Journey-time-for-imported-absences');
             $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debutSQL)));
-            $end_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($finSQL)));
-            error_log(date("[Y-m-d G:i:s]") . "==== Journey time for imported absences\n", 3, $_ENV['CL']);
+            $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($finSQL)));
             $db = new \db();
-            $db->select('absences', 'perso_id,valide,motif,localisation,commentaires', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
+            $db->select('absences', 'perso_id,valide,motif,localisation,commentaires,debut,fin', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
             if ($db->result) {
                 foreach ($db->result as $elem) {
                     if ($elem['motif'] == "Agenda Partage") {
@@ -261,17 +260,14 @@ class PlanningJobController extends BaseController
                         // If there is a location in the imported event, we try to match it with sites keywords specified in configuration
                         // If there isn't, we consider the imported absence is on the agent default site and we don't have journey time
                         if($elem['localisation']){
-                            error_log(date("[Y-m-d G:i:s]") . "==|on a une loca: " . $elem['localisation'] ."\n", 3, $_ENV['CL']);
                             $m = matchSite($elem['localisation']);
                             if($m > 0 && $m != $site){
                                 // Keep both site and imported location to send it to js script
-                                error_log(date("[Y-m-d G:i:s]") . "==|on est sur le site $m\n", 3, $_ENV['CL']);
-                                $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation']);
+                                $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation'],date("G\hi",strtotime($elem['debut'])),date("G\hi",strtotime($elem['fin'])),$elem['commentaires']);
 
                             }
                             // UR1: 06D If we match with the "ext" keyword, we consider there is always journey time
                             if ($m == -1){
-                                error_log(date("[Y-m-d G:i:s]") . "==|on est a l'ext\n", 3, $_ENV['CL']);
                                 $exclJourneyPartage[$elem['perso_id']][] = array("Extérieur","extérieur");
                             }
                         }
@@ -331,9 +327,9 @@ class PlanningJobController extends BaseController
                         $e = array();
                         $m = matchSite($elem['localisation']);
                         if ($m > 0 && $m != $site) {
-                            $e[1] = "<i>[" . $this->config("Multisites-site$m") . "]</i> ";
+                            $e[1] = $this->config("Multisites-site$m");
                         } else if ($m == -1) {
-                            $e[1] = "<i>[Ext]</i> ";
+                            $e[1] = "Ext";
                         } else {
                             $e[1] = "";
                         }
