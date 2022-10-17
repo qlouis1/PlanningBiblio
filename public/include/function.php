@@ -1375,3 +1375,34 @@ function matchSite($loca)
     }
 }
 
+/**
+ * UR1: Function used to filter imported events based on status
+ */
+function filterStatus($event) {
+    // UR1: 04D Import Ouf Of Office events
+    // UR1: 04F Import free telework events
+    // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
+    // BUSY and OOF are both imported without condition
+    // TENTATIVE is filtered out without condition
+    // FREE is imported if the event status is in a pre determined set
+    if (isset($event['X-MICROSOFT-CDO-INTENDEDSTATUS'])) {
+        if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE") {
+            $ttr = "ttr;ttp;teletravail;";
+            if (!$event['SUMMARY'] || ($event['SUMMARY'] && stripos($ttr, strtr($event['SUMMARY'], array('é' => 'e', 'É' => 'E'))) === false)) {
+                return 0;
+            }
+        }
+        if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE") {
+            return 0;
+        }
+    }
+    if ($event['STATUS'] == 'CANCELLED') {
+        return 0;
+    }
+    if (isset($event['X-PLANNING-BILBIO']) and $event['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+        return 0;
+    }
+
+    return 1;
+}
+

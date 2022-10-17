@@ -424,33 +424,12 @@ class ICal
         if (empty($events))
             return false;
 
-        // UR1: 05B We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
         error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
         foreach ($array['VEVENT'] as $anEvent) {
-            // UR1: 04D Import Ouf Of Office events
-            // UR1: 04F Import free telework events
-            // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
-            // BUSY and OOF are both imported without condition
-            // TENTATIVE is filtered out without condition
-            // FREE is imported if the event status is in a pre determined set
-            if (isset($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'])){
-                if($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE"){
-                    $ttr = "ttr ttp";
-                    if(!$anEvent['SUMMARY'] || ($anEvent['SUMMARY'] && stripos($ttr,$anEvent['SUMMARY']) === false)){
-                        continue;
-                    }
-                }
-                if($anEvent['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE"){
-                    continue;
-                }
-            }
-            if ($anEvent['STATUS'] == 'CANCELLED') {
+            // UR1: 05B We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
+            if(filterStatus($anEvent) == 0){
                 continue;
             }
-            if (isset($anEvent['X-PLANNING-BILBIO']) and $anEvent['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
-                continue;
-            }
-            // end UR1: 05B
 
             if (isset($anEvent['RRULE']) && $anEvent['RRULE'] != '') {
                 // Recurring event, parse RRULE and add appropriate duplicate events

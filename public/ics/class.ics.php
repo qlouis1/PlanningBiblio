@@ -200,27 +200,8 @@ class CJICS
 
         $events=array();
         foreach ($tmp as $elem) {
-            // UR1: 04D Import Ouf Of Office events
-            // UR1: 04F Import free telework events
-            // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
-            // BUSY and OOF are both imported without condition
-            // TENTATIVE is filtered out without condition
-            // FREE is imported if the event status is in a pre determined set
-            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'])){
-                if($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE"){
-                    $ttr = "ttr ttp";
-                    if(!$elem['SUMMARY'] || ($elem['SUMMARY'] && stripos($ttr,$elem['SUMMARY']) === false)){
-                        continue;
-                    }
-                }
-                if($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE"){
-                    continue;
-                }
-            }
-            if ($elem['STATUS'] == 'CANCELLED') {
-                continue;
-            }
-            if (isset($elem['X-PLANNING-BILBIO']) and $elem['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+            // UR1: 04 Filter events
+            if(filterStatus($elem) == 0){
                 continue;
             }
 
