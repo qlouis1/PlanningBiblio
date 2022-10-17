@@ -527,7 +527,7 @@ function checkAbs(agent){
   abs = "0";
   $.each(agent.exclusion, function(index, e) {
     if (Array.isArray(e)) {
-      if (e[0] == 'partage') {
+      if (e[0] == 'partage' || e[0] == 'partageJourney') {
         abs="1";
       } else {
         abs="0";
