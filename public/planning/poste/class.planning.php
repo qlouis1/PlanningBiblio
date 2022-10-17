@@ -265,7 +265,7 @@ class planning
 
                 $elem['name_title'] = $title;
 
-                // UR1: Change display to Name + first letter of Surname
+                // UR1: 01A Change display to Name + first letter of Surname
                 $nom = $elem['nom'];
                 if ($elem['prenom']) {
                     $nom = $elem['prenom'] ." ".substr($elem['nom'], 0, 1).". ";
@@ -293,7 +293,7 @@ class planning
                     }
                 }
 
-                // UR1 : As we changed data to [id] => [site name] in PlanningJobController, we now have to test on keys
+                // UR1: 01C As we changed data to [id] => [site name] in PlanningJobController, we now have to test on keys
                 $elem['journey'] = 0;
                 if (array_key_exists($elem['id'], $journey)) {
                     $elem['journey'] = $journey[$elem['id']];
@@ -630,7 +630,7 @@ class planning
         }
         }
         foreach ($perso_ids as $elem) {
-            // UR1: Refresh user calendars each time the planning is validated
+            // UR1: 04E Refresh user calendars each time the planning is validated
             // Script is in exploitationPartage dir outside of Planning Biblio install
             error_log(date("[Y-m-d G:i:s]")."====REFRESH\n",3, $_ENV['CL']);
             error_log(date("[Y-m-d G:i:s]")."==|elem[mail] is " . $tab[$elem]['mail'] . "\n",3, $_ENV['CL']);

@@ -25,10 +25,10 @@ $actif="Actif";
 $date=date("Y-m-d H:i:s");
 $commentaires= "Importation LDAP $date";
 //$droits="a:2:{i:0;i:99;i:1;i:100;}";
-$droits="[99,100]"; // UR1 : default value makes connection fail
+$droits="[99,100]"; // UR1: 00A default value makes connection fail
 $password="password_bidon_pas_importé_depuis_ldap";
 //$postes='a:1:{i:0;s:0:"";}';
-$postes=''; // UR1 : default value makes connection fail
+$postes=''; // UR1: 00A default value makes connection fail
 
 $erreurs=false;
 

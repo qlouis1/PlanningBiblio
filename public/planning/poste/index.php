@@ -370,7 +370,7 @@ if (!$verrou and !$autorisationN1) {
     $a->documents = false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    // UR1: Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
+    // UR1: 03 Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
     $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
     $absences=$a->elements;
     global $absences;
@@ -761,7 +761,7 @@ EOD;
     echo "</table></div>\n";
     break;
       case "4":
-    // UR1: Custom display
+    // UR1: Custom display TODO: remove, not used anymore
     echo "<table class='tableauStandard'>\n";
     echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>UR1 Custom display</h3></td>\n";
     $a = "col1";

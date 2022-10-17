@@ -44,7 +44,7 @@ $perso_id_origine=filter_input(INPUT_POST, "perso_id_origine", FILTER_SANITIZE_N
 $poste=filter_input(INPUT_POST, "poste", FILTER_SANITIZE_NUMBER_INT);
 $site=filter_input(INPUT_POST, "site", FILTER_SANITIZE_NUMBER_INT);
 $tout=filter_input(INPUT_POST, "tout", FILTER_CALLBACK, array("options"=>"sanitize_on"));
-// UR1: Added "absent" param to score off agents at insert
+// UR1: 03 Added "absent" param to score off agents at insert
 $absent=filter_input(INPUT_POST, "absent", FILTER_SANITIZE_NUMBER_INT);
 
 $login_id=$_SESSION['login_id'];
@@ -207,7 +207,7 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true); // UR1: don't consider imported absences
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true); // UR1: 03 don't consider imported absences
 
 $absences=$a->elements;
 

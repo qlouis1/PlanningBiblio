@@ -421,26 +421,15 @@ class ICal
         $array = $this->cal;
         $events = $array['VEVENT'];
 
-        error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
-
         if (empty($events))
             return false;
+
+        error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
         foreach ($array['VEVENT'] as $anEvent) {
-            // UR1 : We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
-                        // UR1 : import Ouf Of Office events
-            if (isset($elem['X-MICROSOFT-CDO-INTENDEDSTATUS']) and ($elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "OOF" && $elem['X-MICROSOFT-CDO-INTENDEDSTATUS'] != "BUSY")) {
+            // UR1: 05B We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
+            if(filterStatus($anEvent) == 0){
                 continue;
             }
-            if (isset($anEvent['TRANSP']) && $anEvent['TRANSP'] != "OPAQUE") {
-                continue;
-            }
-            if ($anEvent['STATUS'] == 'CANCELLED') {
-                continue;
-            }
-            if (isset($anEvent['X-PLANNING-BILBIO']) and $anEvent['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
-                continue;
-            }
-            // end UR1
 
             if (isset($anEvent['RRULE']) && $anEvent['RRULE'] != '') {
                 // Recurring event, parse RRULE and add appropriate duplicate events
@@ -475,7 +464,7 @@ class ICal
                     $weekdays = array('SU' => 'sunday', 'MO' => 'monday', 'TU' => 'tuesday', 'WE' => 'wednesday', 'TH' => 'thursday', 'FR' => 'friday', 'SA' => 'saturday');
                 }
 
-                // UR1 : use until_default as a limit to one year
+                // UR1: 05A use until_default as a limit to one year
                 $until_default = date_create('now');
                 $until_default->modify('+1 year');
                 $until_default->setTime(23, 59, 59); // End of the day
@@ -483,7 +472,7 @@ class ICal
 
                 if (isset($rrules['UNTIL'])) {
                     // Get Until
-                    // UR1 : Limit until to until_default, set to 8 month
+                    // UR1: 05A Limit until to until_default
                     $until = min(strtotime($rrules['UNTIL']),strtotime($until_default));
                     //$until = strtotime($rrules['UNTIL']);
                 } else if (isset($rrules['COUNT'])) {
@@ -493,7 +482,7 @@ class ICal
                     $count += ($count > 0) ? $count * ($interval - 1) : 0;
                     $count_nb = 1;
                     $offset = "+$count " . $frequency_conversion[$frequency];
-                    // UR1 : Limit until to until_default, set to 8 month
+                    // UR1: 05A Limit until to until_default
                     $until = min(strtotime($offset, $start_timestamp),strtotime($until_default));
                     //$until = strtotime($offset, $start_timestamp);
 

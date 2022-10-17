@@ -1345,35 +1345,64 @@ function formatBytes($size, $precision = 2)
 }
 
 /**
- * UR1 : Function used to match imported localisation with keywords detailed in config.
- * Used in PlanningJobController
- * returns the id of matched site, 0 if no match
+ * UR1: 06B Function used to match imported localisation with keywords detailed in config.
+ * Used in PlanningJobController and CalendarController
+ * returns the id of matched site, 0 if no match, -1 if "ext" match
+ * UR1: 06D return -1 when matching "ext" keyword
  */
-function matchSite($loca){
-    error_log(date("[Y-m-d G:i:s]") . "======== Matchsite: $loca\n", 3, $_ENV['CL']);
-    if($loca){
-        for ($i=1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
-            //error_log(date("[Y-m-d G:i:s]") . "======|ms$i" . print_r($GLOBALS['config']["Multisites-site$i"],true)  . "\n", 3, $_ENV['CL']);
-            $keywords = array();
-            if($GLOBALS['config']["Multisites-site$i-keywords"]){
-                $keywords = explode(';',$GLOBALS['config']["Multisites-site$i-keywords"]);
-            }
-            $keywords[] = $GLOBALS['config']["Multisites-site$i"];
-            //error_log(date("[Y-m-d G:i:s]") . "======| keywords: ".print_r($keywords,true)."\n", 3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]") . "======|kw" . print_r($keywords,true)  . "\n", 3, $_ENV['CL']);
-            foreach ($keywords as $kw) {
-                error_log(date("[Y-m-d G:i:s]") . "======| comparing $loca with " . print_r($kw,true) . "\n", 3, $_ENV['CL']);
-                if(strpos(strtolower($loca),strtolower($kw)) !== false){
-                    error_log(date("[Y-m-d G:i:s]") . "======| matched $loca with " . print_r($kw,true) . "\n", 3, $_ENV['CL']);
-                    return $i;
+function matchSite($loca)
+{
+    if ($loca) {
+        if (strcasecmp($loca, "ext") == 0) {
+            return -1;
+        } else {
+            for ($i = 1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
+                $keywords = array();
+                if ($GLOBALS['config']["Multisites-site$i-keywords"]) {
+                    $keywords = explode(';', $GLOBALS['config']["Multisites-site$i-keywords"]);
+                }
+                $keywords[] = $GLOBALS['config']["Multisites-site$i"];
+                foreach ($keywords as $kw) {
+                    if (strpos(strtolower($loca), strtolower($kw)) !== false) {
+                        return $i;
+                    }
                 }
             }
+            return 0;
         }
-        error_log(date("[Y-m-d G:i:s]") . "======|NO MATCH\n", 3, $_ENV['CL']);
-        return 0;
     } else {
-        error_log(date("[Y-m-d G:i:s]") . "======|EMPTY LOCA\n", 3, $_ENV['CL']);
         return 0;
     }
+}
+
+/**
+ * UR1: Function used to filter imported events based on status
+ */
+function filterStatus($event) {
+    // UR1: 04D Import Ouf Of Office events
+    // UR1: 04F Import free telework events
+    // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
+    // BUSY and OOF are both imported without condition
+    // TENTATIVE is filtered out without condition
+    // FREE is imported if the event status is in a pre determined set
+    if (isset($event['X-MICROSOFT-CDO-INTENDEDSTATUS'])) {
+        if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE") {
+            $ttr = "ttr;ttp;teletravail;";
+            if (!$event['SUMMARY'] || ($event['SUMMARY'] && stripos($ttr, strtr($event['SUMMARY'], array('é' => 'e', 'É' => 'E'))) === false)) {
+                return 0;
+            }
+        }
+        if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE") {
+            return 0;
+        }
+    }
+    if ($event['STATUS'] == 'CANCELLED') {
+        return 0;
+    }
+    if (isset($event['X-PLANNING-BILBIO']) and $event['X-PLANNING-BILBIO'] == "EXPORTED-EVENT") {
+        return 0;
+    }
+
+    return 1;
 }
 

@@ -713,7 +713,7 @@ class absences
             $fin.=" 23:59:59";
         }
 
-   		// UR1: Don't consider imported absences
+   		// UR1: 03 Don't consider imported absences
         $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut", "motif"=>"NOT LIKE Agenda Partage");
      
         if ($valide==true or $GLOBALS['config']['Absences-validation']==0) {
@@ -728,7 +728,7 @@ class absences
         return false;
     }
 
-    // UR1: Add custom parameter $partage to ignore imported absences
+    // UR1: 03 Add custom parameter $partage to ignore imported absences
     public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=false)
     {
         $entityManager = $GLOBALS['entityManager'];
@@ -772,7 +772,7 @@ class absences
         $deletedAgents=implode("','", $this->agents_supprimes);
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
 
-        // UR1: Ignore imported absences
+        // UR1: 03 Ignore imported absences
 		if ($partage == true) {
             $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
         }
