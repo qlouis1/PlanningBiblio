@@ -370,8 +370,8 @@ if (!$verrou and !$autorisationN1) {
     $a->documents = false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    // UR1: 03 Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
-    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
+    // UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
+    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, 2);
     $absences=$a->elements;
     global $absences;
   

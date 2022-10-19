@@ -266,8 +266,8 @@ for ($j=0;$j<=$fin;$j++) {
         $a=new absences();
         $a->valide = true;
         $a->documents = false;
-        // UR1: 03 Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
-        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
+        // UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
+        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, 1);
         $absences=$a->elements;
         global $absences;
 
