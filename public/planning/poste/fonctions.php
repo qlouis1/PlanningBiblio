@@ -45,6 +45,10 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     $title = $elem['prenom'] . ' ' . $elem['nom'];
                 }
 
+                if($elem['ur1_forced'] == 1){
+                    $nom_affiche = "(F) " . $nom_affiche;
+                    $title = "(Présence forcée) " . $title;
+                }
                 $resultat = $nom_affiche;
         
                 //		Affichage des sans repas
@@ -95,6 +99,10 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     if ($absence["perso_id"] == $elem['perso_id'] and $absence['debut'] < $date." ".$fin and $absence['fin'] > $date." ".$debut) {
                         // Absence validée : rouge barré
                         if ($absence['valide']>0 or $GLOBALS['config']['Absences-validation'] == 0) {
+                            // UR1: 03D If agent if tagged as forced, we don't want to cross him out
+                            if($elem['ur1_forced'] == 1){
+                                continue;
+                            }
                             $class_tmp[]="red";
                             $class_tmp[]="striped";
                             $absence_valide = true;

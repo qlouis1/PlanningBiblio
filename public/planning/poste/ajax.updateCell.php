@@ -46,6 +46,7 @@ $site=filter_input(INPUT_POST, "site", FILTER_SANITIZE_NUMBER_INT);
 $tout=filter_input(INPUT_POST, "tout", FILTER_CALLBACK, array("options"=>"sanitize_on"));
 // UR1: 03 Added "absent" param to score off agents at insert
 $absent=filter_input(INPUT_POST, "absent", FILTER_SANITIZE_NUMBER_INT);
+$forcer=filter_input(INPUT_POST, "forcer", FILTER_SANITIZE_NUMBER_INT);
 
 $login_id=$_SESSION['login_id'];
 $now=date("Y-m-d H:i:s");
@@ -56,7 +57,7 @@ $now=date("Y-m-d H:i:s");
 if (is_numeric($perso_id) and $perso_id == 0) {
     // Tout barrer
     if ($barrer and $tout) {
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -64,7 +65,7 @@ if (is_numeric($perso_id) and $perso_id == 0) {
 
     // Barrer l'agent sélectionné
     } elseif ($barrer) {
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -77,11 +78,19 @@ if (is_numeric($perso_id) and $perso_id == 0) {
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
     // Supprimer l'agent sélectionné
-    } else {
+    // UR1: 03D Differenciate delete and force
+    } elseif($forcer !=1) {
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
+    } else {
+        // UR1: 03D this is where we tag the poste as "forced"
+        $set=array("absent"=>"0", "ur1_forced"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
+        $db=new db();
+        $db->CSRFToken = $CSRFToken;
+        $db->update("pl_poste", $set, $where);
     }
 }
 // Remplacement
@@ -112,7 +121,7 @@ else {
     // Si barrer : on barre l'ancien et ajoute le nouveau
     elseif ($barrer) {
         // On barre l'ancien
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -155,7 +164,7 @@ if ($griser == 1) {
 $db->selectLeftJoin(
   array("pl_poste","perso_id"),
   array("personnel","id"),
-  array("absent","supprime","grise"),
+  array("absent","ur1_forced","supprime","grise"),
   array("nom","prenom","statut","service","postes",array("name"=>"id","as"=>"perso_id")),
   array("date"=>$date, "debut"=>$debut, "fin"=> $fin, "poste"=>$poste, "site"=>$site),
   array(),

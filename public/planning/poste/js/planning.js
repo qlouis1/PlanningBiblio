@@ -141,7 +141,7 @@ $(document).ready(function(){
         success: function(result) {
             if (result.availables.length) {
                 var agents = JSON.stringify(result.availables);
-                bataille_navale(job, date, cFrom, to, agents, '', '', '', site, '', null, cellid);
+                bataille_navale(job, date, cFrom, to, agents, '', '', '', '', site, '', null, cellid);
             }
             if (result.unavailables) {
                 var message = "Les agents suivants n'ont pas été placés car ils sont indisponibles de " + heureFr(cFrom) + " à " + heureFr(to) + " : " + result.unavailables;
@@ -540,7 +540,7 @@ function checkAbs(agent){
 function ContextMenu2agents(data, agent) {
   td = $('<td>').attr({
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",' + agent.id + ',0,0,' + checkAbs(agent) + ',"' + data.site + '");'
+              + data.start + '","' + data.end + '",' + agent.id + ',0,0,' + checkAbs(agent) + ',0,"' + data.site + '");'
   });
 
   font = $('<font>').attr({
@@ -731,14 +731,14 @@ function ContextMenu2agents(data, agent) {
     add = $('<a>').attr({
       href: 'javascript:bataille_navale("' + data.position_id + '","'
             + data.date + '","' + data.start + '","' + data.end + '",'
-            + agent.id + ',0,1,' + abs + ',"' + data.site + '");'
+            + agent.id + ',0,1,' + abs + ',0,"' + data.site + '");'
     }).html('+');
 
     replace = $('<a>').attr({
       style: 'color:red',
       href: 'javascript:bataille_navale("' + data.position_id + '","'
             + data.date + '","' + data.start + '","' + data.end + '",'
-            + agent.id + ',1,1,' + abs + ',"' + data.site + '");'
+            + agent.id + ',1,1,' + abs + ',0,"' + data.site + '");'
     }).html(' x&nbsp;');
 
     td2.append(add);
@@ -823,12 +823,12 @@ function fillContextMenuLevel1(data) {
 
 function contextMenuDisableCell(data) {
   on = 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-            + data.start + '","' + data.end + '",0,0,0,0,"' + data.site + '",1,-1);';
+            + data.start + '","' + data.end + '",0,0,0,0,0,"' + data.site + '",1,-1);';
   title = 'Dégriser la cellule';
 
   if (data.cell_enabled) {
     on = 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",0,0,0,0,"' + data.site + '",1,1);';
+              + data.start + '","' + data.end + '",0,0,0,0,0,"' + data.site + '",1,1);';
     title = 'Griser la cellule';
   }
 
@@ -879,7 +879,7 @@ function contextMenuScoreOffAll(data) {
     colspan: '2',
     class: 'red',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",0,1,0,0,"' + data.site + '",1);'
+              + data.start + '","' + data.end + '",0,1,0,0,0,"' + data.site + '",1);'
   }).html('Tout barrer');
 
   tr = $('<tr>').attr({
@@ -901,7 +901,7 @@ function contextMenuRemoveAll(data) {
   td = $('<td>').attr({
     colspan: '2',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",0,0,0,0,"' + data.site + '",1);'
+              + data.start + '","' + data.end + '",0,0,0,0,0,"' + data.site + '",1);'
   }).html('Tout supprimer');
 
   tr = $('<tr>').attr({
@@ -923,7 +923,7 @@ function contextMenuScoreOff(data) {
   td = $('<td>').attr({
     class: 'red',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",0,1,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '",0,1,0,0,0,"' + data.site + '");',
     onmouseover: 'plMouseOver(' + data.agent_id + ');',
     onmouseout: 'plMouseOut(' + data.agent_id + ');',
   }).html('Barrer ' + data.agent_name);
@@ -947,7 +947,7 @@ function contextMenuForce(data) {
   td = $('<td>').attr({
     class: 'red',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '","' + data.agent_id + '",0,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '","' + '0' + '","","","",1,"' + data.site + '");',
     onmouseover: 'plMouseOver(' + data.agent_id + ');',
     onmouseout: 'plMouseOut(' + data.agent_id + ');',
   }).html('Forcer ' + data.agent_name);
@@ -971,7 +971,7 @@ function contextMenuRemove(data) {
   td = $('<td>').attr({
     colspan: '2',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",0,0,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '",0,0,0,0,0,"' + data.site + '");',
     onmouseover: 'plMouseOver(' + data.agent_id + ');',
     onmouseout: 'plMouseOut(' + data.agent_id + ');'
   }).html('Supprimer ' + data.agent_name);
@@ -996,7 +996,7 @@ function contextMenuEverybody(data) {
     colspan: '2',
     style: 'color:black;',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",2,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '",2,0,0,0,"' + data.site + '");',
   }).html('Tout le monde');
 
   tr = $('<tr>').attr({
@@ -1174,7 +1174,8 @@ function appelDispo(site,siteNom,poste,posteNom,date,debut,fin,agents){
  * 
  * @param int perso_id : Si 0 = griser la cellule, si 2 = Tout le monde
  */
-function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,site,tout,griser,cellid){
+function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,forcer,site,tout,griser,cellid){
+  console.log(forcer);
   if(griser==undefined){
     griser=0;
   }
@@ -1199,7 +1200,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
     url: "planning/poste/ajax.updateCell.php",
     type: "post",
     dataType: "json",
-    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer,absent: absent, ajouter: ajouter, site: site, tout: tout, griser: griser},
+    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer, absent: absent, forcer: forcer, ajouter: ajouter, site: site, tout: tout, griser: griser},
     success: function(result){
       $("#td"+cellule).html("");
       
@@ -1234,10 +1235,11 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         // Exemple de cellule
         // <div id='cellule11_0' class='cellule statut_bibas service_permanent' >Christophe C.</div>
 
-        var title = result[i]["nom"] + ' ' + result[i]["prenom"];
+        var title =(result[i]['ur1_forced'] == "1"?"(Présence forcée) " : "a") +  result[i]["nom"] + ' ' + result[i]["prenom"];
         
         // UR1: 01A Change display to Name + first letter of Surname
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent=(result[i]['ur1_forced'] == "1" ? "(F) " : "") + result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+
         var perso_id=result[i]["perso_id"];
 
         // classes : A définir en fonction du statut, du service et des absences
@@ -1277,7 +1279,8 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         classes+=' '+result[i]['activites'];
 
         // UR1: 01A Change display to Name + first letter of Surname
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent=(result[i]['ur1_forced'] == "1" ? "(F) " : "") + result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+
         var perso_id=result[i]["perso_id"];
 
         // Sans Repas
