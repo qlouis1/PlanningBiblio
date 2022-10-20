@@ -44,11 +44,12 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     $nom_affiche = $elem['prenom'] . " ".substr($elem['nom'], 0, 1).".";
                     $title = $elem['prenom'] . ' ' . $elem['nom'];
                 }
-
+/*
                 if($elem['ur1_forced'] == 1){
                     $nom_affiche = "(F) " . $nom_affiche;
                     $title = "(Présence forcée) " . $title;
                 }
+*/
                 $resultat = $nom_affiche;
         
                 //		Affichage des sans repas
