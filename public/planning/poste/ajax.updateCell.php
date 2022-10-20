@@ -84,7 +84,7 @@ if (is_numeric($perso_id) and $perso_id == 0) {
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
     } else {
-        // UR1: 03D this is where we tag the poste as "forced"
+        // UR1: 03D this is where we tag the agent as "forced"
         $set=array("absent"=>"0", "ur1_forced"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
@@ -105,14 +105,14 @@ else {
         if (is_numeric($perso_id)) {
             // Insertion des nouveaux éléments
             $p = new planning();
-            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken, $absent);
+            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken);
         } else {
             $tab = json_decode($perso_id);
             if (is_array($tab) and !empty($tab)) {
                 foreach ($tab as $elem) {
                     // Insertion des nouveaux éléments
                     $p = new planning();
-                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken, $absent);
+                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken);
                 }
             }
         }
@@ -128,7 +128,7 @@ else {
     
         // On ajoute le nouveau
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
+      "chgt_login"=>$login_id, "chgt_time"=>$now);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
@@ -136,7 +136,7 @@ else {
     // Si Ajouter, on garde l'ancien et ajoute le nouveau
     elseif ($ajouter) {
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
+      "chgt_login"=>$login_id, "chgt_time"=>$now);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
