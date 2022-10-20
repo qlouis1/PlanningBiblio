@@ -114,6 +114,29 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                             $title = $nom_affiche.' : Absence non-valid&eacute;e';
                         }
                     }
+
+                    // UR1:06 Take account of journey time for imported absences
+                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
+                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
+                        if ($absence["perso_id"] == $elem['perso_id'] and $absence['debut'] < $date." ".$end_with_journey and $absence['fin'] > $date." ".$start_with_journey) {
+                            if ($absence['motif'] == "Agenda Partage") {
+                                if($absence['localisation']){
+                                    $m = matchSite($absence['localisation']);
+                                    if($m != $site){
+                                        if($elem['ur1_forced'] == 1){
+                                            continue;
+                                        }
+                                        $class_tmp[]="red";
+                                        $class_tmp[]="striped";
+                                        $absence_valide = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
     
                 // Il peut y avoir des absences validées et non validées. Si ce cas ce produit, la cellule sera barrée et on n'affichera pas "Absence non-validée"

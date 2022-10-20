@@ -1200,7 +1200,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,for
     url: "planning/poste/ajax.updateCell.php",
     type: "post",
     dataType: "json",
-    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer, absent: absent, forcer: forcer, ajouter: ajouter, site: site, tout: tout, griser: griser},
+    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer, absent: "0", forcer: forcer, ajouter: ajouter, site: site, tout: tout, griser: griser},
     success: function(result){
       $("#td"+cellule).html("");
       
