@@ -124,7 +124,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                             if ($absence['motif'] == "Agenda Partage") {
                                 if($absence['localisation']){
                                     $m = matchSite($absence['localisation']);
-                                    if($m != $site){
+                                    if($m and $m != $site){
                                         if($elem['ur1_forced'] == 1){
                                             continue;
                                         }

@@ -275,7 +275,7 @@ for ($i=0;$i<count($tab);$i++) {
                 if ($absence['motif'] == "Agenda Partage") {
                     if($absence['localisation']){
                         $m = matchSite($absence['localisation']);
-                        if($m != $site){
+                        if($m and $m != $site){
                             if($tab[$i]['ur1_forced'] == 1){
                                 continue;
                             }
