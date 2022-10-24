@@ -34,7 +34,8 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
 
         foreach ($GLOBALS['cellules'] as $elem) {
             $title=null;
-      
+
+
             if ($elem['poste']==$poste and $elem['debut']==$debut and $elem['fin']==$fin) {
                 //		Affichage du nom et du prénom
                 // UR1: 01A Change display to Name + first letter of Surname
@@ -86,7 +87,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
 
                 // On marque les absents (absences enregistrées dans la table absences)
                 $absence_valide = false;
-                
+                $absence_display = "";
                 foreach ($GLOBALS['absences'] as $absence) {
 
                     // Skip teleworking absences if the position is compatible with
@@ -107,12 +108,15 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                             $class_tmp[]="red";
                             $class_tmp[]="striped";
                             $absence_valide = true;
-                            break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
+                            // UR1:03 UR1:06 Display absence data
+                            $m = matchSite($absence['localisation']);
+                            $absence_display .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                            //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
                         }
                         // Absence non-validée : rouge
                         elseif ($GLOBALS['config']['Absences-non-validees']) {
                             $class_tmp[]="red";
-                            $title = $nom_affiche.' : Absence non-valid&eacute;e';
+                            $absence_display .= format_abs("0",$absence['commentaires'],$absence['debut'],$absence['fin']);
                         }
                     }
 
@@ -132,7 +136,8 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                                         $class_tmp[]="red";
                                         $class_tmp[]="striped";
                                         $absence_valide = true;
-                                        break;
+                                        $absence_display .= format_abs("2",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                                        //break;
                                     }
                                 }
                             }
@@ -141,8 +146,13 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                 }
     
                 // Il peut y avoir des absences validées et non validées. Si ce cas ce produit, la cellule sera barrée et on n'affichera pas "Absence non-validée"
-                if ($absence_valide) {
-                    $title=null;
+                // UR1: 03 Display absence data
+                //if ($absence_valide) {
+                //    $title=null;
+                //}
+                if($absence_display){
+                    $title = $absence_display;
+
                 }
     
     

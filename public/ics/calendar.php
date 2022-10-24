@@ -219,7 +219,7 @@ if (isset($planning)) {
                 if ($a['motif'] == "Agenda Partage") {
                     if($a['localisation']){
                         $m = matchSite($a['localisation']);
-                        if($m && $m != $elem['site']){
+                        if($m and $m != $elem['site']){
                             if($elem['ur1_forced'] == 1){
                                 continue;
                             }

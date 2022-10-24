@@ -261,14 +261,11 @@ class PlanningJobController extends BaseController
                         // If there isn't, we consider the imported absence is on the agent default site and we don't have journey time
                         if($elem['localisation']){
                             $m = matchSite($elem['localisation']);
-                            if($m > 0 && $m != $site){
-                                // Keep both site and imported location to send it to js script
-                                $exclJourneyPartage[$elem['perso_id']][] = array($this->config("Multisites-site$m"),$elem['localisation'],date("G\hi",strtotime($elem['debut'])),date("G\hi",strtotime($elem['fin'])),$elem['commentaires']);
-
-                            }
-                            // UR1: 06D If we match with the "ext" keyword, we consider there is always journey time
-                            if ($m == -1){
-                                $exclJourneyPartage[$elem['perso_id']][] = array("Extérieur","extérieur");
+                            if($m and $m != $site){
+                                $exclJourneyPartage[$elem['perso_id']][] = array(
+                                    format_abs("2",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,80),
+                                    format_abs("3",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,20)
+                                );
                             }
                         }
                     }
@@ -314,8 +311,8 @@ class PlanningJobController extends BaseController
             $teleworking_exception = (!empty($teleworking_reasons) and is_array($teleworking_reasons)) ? "AND `motif` NOT IN ('" . implode("','", $teleworking_reasons) . "')" : null;
         }
 
-        // UR1: 03B Select localisation to eventually display it in planning
-        $db->select('absences', 'perso_id,valide,motif,commentaires,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
+        // UR1: 03B Select location and time to eventually display it in planning
+        $db->select('absences', 'perso_id,valide,motif,commentaires,debut,fin,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
         // UR1: 03 Keep imported absences data to pass it later to js script
         $absentPartage = array();
 
@@ -324,17 +321,11 @@ class PlanningJobController extends BaseController
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03 Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
-                        $e = array();
                         $m = matchSite($elem['localisation']);
-                        if ($m > 0 && $m != $site) {
-                            $e[1] = $this->config("Multisites-site$m");
-                        } else if ($m == -1) {
-                            $e[1] = "Ext";
-                        } else {
-                            $e[1] = "";
-                        }
-                        $e[0] = $elem['commentaires'];
-                        $absentPartage[$elem['perso_id']][] = $e;
+                        $absentPartage[$elem['perso_id']][] = array(
+                            format_abs("1",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,80),
+                            format_abs("3",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,20)
+                        );
                     } else {
                         $tab_exclus[] = $elem['perso_id'];
                         $absents[] = $elem['perso_id'];
@@ -612,8 +603,6 @@ class PlanningJobController extends BaseController
                     // UR1: 06 Pass Journey data to js script in Array
                     if (in_array('journey_partage', $exclusion[$elem['id']])) {
                         foreach ($exclJourneyPartage[$elem['id']] as $e) {
-                            //error_log(date("[Y-m-d G:i:s]") . "==|" . print_r($exclJourneyPartage, true) . "\n", 3, $_ENV['CL']);
-                            //error_log(date("[Y-m-d G:i:s]") . "=E=|" . print_r($e, true) . "\n", 3, $_ENV['CL']);
                             $motifExclusion[$elem['id']][] = ["partageJourney", $e];
                         }
                     }

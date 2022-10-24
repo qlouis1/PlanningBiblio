@@ -650,22 +650,16 @@ function ContextMenu2agents(data, agent) {
       }
 
       if (Array.isArray(e)){
-
         // UR1: 03 Consider imported absences as possible availability and display absence data
         if (e[0] == 'partage') {
-          if (e[1][1] != "") {
-            title_attr = 'Absence importée de Partage: [' + e[1][1] + '] ' + e[1][0];
-            content += '<font: style="color:red">' + 'AP ([' + e[1][1] +'] ' + e[1][0].substring(0, 20) + ')' + '</font>';
-          } else {
-            title_attr = 'Absence importée de Partage: ' + e[1][0];
-            content += '<font: style="color:red">' + 'AP (' + e[1][0].substring(0, 20) + ')' + '</font>';
-          }
+          title_attr = e[1][0];
+          content += '<font: style="color:red">' + 'AP (' + e[1][1] + ')' + '</font>';
         }
 
         // UR1: 06 Custom exclusion to be used in journey from imported absences
         if (e[0] == 'partageJourney') {
-          title_attr = 'L\'agent est sur le site [' + e[1][0] + '] de ' + e[1][2] + ' à ' + e[1][3] + ': ' + e[1][4];
-          content += '<font: style="color:red">' + 'PJ [' + e[1][0] + ']' + '</font>';
+          title_attr = e[1][0];
+          content += '<font: style="color:red">' + 'PJ (' + e[1][1] + ')' + '</font>';
         }
       }
 
@@ -1269,7 +1263,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
 
         // Si une absence ou un congé est validé, on efface title pour ne pas afficher XXX non validé(e)
         if(absence_valide){
-          title = '';
+          title = result[i]['title'];
         }
 
         // Service et Statut

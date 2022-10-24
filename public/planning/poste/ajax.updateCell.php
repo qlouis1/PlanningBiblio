@@ -253,6 +253,7 @@ for ($i=0;$i<count($tab);$i++) {
     }
   
     // Marquage des absences de la table absences
+    $title = "";
     foreach ($absences as $absence) {
         if ($absence["perso_id"] == $tab[$i]['perso_id'] and $absence['debut'] < $date." ".$fin and $absence['fin'] > $date." ".$debut) {
             if ($absence['valide']>0 or $config['Absences-validation'] == 0) {
@@ -260,7 +261,10 @@ for ($i=0;$i<count($tab);$i++) {
                     continue;
                 }
                 $tab[$i]['absent']=1;
-                break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
+                // UR1: 03 UR1: 06 Display absence data
+                $m = matchSite($absence['localisation']);
+                $title .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
             } elseif ($config['Absences-non-validees'] and $tab[$i]['absent'] != 1) {
                 $tab[$i]['absent']=2;
             }
@@ -280,13 +284,16 @@ for ($i=0;$i<count($tab);$i++) {
                                 continue;
                             }
                             $tab[$i]['absent']=1;
-                            break;
+                            $title .= format_abs("2",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                            //break;
                         }
                     }
                 }
             }
         }
     }
+    $tab[$i]['title']=$title;
+
 }
 
 // Marquage des congés

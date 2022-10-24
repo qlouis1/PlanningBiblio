@@ -228,7 +228,7 @@ class CalendarController extends BaseController
 
                 $motifAffiche = $elem['motif'];
                 $m = matchSite($elem['localisation']);
-                if ($m > 0 && $m != $site) {
+                if ($m > 0 and $m != $site) {
                     $motifAffiche = " <i>[" . $this->config("Multisites-site$m") . "]</i> ";
                 } else if ($m == -1) {
                     $motifAffiche = " <i>[Ext]</i> ";
