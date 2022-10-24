@@ -1228,12 +1228,10 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
         // Exemple de cellule
         // <div id='cellule11_0' class='cellule statut_bibas service_permanent' >Christophe C.</div>
 
-        //var title =(result[i]['ur1_forced'] == "1"?"(Présence forcée) " : "a") +  result[i]["nom"] + ' ' + result[i]["prenom"];
         var title =result[i]["nom"] + ' ' + result[i]["prenom"];
 
         // UR1: 01A Change display to Name + first letter of Surname
-        //var agent=(result[i]['ur1_forced'] == "1" ? "(F) " : "") + result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent = result[i]["prenom"] + " " + result[i]["nom"].substr(0, 1) + ".";
 
         var perso_id=result[i]["perso_id"];
 
@@ -1274,8 +1272,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
         classes+=' '+result[i]['activites'];
 
         // UR1: 01A Change display to Name + first letter of Surname
-        //var agent=(result[i]['ur1_forced'] == "1" ? "(F) " : "") + result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent = result[i]["prenom"] + " " + result[i]["nom"].substr(0, 1) + ".";
 
         var perso_id=result[i]["perso_id"];
 
@@ -1294,6 +1291,12 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
               }
             }
           });
+        }
+
+        if(result[i]['ur1_forced'] == 1){
+          console.log("FORCED");
+            agent+="*";
+            title = "*Présence forcée: " + title;
         }
 
         // Création d'une balise span avec les classes cellSpan et agent_ de façon à les repérer et agir dessus 

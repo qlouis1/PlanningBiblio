@@ -244,15 +244,16 @@ for ($j=0;$j<=$fin;$j++) {
     if ($verrou or $autorisationN1) {
         //--------------	Recherche des infos cellules	------------//
         // Toutes les infos seront stockées danx un tableau et utilisées par les fonctions cellules_postes
+        // UR1: 03D Select ur1_forced to pass data to cellule_poste
         $db=new db();
         $db->selectLeftJoin(
         array("pl_poste","perso_id"),
         array("personnel","id"),
-      array("perso_id","debut","fin","poste","absent","supprime", "grise"),
-      array("nom","prenom","statut","service","postes"),
-      array("date"=>$date, "site"=>$site),
-      array(),
-      "ORDER BY `{$dbprefix}pl_poste`.`absent` desc,`{$dbprefix}personnel`.`nom`, `{$dbprefix}personnel`.`prenom`"
+        array("perso_id","debut","fin","poste","absent","ur1_forced","supprime", "grise"),
+        array("nom","prenom","statut","service","postes"),
+        array("date"=>$date, "site"=>$site),
+        array(),
+        "ORDER BY `{$dbprefix}pl_poste`.`absent` desc,`{$dbprefix}personnel`.`nom`, `{$dbprefix}personnel`.`prenom`"
     );
 
         // $cellules will be used in the cellule_poste function. Using a global variable will avoid multiple access to the database and enhance performances
