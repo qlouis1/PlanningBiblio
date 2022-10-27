@@ -152,10 +152,11 @@ if (!empty($postes)) {
     $postes_select=implode(",", $postes);
     $db=new db();
 
+    // UR1: 03 Select 'ur1_forced'
     $db->selectInnerJoin(
         array("pl_poste","perso_id"),
         array("personnel","id"),
-        array("debut","fin","date","poste","site"),
+        array("debut","fin","date","poste","site","ur1_forced"),
         array("nom","prenom",array("name"=>"id", "as"=>"perso_id")),
         array("date"=>"BETWEEN{$debutSQL}AND{$finSQL}", "poste"=>"IN{$postes_select}","absent"=>"<>1",
       "supprime"=>"<>1", "site"=>"IN{$sitesSQL}"),
@@ -198,6 +199,10 @@ if (!empty($postes)) {
                     // S'il est absent : continue
                     if ( !empty($absencesDB[$elem['perso_id']]) ) {
                         foreach ($absencesDB[$elem['perso_id']] as $a) {
+                            // UR1: 03 Forced agent overides any absence
+                            if ($elem['ur1_forced'] == "1") {
+                                break;
+                            }
 
                             // Ignore teleworking absences for compatible positions
                             if (in_array($a['motif'], $teleworking_absence_reasons) and $poste_tab[4]) {
@@ -206,6 +211,22 @@ if (!empty($postes)) {
 
                             if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
                                 continue 2;
+                            }
+                            // UR1: 06 Check for imported absence journey
+                            if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                    if ($a['motif'] == "Agenda Partage") {
+                                        if ($a['localisation']) {
+                                            $m = matchSite($a['localisation']);
+                                            if ($m and $m != $elem['site']) {
+                                                continue 2;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

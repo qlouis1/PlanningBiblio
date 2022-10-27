@@ -117,10 +117,11 @@ class CalendarController extends BaseController
 
         //Sélection des postes occupés
         $db = new \db();
+        // UR1: 03D Select ur1_forced to ignored absences when agent is forced
         $db->selectInnerJoin(
             array("pl_poste", "poste"),
             array("postes", "id"),
-            array("date","debut","fin","absent","site"),
+            array("date","debut","fin","absent", "ur1_forced", "site"),
             array(array("name"=>"nom", "as"=>"poste")),
             array("perso_id"=>$perso_id, "date"=>"BETWEEN $debutSQL AND $finSQL"),
             array(),
@@ -185,7 +186,8 @@ class CalendarController extends BaseController
                         // Contrôle des absences depuis la table absence
                         if (is_array($absences)) {
                             foreach ($absences as $a) {
-                                if ($a['debut'] < $elem['date'].' '.$elem['fin'] and $a['fin'] > $elem['date'].' '.$elem['debut']) {
+                                // UR1: 03D Ignore absence if cell is forced
+                                if ($a['debut'] < $elem['date'].' '.$elem['fin'] and $a['fin'] > $elem['date'].' '.$elem['debut'] && $elem['ur1_forced'] != "1") {
                                     $elem['absent'] = 1;
                                     break;
                                 }
@@ -223,9 +225,10 @@ class CalendarController extends BaseController
             // UR1: 03B Display site when different from agent default
             $cl = 80; // Number of characters to print
             foreach ($current_abs as $elem) {
+
                 $motifAffiche = $elem['motif'];
                 $m = matchSite($elem['localisation']);
-                if ($m > 0 && $m != $site) {
+                if ($m > 0 and $m != $site) {
                     $motifAffiche = " <i>[" . $this->config("Multisites-site$m") . "]</i> ";
                 } else if ($m == -1) {
                     $motifAffiche = " <i>[Ext]</i> ";

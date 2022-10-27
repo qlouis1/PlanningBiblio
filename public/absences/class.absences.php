@@ -729,7 +729,7 @@ class absences
     }
 
     // UR1: 03 Add custom parameter $partage to ignore imported absences
-    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=false)
+    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=0)
     {
         $entityManager = $GLOBALS['entityManager'];
 
@@ -773,8 +773,13 @@ class absences
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
 
         // UR1: 03 Ignore imported absences
-		if ($partage == true) {
+		if ($partage == 1) {
             $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
+        }
+
+        // UR1: 03D Use Partage == 2 to ignore only tagged imported absences
+		if ($partage == 2) {
+            $filter.=" AND `{$dbprefix}absences`.`motif_autre` NOT LIKE 'APignored' ";
         }
 
         // Sort
@@ -785,11 +790,12 @@ class absences
 	}
 
         //	Select All
+        // UR1: 06 Select localisation to match journey in planning
         $req="SELECT `{$dbprefix}personnel`.`nom` AS `nom`, `{$dbprefix}personnel`.`prenom` AS `prenom`, "
       ."`{$dbprefix}personnel`.`id` AS `perso_id`, `{$dbprefix}personnel`.`sites` AS `sites`, "
       ."`{$dbprefix}absences`.`id` AS `id`, `{$dbprefix}absences`.`debut` AS `debut`, "
       ."`{$dbprefix}absences`.`fin` AS `fin`, "
-      ."`{$dbprefix}absences`.`motif` AS `motif`, `{$dbprefix}absences`.`commentaires` AS `commentaires`, "
+      ."`{$dbprefix}absences`.`motif` AS `motif`, `{$dbprefix}absences`.`commentaires` AS `commentaires`,  `{$dbprefix}absences`.`localisation` AS `localisation`, "
       ."`{$dbprefix}absences`.`valide` AS `valide`, `{$dbprefix}absences`.`validation` AS `validation`, "
       ."`{$dbprefix}absences`.`valide_n1` AS `valide_n1`, `{$dbprefix}absences`.`validation_n1` AS `validation_n1`, "
       ."`{$dbprefix}absences`.`pj1` AS `pj1`, `{$dbprefix}absences`.`pj2` AS `pj2`, `{$dbprefix}absences`.`so` AS `so`, "
@@ -1003,9 +1009,10 @@ class absences
         }
 
         //	Select All
+        // UR1: 06 Select localisation to handle journeys from imported absences
         $req="SELECT `{$dbprefix}absences`.`perso_id` AS `perso_id`, "
         ."`{$dbprefix}absences`.`id` AS `id`, `{$dbprefix}absences`.`debut` AS `debut`, "
-        ."`{$dbprefix}absences`.`fin` AS `fin`, `{$dbprefix}absences`.`motif` AS `motif` "
+        ."`{$dbprefix}absences`.`fin` AS `fin`, `{$dbprefix}absences`.`motif` AS `motif`, `{$dbprefix}absences`.`localisation` AS `localisation`  "
         ."FROM `{$dbprefix}absences` "
         ."WHERE $dates $filter;";
 

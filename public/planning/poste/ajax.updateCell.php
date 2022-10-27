@@ -44,8 +44,8 @@ $perso_id_origine=filter_input(INPUT_POST, "perso_id_origine", FILTER_SANITIZE_N
 $poste=filter_input(INPUT_POST, "poste", FILTER_SANITIZE_NUMBER_INT);
 $site=filter_input(INPUT_POST, "site", FILTER_SANITIZE_NUMBER_INT);
 $tout=filter_input(INPUT_POST, "tout", FILTER_CALLBACK, array("options"=>"sanitize_on"));
-// UR1: 03 Added "absent" param to score off agents at insert
-$absent=filter_input(INPUT_POST, "absent", FILTER_SANITIZE_NUMBER_INT);
+// UR1: 03 Added "forcer" param to manage force action in menu
+$forcer=filter_input(INPUT_POST, "forcer", FILTER_SANITIZE_NUMBER_INT);
 
 $login_id=$_SESSION['login_id'];
 $now=date("Y-m-d H:i:s");
@@ -56,7 +56,7 @@ $now=date("Y-m-d H:i:s");
 if (is_numeric($perso_id) and $perso_id == 0) {
     // Tout barrer
     if ($barrer and $tout) {
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -64,7 +64,7 @@ if (is_numeric($perso_id) and $perso_id == 0) {
 
     // Barrer l'agent sélectionné
     } elseif ($barrer) {
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -77,11 +77,19 @@ if (is_numeric($perso_id) and $perso_id == 0) {
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
     // Supprimer l'agent sélectionné
-    } else {
+    // UR1: 03D Differenciate delete and force
+    } elseif($forcer !=1) {
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
+    } else {
+        // UR1: 03D this is where we tag the agent as "forced"
+        $set=array("absent"=>"0", "ur1_forced"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
+        $db=new db();
+        $db->CSRFToken = $CSRFToken;
+        $db->update("pl_poste", $set, $where);
     }
 }
 // Remplacement
@@ -97,14 +105,14 @@ else {
         if (is_numeric($perso_id)) {
             // Insertion des nouveaux éléments
             $p = new planning();
-            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken, $absent);
+            $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $perso_id, $login_id, $CSRFToken);
         } else {
             $tab = json_decode($perso_id);
             if (is_array($tab) and !empty($tab)) {
                 foreach ($tab as $elem) {
                     // Insertion des nouveaux éléments
                     $p = new planning();
-                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken, $absent);
+                    $p->update_cell_add_agents($date, $debut, $fin, $poste, $site, $elem, $login_id, $CSRFToken);
                 }
             }
         }
@@ -112,7 +120,7 @@ else {
     // Si barrer : on barre l'ancien et ajoute le nouveau
     elseif ($barrer) {
         // On barre l'ancien
-        $set=array("absent"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
+        $set=array("absent"=>"1", "ur1_forced"=>"0", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
@@ -120,7 +128,7 @@ else {
     
         // On ajoute le nouveau
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
+      "chgt_login"=>$login_id, "chgt_time"=>$now);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
@@ -128,7 +136,7 @@ else {
     // Si Ajouter, on garde l'ancien et ajoute le nouveau
     elseif ($ajouter) {
         $insert=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id,
-      "chgt_login"=>$login_id, "chgt_time"=>$now, "absent"=>$absent);
+      "chgt_login"=>$login_id, "chgt_time"=>$now);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->insert("pl_poste", $insert);
@@ -155,7 +163,7 @@ if ($griser == 1) {
 $db->selectLeftJoin(
   array("pl_poste","perso_id"),
   array("personnel","id"),
-  array("absent","supprime","grise"),
+  array("absent","ur1_forced","supprime","grise"),
   array("nom","prenom","statut","service","postes",array("name"=>"id","as"=>"perso_id")),
   array("date"=>$date, "debut"=>$debut, "fin"=> $fin, "poste"=>$poste, "site"=>$site),
   array(),
@@ -207,7 +215,15 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$debut, $date.' '.$fin, null, true); // UR1: 03 don't consider imported absences
+// UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
+// UR1: 03E revert to manage forced agents
+// UR1: 06 Extend select to consider journey from absences on other sites
+if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+    $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+    $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
+    $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
+}
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$start_with_journey, $date.' '.$end_with_journey, null, 0);
 
 $absences=$a->elements;
 
@@ -237,16 +253,47 @@ for ($i=0;$i<count($tab);$i++) {
     }
   
     // Marquage des absences de la table absences
+    $title = "";
     foreach ($absences as $absence) {
         if ($absence["perso_id"] == $tab[$i]['perso_id'] and $absence['debut'] < $date." ".$fin and $absence['fin'] > $date." ".$debut) {
             if ($absence['valide']>0 or $config['Absences-validation'] == 0) {
+                if($tab[$i]['ur1_forced'] == 1){
+                    continue;
+                }
                 $tab[$i]['absent']=1;
-                break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
+                // UR1: 03 UR1: 06 Display absence data
+                $m = matchSite($absence['localisation']);
+                $title .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
             } elseif ($config['Absences-non-validees'] and $tab[$i]['absent'] != 1) {
                 $tab[$i]['absent']=2;
             }
         }
+
+        // UR1: 06 Detect journey from other sites
+        if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+            $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+            $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
+            $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
+            if ($absence["perso_id"] == $tab[$i]['perso_id'] and $absence['debut'] < $date." ".$end_with_journey and $absence['fin'] > $date." ".$start_with_journey) {
+                if ($absence['motif'] == "Agenda Partage") {
+                    if($absence['localisation']){
+                        $m = matchSite($absence['localisation']);
+                        if($m and $m != $site){
+                            if($tab[$i]['ur1_forced'] == 1){
+                                continue;
+                            }
+                            $tab[$i]['absent']=1;
+                            $title .= format_abs("2",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                            //break;
+                        }
+                    }
+                }
+            }
+        }
     }
+    $tab[$i]['title']=$title;
+
 }
 
 // Marquage des congés

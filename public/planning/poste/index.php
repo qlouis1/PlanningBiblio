@@ -329,11 +329,12 @@ if (!$verrou and !$autorisationN1) {
 } else {
     //--------------	Recherche des infos cellules	------------//
     // Toutes les infos seront stockées danx un tableau et utilisées par les fonctions cellules_postes
+    // UR1: 03D Select ur1_forced to pass data to cellule_poste
     $db=new db();
     $db->selectLeftJoin(
         array("pl_poste","perso_id"),
         array("personnel","id"),
-        array("perso_id","debut","fin","poste","absent","supprime","grise"),
+        array("perso_id","debut","fin","poste","absent","ur1_forced","supprime","grise"),
         array("nom","prenom","statut","service","postes", 'depart'),
         array("date"=>$date, "site"=>$site),
         array(),
@@ -370,8 +371,9 @@ if (!$verrou and !$autorisationN1) {
     $a->documents = false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    // UR1: 03 Use $partage=true to avoid crossing the cell as we consider imported absences as unavailability
-    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, true);
+    // UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
+    // UR1: 03D We now want to crossed agents even if the absence is imported, and managed the forced agents in cellule_poste
+    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, 0);
     $absences=$a->elements;
     global $absences;
   

@@ -99,11 +99,12 @@ if ($config['ICS-Code']) {
     $requete_personnel["code_ics"] = $code;
 }
 
+// UR1: 03D select ur1_forced to export forced cells
 $db=new db();
 $db->selectInnerJoin(
     array("pl_poste","perso_id"),
     array("personnel","id"),
-    array("date", "debut", "fin", "poste", 'site', 'absent', 'supprime'),
+    array("date", "debut", "fin", "poste", 'site', 'absent', 'ur1_forced', 'supprime'),
     array(),
   array("perso_id"=>$id),
     $requete_personnel,
@@ -200,13 +201,36 @@ if (isset($planning)) {
         }
     
         // Exclusion des absences
+        // UR1: 06 Extend select to consider journey from absences on other sites
+        if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+            $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+            $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+            $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+        }
+
+        // UR1: 03D Don't exculde absences that are tagged as forced
         foreach ($absences as $a) {
-            if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date'].' '.$elem['debut']) {
+            if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date'].' '.$elem['debut'] && $elem['ur1_forced'] != "1") {
                 continue 2;
+            }
+
+            // UR1: 06 Manage journey time from imported absences
+            if ($a['debut']< $elem['date'].' '.$end_with_journey and $a['fin']> $elem['date'].' '.$start_with_journey && $elem['ur1_forced'] != "1") {
+                if ($a['motif'] == "Agenda Partage") {
+                    if($a['localisation']){
+                        $m = matchSite($a['localisation']);
+                        if($m and $m != $elem['site']){
+                            if($elem['ur1_forced'] == 1){
+                                continue;
+                            }
+                            continue 2;
+                        }
+                    }
+                }
             }
         }
     
-        if ($elem['absent'] == 1) {
+        if ($elem['absent'] == 1 && $elem['ur1_forced'] != "1") {
             continue;
         }
 

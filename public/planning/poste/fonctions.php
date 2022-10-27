@@ -34,7 +34,8 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
 
         foreach ($GLOBALS['cellules'] as $elem) {
             $title=null;
-      
+
+
             if ($elem['poste']==$poste and $elem['debut']==$debut and $elem['fin']==$fin) {
                 //		Affichage du nom et du prénom
                 // UR1: 01A Change display to Name + first letter of Surname
@@ -43,6 +44,11 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                 if ($elem['prenom']) {
                     $nom_affiche = $elem['prenom'] . " ".substr($elem['nom'], 0, 1).".";
                     $title = $elem['prenom'] . ' ' . $elem['nom'];
+                }
+
+                if($elem['ur1_forced'] == 1){
+                    $nom_affiche .= "*";
+                    $title = "*Présence forcée: " . $title;
                 }
 
                 $resultat = $nom_affiche;
@@ -81,7 +87,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
 
                 // On marque les absents (absences enregistrées dans la table absences)
                 $absence_valide = false;
-                
+                $absence_display = "";
                 foreach ($GLOBALS['absences'] as $absence) {
 
                     // Skip teleworking absences if the position is compatible with
@@ -95,22 +101,57 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     if ($absence["perso_id"] == $elem['perso_id'] and $absence['debut'] < $date." ".$fin and $absence['fin'] > $date." ".$debut) {
                         // Absence validée : rouge barré
                         if ($absence['valide']>0 or $GLOBALS['config']['Absences-validation'] == 0) {
+                            // UR1: 03D If agent if tagged as forced, we don't want to cross him out
+                            if($elem['ur1_forced'] == 1){
+                                continue;
+                            }
                             $class_tmp[]="red";
                             $class_tmp[]="striped";
                             $absence_valide = true;
-                            break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
+                            // UR1:03 UR1:06 Display absence data
+                            $m = matchSite($absence['localisation']);
+                            $absence_display .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                            //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
                         }
                         // Absence non-validée : rouge
                         elseif ($GLOBALS['config']['Absences-non-validees']) {
                             $class_tmp[]="red";
-                            $title = $nom_affiche.' : Absence non-valid&eacute;e';
+                            $absence_display .= format_abs("0",$absence['commentaires'],$absence['debut'],$absence['fin']);
+                        }
+                    }
+
+                    // UR1:06 Take account of journey time for imported absences
+                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
+                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
+                        if ($absence["perso_id"] == $elem['perso_id'] and $absence['debut'] < $date." ".$end_with_journey and $absence['fin'] > $date." ".$start_with_journey) {
+                            if ($absence['motif'] == "Agenda Partage") {
+                                if($absence['localisation']){
+                                    $m = matchSite($absence['localisation']);
+                                    if($m and $m != $site){
+                                        if($elem['ur1_forced'] == 1){
+                                            continue;
+                                        }
+                                        $class_tmp[]="red";
+                                        $class_tmp[]="striped";
+                                        $absence_valide = true;
+                                        $absence_display .= format_abs("2",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
+                                        //break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
     
                 // Il peut y avoir des absences validées et non validées. Si ce cas ce produit, la cellule sera barrée et on n'affichera pas "Absence non-validée"
-                if ($absence_valide) {
-                    $title=null;
+                // UR1: 03 Display absence data
+                //if ($absence_valide) {
+                //    $title=null;
+                //}
+                if($absence_display){
+                    $title = $absence_display;
                 }
     
     

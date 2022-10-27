@@ -527,7 +527,7 @@ function checkAbs(agent){
   abs = "0";
   $.each(agent.exclusion, function(index, e) {
     if (Array.isArray(e)) {
-      if (e[0] == 'partage') {
+      if (e[0] == 'partage' || e[0] == 'partageJourney') {
         abs="1";
       } else {
         abs="0";
@@ -540,7 +540,7 @@ function checkAbs(agent){
 function ContextMenu2agents(data, agent) {
   td = $('<td>').attr({
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",' + agent.id + ',0,0,' + checkAbs(agent) + ',"' + data.site + '");'
+              + data.start + '","' + data.end + '",' + agent.id + ',0,0,0,"' + data.site + '");'
   });
 
   font = $('<font>').attr({
@@ -650,17 +650,16 @@ function ContextMenu2agents(data, agent) {
       }
 
       if (Array.isArray(e)){
-
         // UR1: 03 Consider imported absences as possible availability and display absence data
         if (e[0] == 'partage') {
-          title_attr = 'Absence importée de Partage: ' + e[1][1] + ' ' + e[1][0];
-          content += '<font: style="color:red">' + 'AP (' + e[1][1] + e[1][0].substring(0,20)+ ')' + '</font>';
+          title_attr = e[1][0];
+          content += '<font: style="color:red">' + 'AP (' + e[1][1] + ')' + '</font>';
         }
 
         // UR1: 06 Custom exclusion to be used in journey from imported absences
         if (e[0] == 'partageJourney') {
-          title_attr = 'L\'agent doit arriver depuis: [' + e[1][1] + ']';
-          content += '<font: style="color:red">' + 'PJ (' + e[1][0].substring(0,20)+ ')' + '</font>';
+          title_attr = e[1][0];
+          content += '<font: style="color:red">' + 'PJ (' + e[1][1] + ')' + '</font>';
         }
       }
 
@@ -726,14 +725,14 @@ function ContextMenu2agents(data, agent) {
     add = $('<a>').attr({
       href: 'javascript:bataille_navale("' + data.position_id + '","'
             + data.date + '","' + data.start + '","' + data.end + '",'
-            + agent.id + ',0,1,' + abs + ',"' + data.site + '");'
+            + agent.id + ',0,1,0,"' + data.site + '");'
     }).html('+');
 
     replace = $('<a>').attr({
       style: 'color:red',
       href: 'javascript:bataille_navale("' + data.position_id + '","'
             + data.date + '","' + data.start + '","' + data.end + '",'
-            + agent.id + ',1,1,' + abs + ',"' + data.site + '");'
+            + agent.id + ',1,1,0,"' + data.site + '");'
     }).html(' x&nbsp;');
 
     td2.append(add);
@@ -942,7 +941,7 @@ function contextMenuForce(data) {
   td = $('<td>').attr({
     class: 'red',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '","' + data.agent_id + '",0,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '","' + '0' + '","","",1,"' + data.site + '");',
     onmouseover: 'plMouseOver(' + data.agent_id + ');',
     onmouseout: 'plMouseOut(' + data.agent_id + ');',
   }).html('Forcer ' + data.agent_name);
@@ -991,7 +990,7 @@ function contextMenuEverybody(data) {
     colspan: '2',
     style: 'color:black;',
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
-              + data.start + '","' + data.end + '",2,0,0,"' + data.site + '");',
+              + data.start + '","' + data.end + '",2,0,0,0,"' + data.site + '");',
   }).html('Tout le monde');
 
   tr = $('<tr>').attr({
@@ -1169,7 +1168,7 @@ function appelDispo(site,siteNom,poste,posteNom,date,debut,fin,agents){
  * 
  * @param int perso_id : Si 0 = griser la cellule, si 2 = Tout le monde
  */
-function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,site,tout,griser,cellid){
+function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,site,tout,griser,cellid){
   if(griser==undefined){
     griser=0;
   }
@@ -1194,7 +1193,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
     url: "planning/poste/ajax.updateCell.php",
     type: "post",
     dataType: "json",
-    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer,absent: absent, ajouter: ajouter, site: site, tout: tout, griser: griser},
+    data: {poste: poste, CSRFToken: CSRFToken, date: date, debut: debut, fin: fin, perso_id: perso_id, perso_id_origine: perso_id_origine, barrer: barrer, forcer: forcer, ajouter: ajouter, site: site, tout: tout, griser: griser},
     success: function(result){
       $("#td"+cellule).html("");
       
@@ -1229,10 +1228,11 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         // Exemple de cellule
         // <div id='cellule11_0' class='cellule statut_bibas service_permanent' >Christophe C.</div>
 
-        var title = result[i]["nom"] + ' ' + result[i]["prenom"];
-        
+        var title =result[i]["nom"] + ' ' + result[i]["prenom"];
+
         // UR1: 01A Change display to Name + first letter of Surname
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent = result[i]["prenom"] + " " + result[i]["nom"].substr(0, 1) + ".";
+
         var perso_id=result[i]["perso_id"];
 
         // classes : A définir en fonction du statut, du service et des absences
@@ -1261,7 +1261,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
 
         // Si une absence ou un congé est validé, on efface title pour ne pas afficher XXX non validé(e)
         if(absence_valide){
-          title = '';
+          title = result[i]['title'];
         }
 
         // Service et Statut
@@ -1272,7 +1272,8 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
         classes+=' '+result[i]['activites'];
 
         // UR1: 01A Change display to Name + first letter of Surname
-        var agent=result[i]["prenom"]+" "+result[i]["nom"].substr(0,1)+".";
+        var agent = result[i]["prenom"] + " " + result[i]["nom"].substr(0, 1) + ".";
+
         var perso_id=result[i]["perso_id"];
 
         // Sans Repas
@@ -1290,6 +1291,12 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,absent,sit
               }
             }
           });
+        }
+
+        if(result[i]['ur1_forced'] == 1){
+          console.log("FORCED");
+            agent+="*";
+            title = "*Présence forcée: " + title;
         }
 
         // Création d'une balise span avec les classes cellSpan et agent_ de façon à les repérer et agir dessus 
