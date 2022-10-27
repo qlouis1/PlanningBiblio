@@ -1009,9 +1009,10 @@ class absences
         }
 
         //	Select All
+        // UR1: 06 Select localisation to handle journeys from imported absences
         $req="SELECT `{$dbprefix}absences`.`perso_id` AS `perso_id`, "
         ."`{$dbprefix}absences`.`id` AS `id`, `{$dbprefix}absences`.`debut` AS `debut`, "
-        ."`{$dbprefix}absences`.`fin` AS `fin`, `{$dbprefix}absences`.`motif` AS `motif` "
+        ."`{$dbprefix}absences`.`fin` AS `fin`, `{$dbprefix}absences`.`motif` AS `motif`, `{$dbprefix}absences`.`localisation` AS `localisation`  "
         ."FROM `{$dbprefix}absences` "
         ."WHERE $dates $filter;";
 

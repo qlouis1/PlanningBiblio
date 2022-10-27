@@ -178,10 +178,11 @@ class StatisticController extends BaseController
             $agents_select = implode(",", $agents);
 
             $db = new \db();
+            // UR1: 03 Select 'ur1_forced'
             $db->selectInnerJoin(
                 array("pl_poste","poste"),
                 array("postes","id"),
-                array("debut","fin","date","perso_id","poste","absent"),
+                array("debut","fin","date","perso_id","ur1_forced","poste","absent"),
                 array(array("name"=>"nom","as"=>"poste_nom"),"etage","site","teleworking"),
                 array("date"=>"IN{$dates}", "supprime"=>"<>1", "perso_id"=>"IN{$agents_select}", "site"=>"IN{$sitesSQL}"),
                 array("statistiques"=>"1"),
@@ -223,6 +224,10 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
+                                    // UR1: 03 Forced agent overides any absence
+                                    if ($elem['ur1_forced'] == "1") {
+                                        break;
+                                    }
 
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
@@ -231,6 +236,23 @@ class StatisticController extends BaseController
 
                                     if ($a['debut'] < $elem['date'].' '.$elem['fin'] and $a['fin'] > $elem['date']." ".$elem['debut']) {
                                         continue 2;
+                                    }
+
+                                    // UR1: 06 Check for imported absence journey
+                                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                            if ($a['motif'] == "Agenda Partage") {
+                                                if ($a['localisation']) {
+                                                    $m = matchSite($a['localisation']);
+                                                    if ($m and $m != $elem['site']) {
+                                                        continue 2;
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -544,9 +566,10 @@ class StatisticController extends BaseController
             $finREQ = $db->escapeString($finSQL);
             $sitesREQ = $db->escapeString($sitesSQL);
 
+            // UR1: 03 Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`, `{$dbprefix}pl_poste`.`perso_id` as `perso_id`, 
-            `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`, 
+            `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`,  `{$dbprefix}pl_poste`.`ur1_forced` as `ur1_forced`, 
             `{$dbprefix}pl_poste`.`site` as `site`,
             `{$dbprefix}postes`.`nom` as `poste_nom`, `{$dbprefix}postes`.`etage` as `etage`,
             `{$dbprefix}postes`.`teleworking` as `teleworking` 
@@ -610,6 +633,11 @@ class StatisticController extends BaseController
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
 
+                                    // UR1: 03 Forced agent overides any absence
+                                    if ($elem['ur1_forced'] == "1") {
+                                        break;
+                                    }
+
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
                                         continue;
@@ -617,6 +645,23 @@ class StatisticController extends BaseController
 
                                     if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
                                         $elem['absent'] = "1";
+                                    }
+
+                                    // UR1: 06 Check for imported absence journey
+                                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                            if ($a['motif'] == "Agenda Partage") {
+                                                if ($a['localisation']) {
+                                                    $m = matchSite($a['localisation']);
+                                                    if ($m and $m != $elem['site']) {
+                                                        $elem['absent'] = "1";
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -988,10 +1033,11 @@ class StatisticController extends BaseController
             //	On stock le tout dans le tableau $resultat
 
             $db = new \db();
+            // UR1: 03 Select 'ur1_forced'
             $db->selectInnerJoin(
                 array("pl_poste","poste"),
                 array("postes","id"),
-                array("debut","fin","date","perso_id","poste","absent"),
+                array("debut","fin","date","perso_id","poste","absent","ur1_forced"),
                 array(
                     array(
                         "name"=>"nom",
@@ -1011,6 +1057,7 @@ class StatisticController extends BaseController
                 "ORDER BY `poste_nom`,`etage`"
             );
             $resultat = $db->result;
+
 
             // Ajoute le statut pour chaque agents dans le tableau resultat
             for ($i = 0; $i < count($resultat); $i++) {
@@ -1064,6 +1111,10 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
+                                    // UR1: 03 Forced agent overides any absence
+                                    if ($elem['ur1_forced'] == "1") {
+                                        break;
+                                    }
 
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
@@ -1072,6 +1123,23 @@ class StatisticController extends BaseController
 
                                     if ($a['debut'] < $elem['date'].' '.$elem['fin'] and $a['fin'] > $elem['date']." ".$elem['debut']) {
                                         $elem['absent'] = "1";
+                                    }
+
+                                    // UR1: 06 Check for imported absence journey
+                                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                            if ($a['motif'] == "Agenda Partage") {
+                                                if ($a['localisation']) {
+                                                    $m = matchSite($a['localisation']);
+                                                    if ($m and $m != $elem['site']) {
+                                                        $elem['absent'] = "1";
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -1708,10 +1776,11 @@ class StatisticController extends BaseController
             $a->fetchForStatistics("$debutSQL 00:00:00", "$finSQL 23:59:59");
             $absencesDB=$a->elements;
 
+            // UR1: 03 Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`,  `{$dbprefix}pl_poste`.`poste` as `poste`, 
             `{$dbprefix}personnel`.`nom` as `nom`, `{$dbprefix}personnel`.`prenom` as `prenom`, 
-            `{$dbprefix}personnel`.`id` as `perso_id`, `{$dbprefix}pl_poste`.site as `site` 
+            `{$dbprefix}personnel`.`id` as `perso_id`, `{$dbprefix}pl_poste`.site as `site`, `{$dbprefix}pl_poste`.ur1_forced as `ur1_forced`
             FROM `{$dbprefix}pl_poste` INNER JOIN `{$dbprefix}personnel` 
             ON `{$dbprefix}pl_poste`.`perso_id`=`{$dbprefix}personnel`.`id` 
             WHERE `{$dbprefix}pl_poste`.`date`>='$debutREQ' AND `{$dbprefix}pl_poste`.`date`<='$finREQ' 
@@ -1750,6 +1819,11 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
 
+                                    // UR1: 03 Forced agent overides any absence
+                                    if ($elem['ur1_forced'] == "1") {
+                                        break;
+                                    }
+
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $poste_tab[4]) {
                                         continue;
@@ -1757,6 +1831,23 @@ class StatisticController extends BaseController
 
                                     if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
                                         continue 2;
+                                    }
+
+                                    // UR1: 06 Check for imported absence journey
+                                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                            if ($a['motif'] == "Agenda Partage") {
+                                                if ($a['localisation']) {
+                                                    $m = matchSite($a['localisation']);
+                                                    if ($m and $m != $elem['site']) {
+                                                        continue 2;
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -2013,9 +2104,10 @@ class StatisticController extends BaseController
             $sitesREQ = $db->escapeString($sitesSQL);
             $agentsREQ = $db->escapeString($agents_select);
 
+            // UR1: 03 Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`,
                 `{$dbprefix}pl_poste`.`date` as `date`, `{$dbprefix}pl_poste`.`perso_id` as `perso_id`,
-                `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`,
+                `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`, `{$dbprefix}pl_poste`.`ur1_forced` as `ur1_forced`, 
                 `{$dbprefix}pl_poste`.`site` as `site`,
                 `{$dbprefix}postes`.`nom` as `poste_nom`, `{$dbprefix}postes`.`etage` as `etage`,
                 `{$dbprefix}postes`.`teleworking` as `teleworking`
@@ -2063,6 +2155,12 @@ class StatisticController extends BaseController
                             // S'il est absent, on met à 1 la variable $elem['absent']
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
+                                    // UR1: 03 Forced agent overides any absence
+                                    if ($elem['ur1_forced'] == "1") {
+                                        break;
+                                    }
+                                    error_log(date("[Y-m-d G:i:s]")."====A". print_r($a,true) ."\n",3, $_ENV['CL']);
+
 
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
@@ -2071,6 +2169,23 @@ class StatisticController extends BaseController
 
                                     if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
                                         $elem['absent'] = "1";
+                                    }
+
+                                    // UR1: 06 Check for imported absence journey
+                                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                            if ($a['motif'] == "Agenda Partage") {
+                                                if ($a['localisation']) {
+                                                    $m = matchSite($a['localisation']);
+                                                    if ($m and $m != $elem['site']) {
+                                                        $elem['absent'] = "1";
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -2459,9 +2574,10 @@ class StatisticController extends BaseController
         $finREQ = $db->escapeString($fin);
         $dbprefix = $GLOBALS['dbprefix'];
 
+        // UR1: 03 Select 'ur1_forced'
         $req = "SELECT `{$dbprefix}pl_poste`.`date` AS `date`, `{$dbprefix}pl_poste`.`debut` AS `debut`, ";
         $req.="`{$dbprefix}pl_poste`.`fin` AS `fin`, `{$dbprefix}personnel`.`id` AS `perso_id`, ";
-        $req.="`{$dbprefix}pl_poste`.`site` AS `site`, `{$dbprefix}pl_poste`.`poste` AS `poste`, ";
+        $req.="`{$dbprefix}pl_poste`.`site` AS `site`, `{$dbprefix}pl_poste`.`poste` AS `poste`, `{$dbprefix}pl_poste`.`ur1_forced` AS `ur1_forced`, ";
         $req.="`{$dbprefix}personnel`.`nom` AS `nom`,`{$dbprefix}personnel`.`prenom` AS `prenom`, ";
         $req.="`{$dbprefix}personnel`.`statut` AS `statut`, ";
         $req.="`{$dbprefix}postes`.`teleworking` AS `teleworking` ";
@@ -2478,13 +2594,36 @@ class StatisticController extends BaseController
                 // S'il est absent, on met à 1 la variable $elem['absent']
                 foreach ($absencesDB as $a) {
 
+                    // UR1: 03 Forced agent overides any absence
+                    if ($elem['ur1_forced'] == "1") {
+                        break;
+                    }
+
                     // Ignore teleworking absences for compatible positions
                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
                         continue;
                     }
 
                     if ($elem['perso_id'] == $a['perso_id'] and $a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
+
                         continue 2;
+                    }
+
+                    // UR1: 06 Check for imported absence journey
+                    if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                        $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                        $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                        $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                            if ($a['motif'] == "Agenda Partage") {
+                                if ($a['localisation']) {
+                                    $m = matchSite($a['localisation']);
+                                    if ($m and $m != $elem['site']) {
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 if (!array_key_exists($elem['perso_id'], $tab)) {        // création d'un tableau de données par agent (id, nom, heures de chaque jour ...)
@@ -2879,10 +3018,11 @@ class StatisticController extends BaseController
             $sitesREQ = $db->escapeString($sitesSQL);
             $postesREQ = $db->escapeString($postes_select);
 
+            // UR1: 03 Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`,  `{$dbprefix}pl_poste`.`poste` as `poste`, 
             `{$dbprefix}personnel`.`nom` as `nom`, `{$dbprefix}personnel`.`prenom` as `prenom`, 
-            `{$dbprefix}personnel`.`id` as `perso_id`, `{$dbprefix}pl_poste`.site as `site` 
+            `{$dbprefix}personnel`.`id` as `perso_id`, `{$dbprefix}pl_poste`.site as `site` , `{$dbprefix}pl_poste`.ur1_forced as `ur1_forced` 
             FROM `{$dbprefix}pl_poste` 
             INNER JOIN `{$dbprefix}personnel` ON `{$dbprefix}pl_poste`.`perso_id`=`{$dbprefix}personnel`.`id` 
             WHERE `{$dbprefix}pl_poste`.`date`>='$debutREQ' AND `{$dbprefix}pl_poste`.`date`<='$finREQ' 
@@ -2923,6 +3063,11 @@ class StatisticController extends BaseController
 
                             foreach ($absencesDB[$elem['perso_id']] as $a) {
 
+                                // UR1: 03 Forced agent overides any absence
+                                if ($elem['ur1_forced'] == "1") {
+                                    break;
+                                }
+
                                 // Ignore teleworking absences for compatible positions
                                 if (in_array($a['motif'], $teleworking_absence_reasons) and $poste_tab[4]) {
                                     continue;
@@ -2930,6 +3075,23 @@ class StatisticController extends BaseController
 
                                 if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
                                     continue 2;
+                                }
+
+                                // UR1: 06 Check for imported absence journey
+                                if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
+                                    $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+                                    $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
+                                    $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
+                                    if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                                        if ($a['motif'] == "Agenda Partage") {
+                                            if ($a['localisation']) {
+                                                $m = matchSite($a['localisation']);
+                                                if ($m and $m != $elem['site']) {
+                                                    continue 2;
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
