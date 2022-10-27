@@ -728,8 +728,7 @@ class absences
         return false;
     }
 
-    // UR1: 03 Add custom parameter $partage to ignore imported absences
-    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null, $partage=0)
+    public function fetch($sort="`debut`,`fin`,`nom`,`prenom`", $agent=null, $debut=null, $fin=null, $sites=null)
     {
         $entityManager = $GLOBALS['entityManager'];
 
@@ -771,16 +770,6 @@ class absences
         // Affiche les absences des agents supprimés si précisé : $this->agents_supprimes=array(0,1) ou array(0,1,2)
         $deletedAgents=implode("','", $this->agents_supprimes);
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
-
-        // UR1: 03 Ignore imported absences
-		if ($partage == 1) {
-            $filter.=" AND `{$dbprefix}absences`.`motif` NOT LIKE 'Agenda Partage' ";
-        }
-
-        // UR1: 03D Use Partage == 2 to ignore only tagged imported absences
-		if ($partage == 2) {
-            $filter.=" AND `{$dbprefix}absences`.`motif_autre` NOT LIKE 'APignored' ";
-        }
 
         // Sort
         $sort=$sort?$sort:"`debut`,`fin`,`nom`,`prenom`";

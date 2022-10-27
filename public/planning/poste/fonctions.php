@@ -108,7 +108,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                             $class_tmp[]="red";
                             $class_tmp[]="striped";
                             $absence_valide = true;
-                            // UR1:03 UR1:06 Display absence data
+                            // UR1: 03 UR1: 06 Display absence data
                             $m = matchSite($absence['localisation']);
                             $absence_display .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
                             //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
@@ -120,7 +120,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                         }
                     }
 
-                    // UR1:06 Take account of journey time for imported absences
+                    // UR1: 06 Take account of journey time for imported absences
                     if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
                         $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
                         $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));

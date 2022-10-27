@@ -15,7 +15,6 @@ Cette page est appelée par la function JavaScript "bataille_navale" utilisé pa
 */
 
 use App\Model\Position;
-use Symfony\Component\Validator\Constraints\IsNull;
 
 ini_set("display_errors", 0);
 
@@ -215,15 +214,13 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-// UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
-// UR1: 03E revert to manage forced agents
 // UR1: 06 Extend select to consider journey from absences on other sites
 if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
     $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
     $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
     $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
 }
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$start_with_journey, $date.' '.$end_with_journey, null, 0);
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$start_with_journey, $date.' '.$end_with_journey);
 
 $absences=$a->elements;
 

@@ -522,21 +522,6 @@ function fillContextMenuLevel2(data) {
   menu2.appendTo('#menudiv2');
 }
 
-  // UR1: 03 Check if agent has an exclusion coming from an imported absence
-function checkAbs(agent){
-  abs = "0";
-  $.each(agent.exclusion, function(index, e) {
-    if (Array.isArray(e)) {
-      if (e[0] == 'partage' || e[0] == 'partageJourney') {
-        abs="1";
-      } else {
-        abs="0";
-      }
-    }
-  });
-  return abs;
-}
-
 function ContextMenu2agents(data, agent) {
   td = $('<td>').attr({
     onclick: 'bataille_navale("' + data.position_id + '","' + data.date + '","'
@@ -1164,7 +1149,7 @@ function appelDispo(site,siteNom,poste,posteNom,date,debut,fin,agents){
  * Les cellules sont identifiables, supprimables et modifiables indépendament des autres
  * Les infos service et statut sont utilisées pour la mise en forme des cellules : utilisation des classes service_ et statut_
  * 
- * UR1: 03 Added "absent" param to score off agents at insert
+ * UR1: 03 Added "forcer" param
  * 
  * @param int perso_id : Si 0 = griser la cellule, si 2 = Tout le monde
  */
