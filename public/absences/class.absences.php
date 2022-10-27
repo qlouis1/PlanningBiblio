@@ -703,7 +703,7 @@ class absences
     * Retourne true si absent, false sinon
     * Si $valide==false, les absences non validées seront également prises en compte
     */
-    public function check($perso_id, $debut, $fin, $valide=true)
+    public function check($perso_id, $debut, $fin, $site=null, $valide=true)
     {
         if (strlen($debut)==10) {
             $debut.=" 00:00:00";
@@ -713,8 +713,7 @@ class absences
             $fin.=" 23:59:59";
         }
 
-   		// UR1: 03 Don't consider imported absences
-        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut", "motif"=>"NOT LIKE Agenda Partage");
+        $filter=array("perso_id"=>$perso_id, "debut"=>"<$fin", "fin"=>">$debut");
      
         if ($valide==true or $GLOBALS['config']['Absences-validation']==0) {
             $filter["valide"]=">0";
@@ -724,6 +723,28 @@ class absences
         $db->select2("absences", null, $filter);
         if ($db->result) {
             return true;
+        }
+
+        // UR1: 06 Detect journey from imported absences
+        if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0 and $site) {
+            $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
+            $start_with_journey = date('Y-m-d H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
+            $end_with_journey = date('Y-m-d H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
+            $filter = array("perso_id" => $perso_id, "debut" => "<$end_with_journey", "fin" => ">$start_with_journey");
+            $filter['motif'] = "=Agenda Partage";
+            $db = new db();
+            $db->select2("absences", null, $filter);
+            if ($db->result) {
+                $absences = $db->result;
+                foreach ($absences as $a) {
+                    if ($a['localisation']) {
+                        $m = matchSite($a['localisation']);
+                        if ($m and $m != $site) {
+                            return true;
+                        }
+                    }
+                }
+            }
         }
         return false;
     }

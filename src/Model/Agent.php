@@ -186,7 +186,8 @@ class Agent extends PLBEntity
     public function isAbsentOn($from, $to)
     {
         $a = new \absences();
-        if ($a->check($this->id(), $from, $to, true)) {
+        // UR1: 06 Add site as param to check function
+        if ($a->check($this->id(), $from, $to, null, true)) {
             return true;
         }
 
