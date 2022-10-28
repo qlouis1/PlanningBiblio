@@ -117,7 +117,7 @@ class CalendarController extends BaseController
 
         //Sélection des postes occupés
         $db = new \db();
-        // UR1: 03D Select ur1_forced to ignored absences when agent is forced
+        // UR1: 03C Select ur1_forced to ignore absences when agent is forced
         $db->selectInnerJoin(
             array("pl_poste", "poste"),
             array("postes", "id"),
@@ -186,7 +186,7 @@ class CalendarController extends BaseController
                         // Contrôle des absences depuis la table absence
                         if (is_array($absences)) {
                             foreach ($absences as $a) {
-                                // UR1: 03D Ignore absence if cell is forced
+                                // UR1: 03C Ignore absence if cell is forced
                                 if ($a['debut'] < $elem['date'].' '.$elem['fin'] and $a['fin'] > $elem['date'].' '.$elem['debut'] && $elem['ur1_forced'] != "1") {
                                     $elem['absent'] = 1;
                                     break;
@@ -221,7 +221,7 @@ class CalendarController extends BaseController
             $absent = false;
             $absences_affichage = array();
 
-            // UR1: 03 Customize display of imported absences with comments
+            // UR1: 03B Customize display of imported absences with comments
             // UR1: 03B Display site when different from agent default
             $cl = 80; // Number of characters to print
             foreach ($current_abs as $elem) {

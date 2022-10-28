@@ -178,7 +178,7 @@ class StatisticController extends BaseController
             $agents_select = implode(",", $agents);
 
             $db = new \db();
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $db->selectInnerJoin(
                 array("pl_poste","poste"),
                 array("postes","id"),
@@ -224,7 +224,7 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
-                                    // UR1: 03 Forced agent overides any absence
+                                    // UR1: 03C Forced agent overides any absence
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
@@ -566,7 +566,7 @@ class StatisticController extends BaseController
             $finREQ = $db->escapeString($finSQL);
             $sitesREQ = $db->escapeString($sitesSQL);
 
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`, `{$dbprefix}pl_poste`.`perso_id` as `perso_id`, 
             `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`,  `{$dbprefix}pl_poste`.`ur1_forced` as `ur1_forced`, 
@@ -633,7 +633,7 @@ class StatisticController extends BaseController
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
 
-                                    // UR1: 03 Forced agent overides any absence
+                                    // UR1: 03C Forced agent overides any absence
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
@@ -1033,7 +1033,7 @@ class StatisticController extends BaseController
             //	On stock le tout dans le tableau $resultat
 
             $db = new \db();
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $db->selectInnerJoin(
                 array("pl_poste","poste"),
                 array("postes","id"),
@@ -1111,7 +1111,7 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
 
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
-                                    // UR1: 03 Forced agent overides any absence
+                                    // UR1: 03C Forced agent overides any absence
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
@@ -1776,7 +1776,7 @@ class StatisticController extends BaseController
             $a->fetchForStatistics("$debutSQL 00:00:00", "$finSQL 23:59:59");
             $absencesDB=$a->elements;
 
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`,  `{$dbprefix}pl_poste`.`poste` as `poste`, 
             `{$dbprefix}personnel`.`nom` as `nom`, `{$dbprefix}personnel`.`prenom` as `prenom`, 
@@ -1819,7 +1819,7 @@ class StatisticController extends BaseController
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
 
-                                    // UR1: 03 Forced agent overides any absence
+                                    // UR1: 03C Forced agent overides any absence
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
@@ -2104,7 +2104,7 @@ class StatisticController extends BaseController
             $sitesREQ = $db->escapeString($sitesSQL);
             $agentsREQ = $db->escapeString($agents_select);
 
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`,
                 `{$dbprefix}pl_poste`.`date` as `date`, `{$dbprefix}pl_poste`.`perso_id` as `perso_id`,
                 `{$dbprefix}pl_poste`.`poste` as `poste`, `{$dbprefix}pl_poste`.`absent` as `absent`, `{$dbprefix}pl_poste`.`ur1_forced` as `ur1_forced`, 
@@ -2155,7 +2155,7 @@ class StatisticController extends BaseController
                             // S'il est absent, on met à 1 la variable $elem['absent']
                             if ( !empty($absencesDB[$elem['perso_id']]) ) {
                                 foreach ($absencesDB[$elem['perso_id']] as $a) {
-                                    // UR1: 03 Forced agent overides any absence
+                                    // UR1: 03C Forced agent overides any absence
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
@@ -2574,7 +2574,7 @@ class StatisticController extends BaseController
         $finREQ = $db->escapeString($fin);
         $dbprefix = $GLOBALS['dbprefix'];
 
-        // UR1: 03 Select 'ur1_forced'
+        // UR1: 03C Select 'ur1_forced'
         $req = "SELECT `{$dbprefix}pl_poste`.`date` AS `date`, `{$dbprefix}pl_poste`.`debut` AS `debut`, ";
         $req.="`{$dbprefix}pl_poste`.`fin` AS `fin`, `{$dbprefix}personnel`.`id` AS `perso_id`, ";
         $req.="`{$dbprefix}pl_poste`.`site` AS `site`, `{$dbprefix}pl_poste`.`poste` AS `poste`, `{$dbprefix}pl_poste`.`ur1_forced` AS `ur1_forced`, ";
@@ -2594,7 +2594,7 @@ class StatisticController extends BaseController
                 // S'il est absent, on met à 1 la variable $elem['absent']
                 foreach ($absencesDB as $a) {
 
-                    // UR1: 03 Forced agent overides any absence
+                    // UR1: 03C Forced agent overides any absence
                     if ($elem['ur1_forced'] == "1") {
                         break;
                     }
@@ -3018,7 +3018,7 @@ class StatisticController extends BaseController
             $sitesREQ = $db->escapeString($sitesSQL);
             $postesREQ = $db->escapeString($postes_select);
 
-            // UR1: 03 Select 'ur1_forced'
+            // UR1: 03C Select 'ur1_forced'
             $req = "SELECT `{$dbprefix}pl_poste`.`debut` as `debut`, `{$dbprefix}pl_poste`.`fin` as `fin`, 
             `{$dbprefix}pl_poste`.`date` as `date`,  `{$dbprefix}pl_poste`.`poste` as `poste`, 
             `{$dbprefix}personnel`.`nom` as `nom`, `{$dbprefix}personnel`.`prenom` as `prenom`, 
@@ -3063,7 +3063,7 @@ class StatisticController extends BaseController
 
                             foreach ($absencesDB[$elem['perso_id']] as $a) {
 
-                                // UR1: 03 Forced agent overides any absence
+                                // UR1: 03C Forced agent overides any absence
                                 if ($elem['ur1_forced'] == "1") {
                                     break;
                                 }

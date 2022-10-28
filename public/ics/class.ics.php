@@ -396,11 +396,11 @@ class CJICS
                 } else {
                     $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
                     if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        // UR1: 03 As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
-                        //$commentaires .= "<br/>\n"; // UR1: 03 don't import descriptions
+                        // UR1: 03B As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                        //$commentaires .= "<br/>\n";
                     }
                     if (!empty($elem["DESCRIPTION"])) {
-                        //$commentaires .= $elem['DESCRIPTION']; // UR1: 03 don't import descriptions
+                        //$commentaires .= $elem['DESCRIPTION'];
                     }
                 }
 

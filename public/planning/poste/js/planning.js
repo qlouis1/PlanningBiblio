@@ -635,7 +635,7 @@ function ContextMenu2agents(data, agent) {
       }
 
       if (Array.isArray(e)){
-        // UR1: 03 Consider imported absences as possible availability and display absence data
+        // UR1: 03A UR1: 03B Consider imported absences as possible availability and display absence data
         if (e[0] == 'partage') {
           title_attr = e[1][0];
           content += '<font: style="color:red">' + 'AP (' + e[1][1] + ')' + '</font>';
@@ -774,7 +774,7 @@ function fillContextMenuLevel1(data) {
     // Score off agent.
     menu1.append(contextMenuScoreOff(data));
 
-    // Force agent.
+    // UR1: 03C Additionnal button to force agent in planning.
     menu1.append(contextMenuForce(data));
   }
 
@@ -922,6 +922,7 @@ function contextMenuScoreOff(data) {
   return tr;
 }
 
+// UR1: 03C Additionnal button to force agent in planning
 function contextMenuForce(data) {
   td = $('<td>').attr({
     class: 'red',
@@ -1149,7 +1150,7 @@ function appelDispo(site,siteNom,poste,posteNom,date,debut,fin,agents){
  * Les cellules sont identifiables, supprimables et modifiables indépendament des autres
  * Les infos service et statut sont utilisées pour la mise en forme des cellules : utilisation des classes service_ et statut_
  * 
- * UR1: 03 Added "forcer" param
+ * UR1: 03C Added "forcer" param
  * 
  * @param int perso_id : Si 0 = griser la cellule, si 2 = Tout le monde
  */
@@ -1174,6 +1175,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
   var sr_config_fin=$("#planning-data").attr("data-sr-fin");
   var CSRFToken = $("#planning-data").attr("data-CSRFToken");
 
+  // UR1: 03C Pass "forcer" param to ajax script
   $.ajax({
     url: "planning/poste/ajax.updateCell.php",
     type: "post",
@@ -1278,6 +1280,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
           });
         }
 
+        // UR1: 03D Display a star next to forced agents names
         if(result[i]['ur1_forced'] == 1){
           console.log("FORCED");
             agent+="*";

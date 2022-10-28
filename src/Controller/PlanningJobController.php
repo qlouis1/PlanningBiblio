@@ -315,15 +315,15 @@ class PlanningJobController extends BaseController
 
         // UR1: 03B Select location and time to eventually display it in planning
         $db->select('absences', 'perso_id,valide,motif,commentaires,debut,fin,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
-        // UR1: 03 Keep imported absences data to pass it later to js script
+        // UR1: 03B Keep imported absences data to pass it later to js script
         $absentPartage = array();
 
         if ($db->result) {
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
-                    // UR1: 03 Consider imported absences as possible availability
+                    // UR1: 03A Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
-                        // UR1: 03 Match site to display it menu
+                        // UR1: 03B Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
                             "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
@@ -557,7 +557,7 @@ class PlanningJobController extends BaseController
                     $elem['statut'] = 'volants';
                 }
 
-                // UR1: 03 Tag imported absences to treat them like other unavailablilities
+                // UR1: 03A Tag imported absences to treat them like other unavailablilities
                 if (isset($absentPartage[$elem['id']])) {
                     $exclusion[$elem['id']][] = 'agenda_partage';
                 }
@@ -598,8 +598,8 @@ class PlanningJobController extends BaseController
                         }
 
                     }
-                    // UR1: 03 Pass absences data to js script in an Array
-                    // UR1: 03 Group data when there is multiple absences so the cell dosn't go out of screen
+                    // UR1: 03A Pass absences data to js script in an Array
+                    // UR1: 03E Group data when there is multiple absences so the cell doesn't go out of screen
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
                         $ttl = "";
                         foreach($absentPartage[$elem['id']] as $a){

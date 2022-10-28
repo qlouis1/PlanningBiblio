@@ -244,7 +244,7 @@ for ($j=0;$j<=$fin;$j++) {
     if ($verrou or $autorisationN1) {
         //--------------	Recherche des infos cellules	------------//
         // Toutes les infos seront stockées danx un tableau et utilisées par les fonctions cellules_postes
-        // UR1: 03D Select ur1_forced to pass data to cellule_poste
+        // UR1: 03C Select ur1_forced to pass data to cellule_poste
         $db=new db();
         $db->selectLeftJoin(
         array("pl_poste","perso_id"),
