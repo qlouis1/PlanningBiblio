@@ -1353,7 +1353,7 @@ function formatBytes($size, $precision = 2)
 function matchSite($loca)
 {
     if ($loca) {
-        if (strcasecmp($loca, "ext") == 0) {
+        if (strpos(strtolower($loca), "ext ") !== false) {
             return -1;
         } else {
             for ($i = 1; $i <= $GLOBALS['config']['Multisites-nombre']; $i++) {
