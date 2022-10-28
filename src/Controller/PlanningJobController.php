@@ -263,7 +263,7 @@ class PlanningJobController extends BaseController
                             $m = matchSite($elem['localisation']);
                             if($m and $m != $site){
                                 $exclJourneyPartage[$elem['perso_id']][] = array(
-                                    "commentaires" => $elem['commentaires'],
+                                    "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
                                     "debut" => $elem['debut'],
                                     "fin" => $elem['fin'],
                                     "site" => $m
@@ -326,7 +326,7 @@ class PlanningJobController extends BaseController
                         // UR1: 03 Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
-                            "commentaires" => $elem['commentaires'],
+                            "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
                             "debut" => $elem['debut'],
                             "fin" => $elem['fin'],
                             "site" => $m
