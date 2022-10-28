@@ -263,8 +263,10 @@ class PlanningJobController extends BaseController
                             $m = matchSite($elem['localisation']);
                             if($m and $m != $site){
                                 $exclJourneyPartage[$elem['perso_id']][] = array(
-                                    format_abs("2",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,80),
-                                    format_abs("3",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,20)
+                                    "commentaires" => $elem['commentaires'],
+                                    "debut" => $elem['debut'],
+                                    "fin" => $elem['fin'],
+                                    "site" => $m
                                 );
                             }
                         }
@@ -321,10 +323,13 @@ class PlanningJobController extends BaseController
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03 Consider imported absences as possible availability
                     if ($elem['motif'] == "Agenda Partage") {
+                        // UR1: 03 Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
-                            format_abs("1",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,80),
-                            format_abs("3",$elem['commentaires'],$elem['debut'],$elem['fin'],$m,20)
+                            "commentaires" => $elem['commentaires'],
+                            "debut" => $elem['debut'],
+                            "fin" => $elem['fin'],
+                            "site" => $m
                         );
                     } else {
                         $tab_exclus[] = $elem['perso_id'];
@@ -594,19 +599,26 @@ class PlanningJobController extends BaseController
 
                     }
                     // UR1: 03 Pass absences data to js script in an Array
+                    // UR1: 03 Group data when there is multiple absences so the cell dosn't go out of screen
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
-                        foreach ($absentPartage[$elem['id']] as $e) {
-                            $motifExclusion[$elem['id']][] = ["partage", $e];
+                        $ttl = "";
+                        foreach($absentPartage[$elem['id']] as $a){
+                            $ttl .= format_abs("1",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],80);
                         }
+                        $cont = (count($absentPartage[$elem['id']]) > 1) ? "<i>Plusieurs absences</i>" : format_abs("3",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],20);
+                        $motifExclusion[$elem['id']][] = ["partage", array($ttl, $cont)];
                     }
 
                     // UR1: 06 Pass Journey data to js script in Array
+                    // UR1: 06 Group data when there is multiple absences so the cell dosn't go out of screen
                     if (in_array('journey_partage', $exclusion[$elem['id']])) {
-                        foreach ($exclJourneyPartage[$elem['id']] as $e) {
-                            $motifExclusion[$elem['id']][] = ["partageJourney", $e];
+                        $ttl = "";
+                        foreach($exclJourneyPartage[$elem['id']] as $a){
+                            $ttl .= format_abs("2",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],80);
                         }
+                        $cont = (count($exclJourneyPartage[$elem['id']]) > 1) ? "<i>Plusieurs trajets</i>" : format_abs("3",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],20);
+                        $motifExclusion[$elem['id']][] = ["partageJourney", array($ttl, $cont)];
                     }
-
                 }
             }
         }

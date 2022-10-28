@@ -1408,7 +1408,7 @@ function filterStatus($event) {
 
 /**
  * UR1: 03 UR1: 06 Function to create a formated string from absence info and type
- * @param type 0: absence non validée 1: absence validée 2: trajet depuis une absence 3: JS title
+ * @param type 0: absence non validée 1: absence validée 2: trajet depuis une absence 3: JS content
  */
 function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
     $f_start = date("G\hi",strtotime($start));
