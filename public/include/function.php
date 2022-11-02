@@ -1415,7 +1415,7 @@ function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
     $f_end = date("G\hi",strtotime($end));
     $f_time = (date('H',strtotime($start)) == "00" and date('H',strtotime($end)) == "23") ? "toute la journée " : "de " . ($f_start . " à " . $f_end);
     $f_site = $site == -1 ? "Ext" : $GLOBALS['config']["Multisites-site$site"];
-    $f_comment = explode("|||",wordwrap($comment,$wrap,"|||"))[0];
+    $f_comment = explode("|||",wordwrap($comment,$wrap,"|||",true))[0];
     $f_comment .= strlen($comment) >= $wrap ? "..." : "";
 
     switch ($type) {

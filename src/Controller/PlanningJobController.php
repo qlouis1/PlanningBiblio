@@ -252,7 +252,7 @@ class PlanningJobController extends BaseController
             $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debutSQL)));
             $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($finSQL)));
             $db = new \db();
-            $db->select('absences', 'perso_id,valide,motif,localisation,commentaires,debut,fin', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
+            $db->select('absences', 'id,perso_id,valide,motif,localisation,commentaires,debut,fin', "`debut`<'$dateSQL $end_with_journey' AND `fin` >'$dateSQL $start_with_journey' AND `valide` != -1");
             if ($db->result) {
                 foreach ($db->result as $elem) {
                     if ($elem['motif'] == "Agenda Partage") {
@@ -263,6 +263,7 @@ class PlanningJobController extends BaseController
                             $m = matchSite($elem['localisation']);
                             if($m and $m != $site){
                                 $exclJourneyPartage[$elem['perso_id']][] = array(
+                                    "id" => $elem['id'],
                                     "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
                                     "debut" => $elem['debut'],
                                     "fin" => $elem['fin'],
@@ -314,7 +315,7 @@ class PlanningJobController extends BaseController
         }
 
         // UR1: 03B Select location and time to eventually display it in planning
-        $db->select('absences', 'perso_id,valide,motif,commentaires,debut,fin,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
+        $db->select('absences', 'id,perso_id,valide,motif,commentaires,debut,fin,localisation', "`debut`<'$dateSQL $finSQL' AND `fin` >'$dateSQL $debutSQL' AND `valide` != -1 $teleworking_exception");
         // UR1: 03B Keep imported absences data to pass it later to js script
         $absentPartage = array();
 
@@ -326,6 +327,7 @@ class PlanningJobController extends BaseController
                         // UR1: 03B Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
+                            "id" => $elem['id'],
                             "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
                             "debut" => $elem['debut'],
                             "fin" => $elem['fin'],
@@ -598,26 +600,86 @@ class PlanningJobController extends BaseController
                         }
 
                     }
+
                     // UR1: 03A Pass absences data to js script in an Array
                     // UR1: 03E Group data when there is multiple absences so the cell doesn't go out of screen
+                    // UR1: 06E Don't display journey if we are already displaying the same absence
+                    $idToIgnore = array();
+
+                    // Build displays in temp arrays to process them later
+                    $tmpPartage = array();
                     if (in_array('agenda_partage', $exclusion[$elem['id']])) {
-                        $ttl = "";
-                        foreach($absentPartage[$elem['id']] as $a){
-                            $ttl .= format_abs("1",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],80);
+                        foreach ($absentPartage[$elem['id']] as $a) {
+                            $idToIgnore[] = $a['id'];
+                            $tmpPartage[] = [
+                                format_abs("1", $a['commentaires'], $a['debut'], $a['fin'], $a['site'], 80),
+                                format_abs("3", $a['commentaires'], $a['debut'], $a['fin'], $a['site'], 36 - 6 * count($absentPartage[$elem['id']]))
+                            ];
                         }
-                        $cont = (count($absentPartage[$elem['id']]) > 1) ? "<i>Plusieurs absences</i>" : format_abs("3",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],20);
-                        $motifExclusion[$elem['id']][] = ["partage", array($ttl, $cont)];
                     }
 
-                    // UR1: 06 Pass Journey data to js script in Array
-                    // UR1: 06 Group data when there is multiple absences so the cell dosn't go out of screen
+                    $tmpJourney = array();
                     if (in_array('journey_partage', $exclusion[$elem['id']])) {
-                        $ttl = "";
-                        foreach($exclJourneyPartage[$elem['id']] as $a){
-                            $ttl .= format_abs("2",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],80);
+                        foreach ($exclJourneyPartage[$elem['id']] as $a) {
+                            if (!in_array($a['id'], $idToIgnore)) {
+                                $tmpJourney[] = [
+                                    format_abs("2", $a['commentaires'], $a['debut'], $a['fin'], $a['site'], 80),
+                                    format_abs("3", $a['commentaires'], $a['debut'], $a['fin'], $a['site'], 30 - 6 * count($exclJourneyPartage[$elem['id']]))
+                                ];
+                            }
                         }
-                        $cont = (count($exclJourneyPartage[$elem['id']]) > 1) ? "<i>Plusieurs trajets</i>" : format_abs("3",$a['commentaires'],$a['debut'],$a['fin'],$a['site'],20);
-                        $motifExclusion[$elem['id']][] = ["partageJourney", array($ttl, $cont)];
+                    }
+
+                    $toDisplay = 3;
+                    // If we have N or less exclusions to display, display all
+                    if ((count($tmpPartage) + count($tmpJourney)) <= $toDisplay) {
+                        foreach ($tmpPartage as $tmp) {
+                            $motifExclusion[$elem['id']][] = ["partage", $tmp];
+                        }
+                        foreach ($tmpJourney as $tmp) {
+                            $motifExclusion[$elem['id']][] = ["partageJourney", $tmp];
+                        }
+                    } else {
+                        // Else, we priorize displaying regular absences over journeys
+                        // Display up to N absences and fill up with journeys
+                        if (count($tmpPartage) >= $toDisplay) {
+                            // More than N absences, wrap them
+                            $ttl = "";
+                            foreach ($tmpPartage as $tmp) {
+                                $ttl .= $tmp[0];
+                            }
+                            $motifExclusion[$elem['id']][] = ["partage", [$ttl, "<i>Plusieurs absences</i>"]];
+                            // We now have up to N-1 "spaces" left to fill with journeys
+                            if (count($tmpJourney) >= $toDisplay) {
+                                $ttl = "";
+                                foreach ($tmpJourney as $tmp) {
+                                    $ttl .= $tmp[0];
+                                }
+                                $motifExclusion[$elem['id']][] = ["partageJourney", [$ttl, "<i>Plusieurs trajets</i>"]];
+                            } else {
+                                foreach ($tmpJourney as $tmp) {
+                                    $motifExclusion[$elem['id']][] = ["partageJourney", $tmp];
+                                }
+                            }
+                        } else {
+                            // Less then N-1 absences, display them
+                            foreach ($tmpPartage as $tmp) {
+                                $motifExclusion[$elem['id']][] = ["partage", $tmp];
+                            }
+                            // We now have only one space left to display journeys
+                            // So we either have only one or we wrap
+                            if (count($tmpJourney) >= 2) {
+                                $ttl = "";
+                                foreach ($tmpJourney as $tmp) {
+                                    $ttl .= $tmp[0];
+                                }
+                                $motifExclusion[$elem['id']][] = ["partageJourney", [$ttl, "<i>Plusieurs trajets</i>"]];
+                            } else {
+                                foreach ($tmpJourney as $tmp) {
+                                    $motifExclusion[$elem['id']][] = ["partageJourney", $tmp];
+                                }
+                            }
+                        }
                     }
                 }
             }
