@@ -244,7 +244,7 @@ for ($j=0;$j<=$fin;$j++) {
     if ($verrou or $autorisationN1) {
         //--------------	Recherche des infos cellules	------------//
         // Toutes les infos seront stockées danx un tableau et utilisées par les fonctions cellules_postes
-        // UR1: 03D Select ur1_forced to pass data to cellule_poste
+        // UR1: 03C Select ur1_forced to pass data to cellule_poste
         $db=new db();
         $db->selectLeftJoin(
         array("pl_poste","perso_id"),
@@ -267,8 +267,7 @@ for ($j=0;$j<=$fin;$j++) {
         $a=new absences();
         $a->valide = true;
         $a->documents = false;
-        // UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
-        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, 0);
+        $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date);
         $absences=$a->elements;
         global $absences;
 

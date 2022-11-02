@@ -46,6 +46,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     $title = $elem['prenom'] . ' ' . $elem['nom'];
                 }
 
+                // UR1: 03D Display a star next to forced agents names
                 if($elem['ur1_forced'] == 1){
                     $nom_affiche .= "*";
                     $title = "*Présence forcée: " . $title;
@@ -101,14 +102,14 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                     if ($absence["perso_id"] == $elem['perso_id'] and $absence['debut'] < $date." ".$fin and $absence['fin'] > $date." ".$debut) {
                         // Absence validée : rouge barré
                         if ($absence['valide']>0 or $GLOBALS['config']['Absences-validation'] == 0) {
-                            // UR1: 03D If agent if tagged as forced, we don't want to cross him out
+                            // UR1: 03C If agent if tagged as forced, we don't want to cross him out
                             if($elem['ur1_forced'] == 1){
                                 continue;
                             }
                             $class_tmp[]="red";
                             $class_tmp[]="striped";
                             $absence_valide = true;
-                            // UR1:03 UR1:06 Display absence data
+                            // UR1: 03B UR1: 06 Display absence data
                             $m = matchSite($absence['localisation']);
                             $absence_display .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
                             //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
@@ -120,7 +121,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                         }
                     }
 
-                    // UR1:06 Take account of journey time for imported absences
+                    // UR1: 06 Take account of journey time for imported absences
                     if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
                         $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
                         $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
@@ -146,7 +147,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                 }
     
                 // Il peut y avoir des absences validées et non validées. Si ce cas ce produit, la cellule sera barrée et on n'affichera pas "Absence non-validée"
-                // UR1: 03 Display absence data
+                // UR1: 03B We actually want to display data when an agent is absent
                 //if ($absence_valide) {
                 //    $title=null;
                 //}

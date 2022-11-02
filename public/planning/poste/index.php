@@ -329,7 +329,7 @@ if (!$verrou and !$autorisationN1) {
 } else {
     //--------------	Recherche des infos cellules	------------//
     // Toutes les infos seront stockées danx un tableau et utilisées par les fonctions cellules_postes
-    // UR1: 03D Select ur1_forced to pass data to cellule_poste
+    // UR1: 03C Select ur1_forced to pass data to cellule_poste
     $db=new db();
     $db->selectLeftJoin(
         array("pl_poste","perso_id"),
@@ -371,9 +371,7 @@ if (!$verrou and !$autorisationN1) {
     $a->documents = false;
     $a->rejected = false;
     $a->agents_supprimes = array(0,1,2);    // required for history
-    // UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
-    // UR1: 03D We now want to crossed agents even if the absence is imported, and managed the forced agents in cellule_poste
-    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date, null, 0);
+    $a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date, $date);
     $absences=$a->elements;
     global $absences;
   
@@ -669,6 +667,7 @@ EOD;
                     $nonValidee = " (non valid&eacute;e)";
                 }
             }
+            
             echo "<tr class='$bold'><td>{$elem['nom']}</td><td>{$elem['prenom']}</td>";
             echo "<td>{$elem['debutAff']}</td><td>{$elem['finAff']}</td>";
             echo "<td>{$elem['motif']}{$nonValidee}</td></tr>\n";
@@ -761,16 +760,6 @@ EOD;
     echo "</table>\n";
     echo "</td></tr>\n";
     echo "</table></div>\n";
-    break;
-      case "4":
-    // UR1: Custom display TODO: remove, not used anymore
-    echo "<table class='tableauStandard'>\n";
-    echo "<tr><td><h3 style='text-align:left;margin:40px 0 0 0;'>UR1 Custom display</h3></td>\n";
-    $a = "col1";
-    $b = "col2";
-    echo "<tr class='$class $bold'><td>{$a} {$b}</td></tr>\n";
-    echo "</table>\n";
-
     break;
 
     }

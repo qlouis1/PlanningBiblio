@@ -87,7 +87,8 @@ $data=array();
 // On utilide PDO pour de meilleurs performances car la même requête sera executée de nombreuses fois avec des valeurs différentes
 $dbh=new dbh();
 $dbh->CSRFToken = $CSRFToken;
-$dbh->prepare("SELECT `id`,`perso_id`,`absent` FROM `{$dbprefix}pl_poste` 
+// UR1: 03C Select ur1_forced
+$dbh->prepare("SELECT `id`,`perso_id`,`absent`,`ur1_forced` FROM `{$dbprefix}pl_poste` 
   WHERE `date`=:date AND `site`=:site AND `poste`=:poste AND `debut`=:debut AND `fin`=:fin AND `absent`='0' AND `supprime`='0';");
 
 
@@ -166,7 +167,9 @@ foreach ($dates as $date) {
                                 // Contrôle des absences
                                 $absent=false;
                                 $a=new absences();
-                                if ($a->check($res['perso_id'], $date." ".$h['debut'], $date." ".$h['fin'])) {
+                                // UR1: 03C Filter on ur1_forced
+                                // UR1: 06 Pass site param to check to handle journeys from imported absences
+                                if ($a->check($res['perso_id'], $date." ".$h['debut'], $date." ".$h['fin'], $site[0]) and $res['ur1_forced'] != "1") {
                                     $absent=true;
                                 }
         

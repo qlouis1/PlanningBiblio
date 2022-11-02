@@ -152,7 +152,7 @@ if (!empty($postes)) {
     $postes_select=implode(",", $postes);
     $db=new db();
 
-    // UR1: 03 Select 'ur1_forced'
+    // UR1: 03C Select 'ur1_forced'
     $db->selectInnerJoin(
         array("pl_poste","perso_id"),
         array("personnel","id"),
@@ -199,7 +199,7 @@ if (!empty($postes)) {
                     // S'il est absent : continue
                     if ( !empty($absencesDB[$elem['perso_id']]) ) {
                         foreach ($absencesDB[$elem['perso_id']] as $a) {
-                            // UR1: 03 Forced agent overides any absence
+                            // UR1: 03C Forced agent overides any absence
                             if ($elem['ur1_forced'] == "1") {
                                 break;
                             }

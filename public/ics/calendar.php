@@ -99,7 +99,7 @@ if ($config['ICS-Code']) {
     $requete_personnel["code_ics"] = $code;
 }
 
-// UR1: 03D select ur1_forced to export forced cells
+// UR1: 03C select ur1_forced to export forced cells
 $db=new db();
 $db->selectInnerJoin(
     array("pl_poste","perso_id"),
@@ -208,7 +208,7 @@ if (isset($planning)) {
             $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
         }
 
-        // UR1: 03D Don't exculde absences that are tagged as forced
+        // UR1: 03C Don't exculde absences that are tagged as forced
         foreach ($absences as $a) {
             if ($a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date'].' '.$elem['debut'] && $elem['ur1_forced'] != "1") {
                 continue 2;

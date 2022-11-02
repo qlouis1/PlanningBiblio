@@ -15,7 +15,6 @@ Cette page est appelée par la function JavaScript "bataille_navale" utilisé pa
 */
 
 use App\Model\Position;
-use Symfony\Component\Validator\Constraints\IsNull;
 
 ini_set("display_errors", 0);
 
@@ -44,7 +43,7 @@ $perso_id_origine=filter_input(INPUT_POST, "perso_id_origine", FILTER_SANITIZE_N
 $poste=filter_input(INPUT_POST, "poste", FILTER_SANITIZE_NUMBER_INT);
 $site=filter_input(INPUT_POST, "site", FILTER_SANITIZE_NUMBER_INT);
 $tout=filter_input(INPUT_POST, "tout", FILTER_CALLBACK, array("options"=>"sanitize_on"));
-// UR1: 03 Added "forcer" param to manage force action in menu
+// UR1: 03C Added "forcer" param to manage force action in menu
 $forcer=filter_input(INPUT_POST, "forcer", FILTER_SANITIZE_NUMBER_INT);
 
 $login_id=$_SESSION['login_id'];
@@ -77,14 +76,14 @@ if (is_numeric($perso_id) and $perso_id == 0) {
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
     // Supprimer l'agent sélectionné
-    // UR1: 03D Differenciate delete and force
+    // UR1: 03C Differenciate delete and force
     } elseif($forcer !=1) {
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
         $db->CSRFToken = $CSRFToken;
         $db->delete("pl_poste", $where);
     } else {
-        // UR1: 03D this is where we tag the agent as "forced"
+        // UR1: 03C this is where we tag the agent as "forced"
         $set=array("absent"=>"0", "ur1_forced"=>"1", "chgt_login"=>$login_id, "chgt_time"=>$now);
         $where=array("date"=>$date, "debut"=>$debut, "fin"=>$fin, "poste"=>$poste, "site"=>$site, "perso_id"=>$perso_id_origine);
         $db=new db();
@@ -215,15 +214,13 @@ $a=new absences();
 $a->valide=false;
 $a->rejected = false;
 $a->teleworking = !$p->teleworking();
-// UR1: 03 Use $partage=1 to avoid crossing the cell as we consider imported absences as unavailability
-// UR1: 03E revert to manage forced agents
 // UR1: 06 Extend select to consider journey from absences on other sites
 if ($GLOBALS['config']['Journey-time-for-imported-absences'] > 0) {
     $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
     $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($debut)));
     $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($fin)));
 }
-$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$start_with_journey, $date.' '.$end_with_journey, null, 0);
+$a->fetch("`nom`,`prenom`,`debut`,`fin`", null, $date.' '.$start_with_journey, $date.' '.$end_with_journey);
 
 $absences=$a->elements;
 
@@ -261,7 +258,7 @@ for ($i=0;$i<count($tab);$i++) {
                     continue;
                 }
                 $tab[$i]['absent']=1;
-                // UR1: 03 UR1: 06 Display absence data
+                // UR1: 03B UR1: 06 Display absence data
                 $m = matchSite($absence['localisation']);
                 $title .= format_abs("1",$absence['commentaires'],$absence['debut'],$absence['fin'],$m);
                 //break;  // Garder le break à cet endroit pour que les absences validées prennent le dessus sur les non-validées
