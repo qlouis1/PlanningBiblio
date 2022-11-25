@@ -2159,8 +2159,6 @@ class StatisticController extends BaseController
                                     if ($elem['ur1_forced'] == "1") {
                                         break;
                                     }
-                                    error_log(date("[Y-m-d G:i:s]")."====A". print_r($a,true) ."\n",3, $_ENV['CL']);
-
 
                                     // Ignore teleworking absences for compatible positions
                                     if (in_array($a['motif'], $teleworking_absence_reasons) and $elem['teleworking']) {
@@ -2614,7 +2612,7 @@ class StatisticController extends BaseController
                         $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
                         $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
                         $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
-                        if ($a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                        if ($elem['perso_id'] == $a['perso_id'] and  $a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
                             if ($a['motif'] == "Agenda Partage") {
                                 if ($a['localisation']) {
                                     $m = matchSite($a['localisation']);
