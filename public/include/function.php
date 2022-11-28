@@ -1410,12 +1410,12 @@ function filterStatus($event) {
  * UR1: 03B UR1: 06 Function to create a formated string from absence info and type
  * @param type 0: absence non validée 1: absence validée 2: trajet depuis une absence 3: JS content
  */
-function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
-    $f_start = date("G\hi",strtotime($start));
-    $f_end = date("G\hi",strtotime($end));
-    $f_time = (date('H',strtotime($start)) == "00" and date('H',strtotime($end)) == "23") ? "toute la journée " : "de " . ($f_start . " à " . $f_end);
-    $f_site = $site == -1 ? "Ext" : $GLOBALS['config']["Multisites-site$site"];
-    $f_comment = explode("|||",wordwrap($comment,$wrap,"|||",true))[0];
+function format_abs($type, $comment, $start, $end, $site = null, $wrap = 40){
+    $f_start = date("G\hi", strtotime($start));
+    $f_end = date("G\hi", strtotime($end));
+    $f_time = (date('H', strtotime($start)) == "00" and date('H', strtotime($end)) == "23") ? "toute la journée " : "de " . ($f_start . " à " . $f_end);
+    $f_site = $site == -1 ?  "Ext" : ($site == 0 ? "" :  $GLOBALS['config']["Multisites-site$site"]);
+    $f_comment = explode("|||", wordwrap($comment, $wrap, "|||", true))[0];
     $f_comment .= strlen($comment) >= $wrap ? "..." : "";
 
     switch ($type) {
@@ -1433,5 +1433,4 @@ function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
     }
 
     return "Erreur: formatage d'absence non valide";
-
 }
