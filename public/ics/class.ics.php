@@ -268,8 +268,16 @@ class CJICS
             // Check if it is an invitation from someone else (or including attendees)
             // And check if the owner of this calendar accepted it
             if (!empty($elem['ATTENDEE'])) {
+                    // UR1: 04I Build the univ-rennes.fr and univ-rennes1.fr adresses from the agent mail to handle domain change without breaking event imports
+                    if (strpos($email, "@univ-rennes")) {
+                        $emails[]  = explode("@", $email)[0] . "@univ-rennes1.fr";
+                        $emails[]  = explode("@", $email)[0] . "@univ-rennes.fr";
+                    } else {
+                        $emails[] = $email;
+                    }
                 // UR1: 04A If agent is organizer, import event
-                if (strpos($elem['ORGANIZER'], $email)) {
+                // UR1: 04I test on both domains
+                if (strposa($elem['ORGANIZER'], $emails)) {
                     $add = true;
                 } else {
                     // UR1: 04A The ATTENDEE value is sometime badly created and contains only the mailto value of attendees even if the ATTENDEE_array of $event is complete
@@ -287,9 +295,10 @@ class CJICS
                     }
                     // UR1: 04A Partage doesn't use CUTYPE but CN
                     //$attendees = explode('CUTYPE=', $elem['ATTENDEE']);
+                    // UR1: 04I test on both domains
                     $attendees = explode('CN=', $rebuiltAttendee);
                     foreach ($attendees as $attendee) {
-                        if (!empty($attendee) and strpos($attendee, $email)) {
+                        if (!empty($attendee) and strposa($attendee, $emails)) {
                             if (strpos($attendee, 'PARTSTAT=ACCEPTED')) {
                                 $add = true;
                             }
