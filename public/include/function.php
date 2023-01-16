@@ -1434,3 +1434,17 @@ function format_abs($type, $comment, $start, $end, $site = null, $wrap = 40){
 
     return "Erreur: formatage d'absence non valide";
 }
+
+// From https://stackoverflow.com/a/9220624
+// Extend strpos to an array of needles
+// UR1: 04I Used in class.ics.php to match multiple email adresses
+function strposa(string $haystack, array $needles, int $offset = 0): bool
+{
+    foreach($needles as $needle) {
+        if(strpos($haystack, $needle, $offset) !== false) {
+            return true; // stop on first true result
+        }
+    }
+
+    return false;
+}
