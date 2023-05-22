@@ -1378,18 +1378,24 @@ function matchSite($loca)
 /**
  * UR1: Function used to filter imported events based on status
  */
-function filterStatus($event) {
+function filterStatus($event)
+{
     // UR1: 04D Import Ouf Of Office events
     // UR1: 04F Import free telework events
     // X-MICROSOFT-CDO-INTENDEDSTATUS can have four values, FREE, TENTATIVE, BUSY and OOF.
     // BUSY and OOF are both imported without condition
     // TENTATIVE is filtered out without condition
     // FREE is imported if the event status is in a pre determined set
+    // Returns 0 if the event is to be filtered out, 1 if it is to be imported.
     if (isset($event['X-MICROSOFT-CDO-INTENDEDSTATUS'])) {
         if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE") {
-            $ttr = "ttr;ttp;teletravail;";
-            if (!$event['SUMMARY'] || ($event['SUMMARY'] && stripos($ttr, strtr($event['SUMMARY'], array('é' => 'e', 'É' => 'E'))) === false)) {
-                return 0;
+            if ($event['SUMMARY']) {
+                $set = array("ttp", "ttr", "teletravail");
+                $summary = strtr($event['SUMMARY'], array('é' => 'e', 'É' => 'E'));
+                $match = '/\b(' . implode('|', $set) . ')\b/i';
+                if (preg_match($match, $summary) === 0) {
+                    return 0;
+                }
             }
         }
         if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "TENTATIVE") {
