@@ -629,22 +629,29 @@ class planning
             }
         }
         }
+        //error_log(date("[Y-m-d G:i:s]")."==| ==== ==== new refresh batch ==== ====\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| // " . print_r($perso_ids,true)."\n",3, $_ENV['CL']);
         foreach ($perso_ids as $elem) {
             // UR1: 04E Refresh user calendars each time the planning is validated
             // Script is in exploitationPartage dir outside of Planning Biblio install
-            error_log(date("[Y-m-d G:i:s]")."====REFRESH\n",3, $_ENV['CL']);
-            error_log(date("[Y-m-d G:i:s]")."==|elem[mail] is " . $tab[$elem]['mail'] . "\n",3, $_ENV['CL']);
-            error_log(date("[Y-m-d G:i:s]")."==|oldelem[mail] is " . $oldData[$elem]['mail'] . "\n",3, $_ENV['CL']);
-            error_log(date("[Y-m-d G:i:s]")."==|elem is " . print_r($elem, true)  . "\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."====REFRESH\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."==|elem[mail] is " . $tab[$elem]['mail'] . "\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."==|oldelem[mail] is " . $oldData[$elem]['mail'] . "\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."==|elem is " . print_r($elem, true)  . "\n",3, $_ENV['CL']);
 
 
             $tardir = '../../../../exploitationPartage/';
             $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
-            error_log(date("[Y-m-d G:i:s]")."==|final mail is " . $mail . "\n",3, $_ENV['CL']);
+            //error_log(date("[Y-m-d G:i:s]")."==|final mail is " . $mail . "\n",3, $_ENV['CL']);
 
-            $script = 'cd '.$tardir .' ; ';
-            $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planning-biblio-test.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr ';
-            shell_exec($script);
+            if (!strpos($mail, "etudiant")) {
+                $script = 'cd '.$tardir .' ; ';
+                $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planno.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr &';
+                shell_exec($script);
+                //error_log(date("[Y-m-d G:i:s]") . "==|>refresh / " . $mail . "\n", 3, $_ENV['CL']);
+            } else {
+                //error_log(date("[Y-m-d G:i:s]") . "==|>skipping / " . $mail . "\n", 3, $_ENV['CL']);
+            }
         }
     }
 

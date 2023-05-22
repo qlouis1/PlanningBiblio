@@ -65,7 +65,7 @@ class ICal
         if ($weekStart) {
             $this->default_weekStart = $weekStart;
         }
-        error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, $_ENV['CL']);
         return $this->initLines($lines);
     }
 
@@ -114,7 +114,7 @@ class ICal
         if (!is_array($lines)) {
             return false;
         }
-        error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, $_ENV['CL']);
 
         if (stristr($lines[0], 'BEGIN:VCALENDAR') === false) {
             return false;
@@ -424,7 +424,7 @@ class ICal
         if (empty($events))
             return false;
 
-        error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
         foreach ($array['VEVENT'] as $anEvent) {
             // UR1: 05B We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
             if(filterStatus($anEvent) == 0){
@@ -755,7 +755,7 @@ class ICal
                 }
             }
         }
-        error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, $_ENV['CL']);
 
         $this->cal['VEVENT'] = $events;
     }
