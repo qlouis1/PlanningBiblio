@@ -629,8 +629,9 @@ class planning
             }
         }
         }
-        //error_log(date("[Y-m-d G:i:s]")."==| ==== ==== new refresh batch ==== ====\n",3, $_ENV['CL']);
-        //error_log(date("[Y-m-d G:i:s]")."==| // " . print_r($perso_ids,true)."\n",3, $_ENV['CL']);
+        error_log(date("[Y-m-d G:i:s]")."==| ==== ==== new refresh batch ==== ====\n",3, $_ENV['CL']);
+        $tBatchStart = microtime(true);
+        error_log(date("[Y-m-d G:i:s]")."==| // count " . print_r(count($perso_ids),true)."\n",3, $_ENV['CL']);
         foreach ($perso_ids as $elem) {
             // UR1: 04E Refresh user calendars each time the planning is validated
             // Script is in exploitationPartage dir outside of Planning Biblio install
@@ -646,13 +647,20 @@ class planning
 
             if (!strpos($mail, "etudiant")) {
                 $script = 'cd '.$tardir .' ; ';
-                $script .= './exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planno.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr &';
+                $script .= 'bash -c "exec nohup setsid ./exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planno.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr > /dev/null 2>&1 &"';
+                $t1 = microtime(true);
                 shell_exec($script);
-                //error_log(date("[Y-m-d G:i:s]") . "==|>refresh / " . $mail . "\n", 3, $_ENV['CL']);
+                $t2 = microtime(true);
+                $td = $t2 - $t1;
+                error_log(date("[Y-m-d G:i:s]") . "==|>elapsed / " . $td . "\n", 3, $_ENV['CL']);
             } else {
                 //error_log(date("[Y-m-d G:i:s]") . "==|>skipping / " . $mail . "\n", 3, $_ENV['CL']);
             }
         }
+        $tBatchEnd = microtime(true);
+        $tBatchTotal = $tBatchEnd - $tBatchStart;
+        error_log(date("[Y-m-d G:i:s]") . "==|refreshed batch in / " . $tBatchTotal . "\n", 3, $_ENV['CL']);
+
     }
 
     // Notes

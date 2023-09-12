@@ -644,7 +644,7 @@ function ContextMenu2agents(data, agent) {
         // UR1: 06 Custom exclusion to be used in journey from imported absences
         if (e[0] == 'partageJourney') {
           title_attr = e[1][0];
-          content += '<font: style="color:red">' + 'PJ (' + e[1][1] + ')' + '</font>';
+          content += '<font: style="color:red">' + 'TR (' + e[1][1] + ')' + '</font>';
         }
       }
 

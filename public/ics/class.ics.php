@@ -71,7 +71,8 @@ class CJICS
         $calName = null;                // Nom du calendrier
 
         // Parse le fichier ICS, le tableau $events contient les événements du fichier ICS
-        $ical   = new ICal($src, "MO");
+        // UR1: 04G Partage calendar has week start at sunday
+        $ical   = new ICal($src);
 
         // Récupération du nom du calendrier
         $calName=$ical->calendarName();
@@ -136,7 +137,8 @@ class CJICS
         }
 
         // Parse le fichier ICS, le tableau $events contient les événements du fichier ICS
-        $ical   = new ICal($src, "MO");
+        // UR1: 04G Partage calendar has week start at sunday
+        $ical   = new ICal($src);
         $events = $ical->events();
 
         // Récupération du nom du calendrier

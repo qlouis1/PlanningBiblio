@@ -442,6 +442,10 @@ class ICal
                 // Get frequency
                 $frequency = $rrules['FREQ'];
                 // Get Start timestamp
+                // UR1: debug
+                $logE=true;
+                $debugDTSTART = date("w",strtotime($anEvent['DTSTART']));
+
                 $start_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTSTART']);
                 $end_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTEND']);
                 $event_timestamp_offset = $end_timestamp - $start_timestamp;
@@ -588,7 +592,16 @@ class ICal
 
                                     if (!$is_excluded) {
                                         $events[] = $anEvent;
-
+                                        // UR1: debug
+                                        if(date("w",strtotime($anEvent['DTSTART'])) != $debugDTSTART && $logE){
+                                            error_log(date("[Y-m-d G:i:s]")."=============\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==|/!\ event created day (".date("w",strtotime($anEvent['DTSTART'])).") is different from origin DTSTART (".$debugDTSTART.")\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| EVENT IS " . $anEvent['SUMMARY'] . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| BY " . $anEvent['ORGANIZER'] . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| STARTS " . $anEvent['DTSTART'] . ": " . date("r",strtotime($anEvent['DTSTART'])) . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| RRULE " . $anEvent['RRULE'] . "\n",3, $_ENV['CL']);
+                                            $logE=false;
+                                        }
                                         // If RRULE[COUNT] is reached : break
                                         if (isset($rrules['COUNT'])) {
                                             $count_nb ++;
