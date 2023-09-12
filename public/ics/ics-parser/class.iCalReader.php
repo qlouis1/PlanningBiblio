@@ -442,19 +442,11 @@ class ICal
                 // Get frequency
                 $frequency = $rrules['FREQ'];
                 // Get Start timestamp
-                //error_log(date("[Y-m-d G:i:s]")."==| TRIGGER ".$anEvent['SUMMARY']. "/" . $anEvent['ORGANIZER'] ."\n",3, $_ENV['CL']);
-                $logE = false;
-                if($anEvent['SUMMARY'] == "TTR" and str_contains($anEvent['DTSTART'], "20230407T084500") and str_contains($anEvent['DTEND'], "170000")){
-                    $logE = true;
-                    error_log(date("[Y-m-d G:i:s]")."=============\n",3, $_ENV['CL']);
-                    error_log(date("[Y-m-d G:i:s]")."==| EVENT IS " . $anEvent['SUMMARY'] . "\n",3, $_ENV['CL']);
-                    error_log(date("[Y-m-d G:i:s]")."==| BY " . $anEvent['ORGANIZER'] . "\n",3, $_ENV['CL']);
-                    error_log(date("[Y-m-d G:i:s]")."==| STARTS " . $anEvent['DTSTART'] . ": " . date("r",strtotime($anEvent['DTSTART'])) . "\n",3, $_ENV['CL']);
-                    error_log(date("[Y-m-d G:i:s]")."==|   ENDS " . $anEvent['DTEND'] . ": " . date("r",strtotime($anEvent['DTEND'])) . "\n",3, $_ENV['CL']);
-                    error_log(date("[Y-m-d G:i:s]")."==| RRULE " . $anEvent['RRULE'] . "\n",3, $_ENV['CL']);
-                }
+                // UR1: debug
+                $logE=true;
+                $debugDTSTART = date("w",strtotime($anEvent['DTSTART']));
+
                 $start_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTSTART']);
-                if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> start_timestamp " . print_r($start_timestamp,true) . ": " . date("r",$start_timestamp) .  "\n",3, $_ENV['CL']);}
 
                 $end_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTEND']);
                 $event_timestamp_offset = $end_timestamp - $start_timestamp;
@@ -487,7 +479,6 @@ class ICal
                     // Get Until
                     // UR1: 05A Limit until to until_default
                     $until = min(strtotime($rrules['UNTIL']),strtotime($until_default));
-                    if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> until " . date("r",$until) . "\n",3, $_ENV['CL']);}
 
                     //$until = strtotime($rrules['UNTIL']);
                 } else if (isset($rrules['COUNT'])) {
@@ -567,11 +558,8 @@ class ICal
                             'SU' => array('SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'),
                             'MO' => array('MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'));
 
-                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> default_weekStart " . print_r($this->default_weekStart,true) . "\n",3, $_ENV['CL']);}
 
-                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> rrule[wkst] " . print_r($rrules['WKST'],true) . "\n",3, $_ENV['CL']);}
                         $wkst = (isset($rrules['WKST']) and in_array($rrules['WKST'], array('SA','SU','MO'))) ? $rrules['WKST'] : $this->default_weekStart;
-                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> wkst " . print_r($wkst,true) . "\n",3, $_ENV['CL']);}
 
                         $aWeek = $weeks[$wkst];
                         $days = array('SA'=>'Saturday', 'SU'=>'Sunday', 'MO'=> 'Monday');
@@ -580,23 +568,15 @@ class ICal
                         $weekdays = $aWeek;
 
                         if (isset($rrules['BYDAY']) && $rrules['BYDAY'] != '') {
-                            if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> BYDAY " . $rrules['BYDAY'] . "\n",3, $_ENV['CL']);}
                             $bydays = explode(',', $rrules['BYDAY']);
                         } else {
-                            if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> find day \n",3, $_ENV['CL']);}
                             $weekTemp = $aWeek;
-                            if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> weekTemp " . print_r($weekTemp,true) . "\n",3, $_ENV['CL']);}
-
                             $findDay = $weekTemp[date('w', $start_timestamp)];
-                            if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> findDay " . print_r($findDay,true) . "\n",3, $_ENV['CL']);}
                             $bydays = array($findDay);
-                            if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> bydays " . print_r($bydays,true) . "\n",3, $_ENV['CL']);}
-
                         }
 
                         // Get timestamp of first day of start week
                         $week_recurring_timestamp = (date('w', $start_timestamp) == 0) ? $start_timestamp : strtotime("last {$days[$wkst]} " . date('H:i:s', $start_timestamp), $start_timestamp);
-                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>> week r tmst" . print_r($week_recurring_timestamp,true) . "\n",3, $_ENV['CL']);}
 
                         // Step through weeks
                         while ($week_recurring_timestamp <= $until) {
@@ -616,10 +596,17 @@ class ICal
 
                                     if (!$is_excluded) {
                                         $events[] = $anEvent;
-                                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>>> added event " . $anEvent['SUMMARY'] . "\n",3, $_ENV['CL']);}
-                                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>>> start " . date("r",strtotime($anEvent['DTSTART'])) . "\n",3, $_ENV['CL']);}
-                                        if($logE){error_log(date("[Y-m-d G:i:s]")."==|>>>   end " . date("r",strtotime($anEvent['DTEND'])) . "\n",3, $_ENV['CL']);}
-                                        if($logE){$logE=false;}
+                                        // UR1: debug
+                                        if(date("w",strtotime($anEvent['DTSTART'])) != $debugDTSTART && $logE){
+                                            error_log(date("[Y-m-d G:i:s]")."=============\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==|/!\ event created day (".date("w",strtotime($anEvent['DTSTART'])).") is different from origin DTSTART (".$debugDTSTART.")\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| EVENT IS " . $anEvent['SUMMARY'] . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| BY " . $anEvent['ORGANIZER'] . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| STARTS " . $anEvent['DTSTART'] . ": " . date("r",strtotime($anEvent['DTSTART'])) . "\n",3, $_ENV['CL']);
+                                            error_log(date("[Y-m-d G:i:s]")."==| RRULE " . $anEvent['RRULE'] . "\n",3, $_ENV['CL']);
+                                            $logE=false;
+
+                                        }
                                         // If RRULE[COUNT] is reached : break
                                         if (isset($rrules['COUNT'])) {
                                             $count_nb ++;
