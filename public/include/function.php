@@ -1455,6 +1455,9 @@ function strposa(string $haystack, array $needles, int $offset = 0): bool
 // fitler events between teleworking and others
 // returns true if teleworking
 function isImportedTeleworking(string $motif){
+    if(is_null($motif)){
+        return false;
+    }
     $set = array("ttp", "ttr", "teletravail");
     $summary = strtr($motif, array('é' => 'e', 'É' => 'E'));
     $match = '/\b(' . implode('|', $set) . ')\b/i';

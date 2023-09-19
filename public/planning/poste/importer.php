@@ -292,7 +292,7 @@ if (!$model_id) {		// Etape 1 : Choix du modèle à importer
 
                 // UR1: 03A score off agents with an imported absence
                 $db2 = new db();
-                $db2->select("absences", "*", "`debut`<'$fin' AND `fin`>'$debut' AND `perso_id`='{$elem2['perso_id']}' AND `motif` LIKE 'Agenda Partage' $filter ");
+                $db2->select("absences", "*", "`debut`<'$fin' AND `fin`>'$debut' AND `perso_id`='{$elem2['perso_id']}' AND `motif` LIKE '% Partage' $filter ");
                 $value[':absent'] = $db2->result ? "1" : "0";
 
                 if (isset($value[':absent'])) {

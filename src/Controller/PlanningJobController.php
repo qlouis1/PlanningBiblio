@@ -323,7 +323,7 @@ class PlanningJobController extends BaseController
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03A Consider imported absences as possible availability
-                    if ($elem['motif'] == "Agenda Partage") {
+                    if (str_ends_with($elem['motif'], " Partage")) {
                         // UR1: 03B Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
