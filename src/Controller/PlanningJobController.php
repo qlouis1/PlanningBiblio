@@ -323,12 +323,20 @@ class PlanningJobController extends BaseController
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03A Consider imported absences as possible availability
+                    // UR1: 03F as we don't import summary as commentaires on teleworing event, set it here
                     if (str_ends_with($elem['motif'], " Partage")) {
+                        if($elem['motif'] == "Télétravail Partage"){
+                            $commentaires = "Télétravail";
+                        } else if($elem['commentaires'] == ''){
+                            $commentaires = "Privé";
+                        } else {
+                            $commentaires = html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8');
+                        }
                         // UR1: 03B Match site to display it menu
                         $m = matchSite($elem['localisation']);
                         $absentPartage[$elem['perso_id']][] = array(
                             "id" => $elem['id'],
-                            "commentaires" => html_entity_decode($elem['commentaires'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'),
+                            "commentaires" => $commentaires,
                             "debut" => $elem['debut'],
                             "fin" => $elem['fin'],
                             "site" => $m
