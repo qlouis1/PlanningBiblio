@@ -323,7 +323,7 @@ class PlanningJobController extends BaseController
             foreach ($db->result as $elem) {
                 if ($elem['valide'] > 0 or $this->config('Absences-validation') == '0') {
                     // UR1: 03A Consider imported absences as possible availability
-                    // UR1: 03F as we don't import summary as commentaires on teleworing event, set it here
+                    // UR1: 03F better display on imported teleworking and private events
                     if (str_ends_with($elem['motif'], " Partage")) {
                         if($elem['motif'] == "Télétravail Partage"){
                             $commentaires = "Télétravail";

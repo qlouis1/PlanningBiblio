@@ -423,7 +423,7 @@ class CJICS
                 }
 
                 if ($motif == $patternTTR) {
-                    $commentaires = '';
+                    $commentaires = 'Télétravail Partage';
                 }
 
                 // UR1: 06A import locations
