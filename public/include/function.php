@@ -1390,10 +1390,7 @@ function filterStatus($event)
     if (isset($event['X-MICROSOFT-CDO-INTENDEDSTATUS'])) {
         if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE") {
             if ($event['SUMMARY']) {
-                $set = array("ttp", "ttr", "teletravail");
-                $summary = strtr($event['SUMMARY'], array('é' => 'e', 'É' => 'E'));
-                $match = '/\b(' . implode('|', $set) . ')\b/i';
-                if (preg_match($match, $summary) === 0) {
+                if (!isImportedTeleworking($event['SUMMARY'])) {
                     return 0;
                 }
             }
@@ -1453,5 +1450,20 @@ function strposa(string $haystack, array $needles, int $offset = 0): bool
         }
     }
 
+    return false;
+}
+
+// fitler events between teleworking and others
+// returns true if teleworking
+function isImportedTeleworking($motif){
+    if(is_null($motif)){
+        return false;
+    }
+    $set = array("ttp", "ttr", "teletravail");
+    $summary = strtr($motif, array('é' => 'e', 'É' => 'E'));
+    $match = '/\b(' . implode('|', $set) . ')\b/i';
+    if (preg_match($match, $summary) === 1) {
+        return true;
+    }
     return false;
 }

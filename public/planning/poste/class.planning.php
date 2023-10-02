@@ -16,6 +16,10 @@ Utilisée par les fichiers du dossier "planning/poste"
 */
 
 use App\Model\Agent;
+use PhpAmqpLib\Connection\AMQPSSLConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+
 
 // pas de $version=acces direct aux pages de ce dossier => Accès refusé
 $version = $GLOBALS['version'] ?? null;
@@ -426,8 +430,9 @@ class planning
             }
 
             // Création d'un tableau par agent, avec nom, prénom et email
+            // UR1: 04E get login to send to rabbitmq
             if (!isset($tab[$id])) {
-                $tab[$id]=array("nom"=>$agent->nom(), "prenom"=>$agent->prenom(), "mail"=>$agent->mail(), "planning"=>array());
+                $tab[$id]=array("nom"=>$agent->nom(), "prenom"=>$agent->prenom(),"login"=>$agent->login(), "mail"=>$agent->mail(), "planning"=>array());
             }
             // Complète le tableau avec les postes, les sites, horaires et marquage "absent"
             $tab[$id]["planning"][]=array("debut"=> $elem["debut"], "fin"=> $elem["fin"], "absent"=> $elem["absent"], "site"=> $site, "poste"=> $elem['poste']);
@@ -629,37 +634,36 @@ class planning
             }
         }
         }
-        error_log(date("[Y-m-d G:i:s]")."==| ==== ==== new refresh batch ==== ====\n",3, $_ENV['CL']);
-        $tBatchStart = microtime(true);
-        error_log(date("[Y-m-d G:i:s]")."==| // count " . print_r(count($perso_ids),true)."\n",3, $_ENV['CL']);
+
+        // UR1: 04E Force refresh calendars after planning validation
+        // UR1: 04E Go through rabbitmq to dissociate dependency to Partage API/performance
+
+        $connection = new AMQPSSLConnection(
+            $_ENV['RMQ_HOST'],
+            $_ENV['RMQ_PORT'],
+            $_ENV['RMQ_USER'],
+            $_ENV['RMQ_PASSWORD'],
+            $_ENV['RMQ_VHOST'],
+            array('verify_peer' => true),
+            array('heartbeat' => $_ENV['RMQ_HEARTBEAT'], 'read_write_timeout' => $_ENV['RMQ_RW_TIMEOUT'], 'connection_timeout' => 1)
+        );
+        $channel = $connection->channel();
+        $channel->exchange_declare($_ENV['RMQ_EXCHANGE'], 'fanout', false, true, false, false);
+
         foreach ($perso_ids as $elem) {
-            // UR1: 04E Refresh user calendars each time the planning is validated
-            // Script is in exploitationPartage dir outside of Planning Biblio install
-            //error_log(date("[Y-m-d G:i:s]")."====REFRESH\n",3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]")."==|elem[mail] is " . $tab[$elem]['mail'] . "\n",3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]")."==|oldelem[mail] is " . $oldData[$elem]['mail'] . "\n",3, $_ENV['CL']);
-            //error_log(date("[Y-m-d G:i:s]")."==|elem is " . print_r($elem, true)  . "\n",3, $_ENV['CL']);
+            // UR1: 04E TODO format time correctly
+            $timestamp = new DateTimeImmutable();
+            $timestamp = $timestamp->format('Y-m-d\TG:i:s.u');
+            $txt = '{"identifiant":"'.$tab[$elem]['login'].'","urlPrefix":"'.$_ENV['URLPREFIX'].'","producteurTimestamp":"'.$timestamp.'","operation":"synchroAgenda","producteur":"planno"}';
 
+            error_log(date("[Y-m-d G:i:s]") . "==|msg ". print_r($txt,true) . "\n", 3, $_ENV['CL']);
 
-            $tardir = '../../../../exploitationPartage/';
-            $mail = empty($tab) ? $oldData[$elem]['mail'] : $tab[$elem]['mail'];
-            //error_log(date("[Y-m-d G:i:s]")."==|final mail is " . $mail . "\n",3, $_ENV['CL']);
-
-            if (!strpos($mail, "etudiant")) {
-                $script = 'cd '.$tardir .' ; ';
-                $script .= 'bash -c "exec nohup setsid ./exploitation-partage.py --conf=conf-partage-ur1.json --forceSyncExternalCalendar --email='.$mail.' --urlPrefix=\'https://planno.univ-rennes1.fr/ics/calendar.php\' --domain=univ-rennes1.fr > /dev/null 2>&1 &"';
-                $t1 = microtime(true);
-                shell_exec($script);
-                $t2 = microtime(true);
-                $td = $t2 - $t1;
-                error_log(date("[Y-m-d G:i:s]") . "==|>elapsed / " . $td . "\n", 3, $_ENV['CL']);
-            } else {
-                //error_log(date("[Y-m-d G:i:s]") . "==|>skipping / " . $mail . "\n", 3, $_ENV['CL']);
-            }
+            $msg = new AMQPMessage($txt);
+            $channel->basic_publish($msg, $_ENV['RMQ_EXCHANGE']);
         }
-        $tBatchEnd = microtime(true);
-        $tBatchTotal = $tBatchEnd - $tBatchStart;
-        error_log(date("[Y-m-d G:i:s]") . "==|refreshed batch in / " . $tBatchTotal . "\n", 3, $_ENV['CL']);
+
+        $channel->close();
+        $connection->close();
 
     }
 

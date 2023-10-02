@@ -393,7 +393,14 @@ class CJICS
                 // Par défaut, nous mettons dans le champ motif l'information enregistrée dans la config, paramètre ICS-PatternX (ex: Agenda personnel)
                 // Mais nous pouvons mettre l'information présente dans le champ SUMMARY de l'événements. Dans ce cas, il faut préciser $this->pattern = "[SUMMARY]"; (exemple d'utilisation : enregistrement d'absences récurrentes dans Planning Biblio)
 
-                $motif = $this->pattern == '[SUMMARY]' ? $elem['SUMMARY'] : $this->pattern;
+                // UR1: 03F differenciate teleworking and regular events
+                // teleworking pattern is hardcoded because it does not seem worth to set it up in config
+                $patternTTR = "Télétravail Partage";
+                if(isImportedTeleworking($elem['SUMMARY'])){
+                    $motif = $patternTTR;
+                } else {
+                    $motif = $this->pattern == '[SUMMARY]' ? $elem['SUMMARY'] : $this->pattern;
+                }
                 $motif_autre = '';
 
                 if (!in_array($motif, $reasons)) {
@@ -413,6 +420,10 @@ class CJICS
                     if (!empty($elem["DESCRIPTION"])) {
                         //$commentaires .= $elem['DESCRIPTION'];
                     }
+                }
+
+                if ($motif == $patternTTR) {
+                    $commentaires = 'Télétravail Partage';
                 }
 
                 // UR1: 06A import locations
