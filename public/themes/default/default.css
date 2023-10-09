@@ -2416,3 +2416,25 @@ div.presents-absents {
   background: #BFEEC8; 
   color: #000;
 }
+
+/* Rose */
+.rose.tr_horaires, .rose.tr_separation, .rose.tr_horaires td.td_postes, .pink.tr_horaires, .pink.tr_separation, .pink.tr_horaires td.td_postes{
+  background: #e030a5;
+  color: #000;
+}
+
+.rose td.td_postes, .pink td.td_postes{
+  background: #ff99fa;
+  color: #000;
+}
+
+/* Orange */
+.orange.tr_horaires, .orange.tr_separation, .orange.tr_horaires td.td_postes{
+  background: #f56623;
+  color: #000;
+}
+
+.orange td.td_postes{
+  background: #ffc9aa;
+  color: #000;
+}
