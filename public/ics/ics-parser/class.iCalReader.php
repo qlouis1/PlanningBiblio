@@ -65,7 +65,7 @@ class ICal
         if ($weekStart) {
             $this->default_weekStart = $weekStart;
         }
-        error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."====INIT LINES FOR " .$filename."\n",3, $_ENV['CL']);
         return $this->initLines($lines);
     }
 
@@ -114,7 +114,7 @@ class ICal
         if (!is_array($lines)) {
             return false;
         }
-        error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| found ".count($lines)." lines\n",3, $_ENV['CL']);
 
         if (stristr($lines[0], 'BEGIN:VCALENDAR') === false) {
             return false;
@@ -424,7 +424,7 @@ class ICal
         if (empty($events))
             return false;
 
-        error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| found ".count($events)." events\n",3, $_ENV['CL']);
         foreach ($array['VEVENT'] as $anEvent) {
             // UR1: 05B We are computing a lot of events that will never be imported. In the case of recurring events, we can compute thousands of events that will later be filtered out, so we do this filtering here.
             if(filterStatus($anEvent) == 0){
@@ -447,7 +447,6 @@ class ICal
                 $debugDTSTART = date("w",strtotime($anEvent['DTSTART']));
 
                 $start_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTSTART']);
-
                 $end_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTEND']);
                 $event_timestamp_offset = $end_timestamp - $start_timestamp;
                 // Get Interval
@@ -479,7 +478,6 @@ class ICal
                     // Get Until
                     // UR1: 05A Limit until to until_default
                     $until = min(strtotime($rrules['UNTIL']),strtotime($until_default));
-
                     //$until = strtotime($rrules['UNTIL']);
                 } else if (isset($rrules['COUNT'])) {
                     $frequency_conversion = array('DAILY' => 'day', 'WEEKLY' => 'week', 'MONTHLY' => 'month', 'YEARLY' => 'year');
@@ -558,9 +556,7 @@ class ICal
                             'SU' => array('SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'),
                             'MO' => array('MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'));
 
-
                         $wkst = (isset($rrules['WKST']) and in_array($rrules['WKST'], array('SA','SU','MO'))) ? $rrules['WKST'] : $this->default_weekStart;
-
                         $aWeek = $weeks[$wkst];
                         $days = array('SA'=>'Saturday', 'SU'=>'Sunday', 'MO'=> 'Monday');
 
@@ -605,7 +601,6 @@ class ICal
                                             error_log(date("[Y-m-d G:i:s]")."==| STARTS " . $anEvent['DTSTART'] . ": " . date("r",strtotime($anEvent['DTSTART'])) . "\n",3, $_ENV['CL']);
                                             error_log(date("[Y-m-d G:i:s]")."==| RRULE " . $anEvent['RRULE'] . "\n",3, $_ENV['CL']);
                                             $logE=false;
-
                                         }
                                         // If RRULE[COUNT] is reached : break
                                         if (isset($rrules['COUNT'])) {
@@ -773,7 +768,7 @@ class ICal
                 }
             }
         }
-        error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, $_ENV['CL']);
+        //error_log(date("[Y-m-d G:i:s]")."==| created to ".count($events)." events\n",3, $_ENV['CL']);
 
         $this->cal['VEVENT'] = $events;
     }

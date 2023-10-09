@@ -665,7 +665,7 @@ class planning
             $channel->close();
             $connection->close();
         } catch (Exception $e) {
-            error_log(date("[Y-m-d G:i:s]") . " [ERROR] RMQ error | ". print_r($e,true) . "\n", 3, $_ENV['CL']);
+            error_log(date("[Y-m-d G:i:s]") . " [ERROR] RMQ error | ". print_r($e->getMessage(),true) . "\n", 3, $_ENV['CL']);
         }
 
     }

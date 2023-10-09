@@ -2591,7 +2591,6 @@ class StatisticController extends BaseController
                 // Vérifie à partir de la table absences si l'agent est absent
                 // S'il est absent, on met à 1 la variable $elem['absent']
                 foreach ($absencesDB as $a) {
-
                     // UR1: 03C Forced agent overides any absence
                     if ($elem['ur1_forced'] == "1") {
                         break;
@@ -2603,7 +2602,6 @@ class StatisticController extends BaseController
                     }
 
                     if ($elem['perso_id'] == $a['perso_id'] and $a['debut']< $elem['date'].' '.$elem['fin'] and $a['fin']> $elem['date']." ".$elem['debut']) {
-
                         continue 2;
                     }
 
@@ -2612,7 +2610,7 @@ class StatisticController extends BaseController
                         $j_time = $GLOBALS['config']['Journey-time-for-imported-absences'];
                         $start_with_journey = date('H:i:s', strtotime("-$j_time minutes", strtotime($elem['debut'])));
                         $end_with_journey = date('H:i:s', strtotime("+$j_time minutes", strtotime($elem['fin'])));
-                        if ($elem['perso_id'] == $a['perso_id'] and  $a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
+                        if ($elem['perso_id'] == $a['perso_id'] and $a['debut'] < $elem['date'] . ' ' . $end_with_journey and $a['fin'] > $elem['date'] . ' ' . $start_with_journey) {
                             if ($a['motif'] == "Agenda Partage") {
                                 if ($a['localisation']) {
                                     $m = matchSite($a['localisation']);
@@ -2718,6 +2716,7 @@ class StatisticController extends BaseController
             $agents_id = array();
             if (is_array($tab)) {
                 foreach ($tab as $elem) {
+
                     // on compte les heures de chaque agent
                     if (!array_key_exists($d[0], $agents)) {
                         $agents[$d[0]] = 0;
