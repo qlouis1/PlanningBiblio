@@ -181,7 +181,10 @@ class PlanningJobController extends BaseController
                         foreach ($db->result as $elem) {
                             // UR1: 01C easily keep both id and poste data
                             //$journey[$elem['perso_id']] = $elem['site'];
-                            $journey[$elem['perso_id']] = $this->config("Multisites-site" . $elem['site']);
+                            //$journey_site[$elem['perso_id']] = $this->config("Multisites-site" . $elem['site']);
+
+                            // UR1: 06F Set journey from other site as exclusion
+                            $exclJourneySite[$elem['perso_id']] = $this->config("Multisites-site" . $elem['site']);
                         }
                     }
                 }
@@ -577,6 +580,11 @@ class PlanningJobController extends BaseController
                     $exclusion[$elem['id']][] = 'journey_partage';
                 }
 
+                // UR1: 06F Set journey from other site as exclusion
+                if (isset($exclJourneySite[$elem['id']])) {
+                    $exclusion[$elem['id']][] = 'journey_site';
+                }
+
                 // If no exclusion for this agent,
                 // put it in the availables list.
                 if (empty($exclusion[$elem['id']])) {
@@ -599,6 +607,10 @@ class PlanningJobController extends BaseController
                     }
                     if (in_array('activites', $exclusion[$elem['id']])) {
                         $motifExclusion[$elem['id']][]="skills";
+                    }
+                    // UR1: 06F Set journey from other site as exclusion
+                    if (in_array('journey_site', $exclusion[$elem['id']])) {
+                        $motifExclusion[$elem['id']][]=["journey_site",$exclJourneySite[$elem['id']]];
                     }
                     if (in_array('categories', $exclusion[$elem['id']])) {
                         if ($categories_nb > 1) {
