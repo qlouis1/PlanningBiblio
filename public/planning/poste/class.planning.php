@@ -638,36 +638,37 @@ class planning
         // UR1: 04E Force refresh calendars after planning validation
         // UR1: 04E Go through rabbitmq to dissociate dependency to Partage API/performance
 
-        try {
-            $connection = new AMQPSSLConnection(
-                $_ENV['RMQ_HOST'],
-                $_ENV['RMQ_PORT'],
-                $_ENV['RMQ_USER'],
-                $_ENV['RMQ_PASSWORD'],
-                $_ENV['RMQ_VHOST'],
-                array('verify_peer' => true),
-                array('heartbeat' => $_ENV['RMQ_HEARTBEAT'], 'read_write_timeout' => $_ENV['RMQ_RW_TIMEOUT'], 'connection_timeout' => 1)
-            );
-            $channel = $connection->channel();
-            $channel->exchange_declare($_ENV['RMQ_EXCHANGE'], 'fanout', false, true, false, false);
+        if($_ENV['RMQ_HOST']){
+            try {
+                $connection = new AMQPSSLConnection(
+                    $_ENV['RMQ_HOST'],
+                    $_ENV['RMQ_PORT'],
+                    $_ENV['RMQ_USER'],
+                    $_ENV['RMQ_PASSWORD'],
+                    $_ENV['RMQ_VHOST'],
+                    array('verify_peer' => true),
+                    array('heartbeat' => $_ENV['RMQ_HEARTBEAT'], 'read_write_timeout' => $_ENV['RMQ_RW_TIMEOUT'], 'connection_timeout' => 1)
+                );
+                $channel = $connection->channel();
+                $channel->exchange_declare($_ENV['RMQ_EXCHANGE'], 'fanout', false, true, false, false);
 
-            foreach ($perso_ids as $elem) {
-                $timestamp = new DateTimeImmutable();
-                $timestamp = substr($timestamp->format('Y-m-d\TG:i:s.u'),0,-3);
-                $txt = '{"identifiant":"'.$tab[$elem]['login'].'","urlPrefix":"'.$_ENV['URLPREFIX'].'","producteurTimestamp":"'.$timestamp.'","operation":"synchroAgenda","producteur":"planno"}';
+                foreach ($perso_ids as $elem) {
+                    $timestamp = new DateTimeImmutable();
+                    $timestamp = substr($timestamp->format('Y-m-d\TG:i:s.u'),0,-3);
+                    $txt = '{"identifiant":"'.$tab[$elem]['login'].'","urlPrefix":"'.$_ENV['URLPREFIX'].'","producteurTimestamp":"'.$timestamp.'","operation":"synchroAgenda","producteur":"planno"}';
 
-                error_log(date("[Y-m-d G:i:s]") . " [INFO] RMQ message ". print_r($txt,true) . "\n", 3, $_ENV['CL']);
+                    error_log(date("[Y-m-d G:i:s]") . " [INFO] RMQ message ". print_r($txt,true) . "\n", 3, $_ENV['CL']);
 
-                $msg = new AMQPMessage($txt);
-                $channel->basic_publish($msg, $_ENV['RMQ_EXCHANGE']);
+                    $msg = new AMQPMessage($txt);
+                    $channel->basic_publish($msg, $_ENV['RMQ_EXCHANGE']);
+                }
+
+                $channel->close();
+                $connection->close();
+            } catch (Exception $e) {
+                error_log(date("[Y-m-d G:i:s]") . " [ERROR] RMQ error | ". print_r($e->getMessage(),true) . "\n", 3, $_ENV['CL']);
             }
-
-            $channel->close();
-            $connection->close();
-        } catch (Exception $e) {
-            error_log(date("[Y-m-d G:i:s]") . " [ERROR] RMQ error | ". print_r($e->getMessage(),true) . "\n", 3, $_ENV['CL']);
         }
-
     }
 
     // Notes

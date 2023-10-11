@@ -646,6 +646,12 @@ function ContextMenu2agents(data, agent) {
           title_attr = e[1][0];
           content += '<font: style="color:red">' + 'TR (' + e[1][1] + ')' + '</font>';
         }
+
+        // UR1: 06F Set journey from other site as exclusion
+        if (e[0] == 'journey_site') {
+          title_attr = "Temps de trajet insuffisant pour rejoindre le poste depuis: "+e[1];
+          content += '<font: style="color:red">' + 'T:'+e[1];
+        }
       }
 
       exclusion = $('<span>').attr({
