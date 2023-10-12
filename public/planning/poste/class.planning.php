@@ -436,6 +436,9 @@ class planning
             }
             // Complète le tableau avec les postes, les sites, horaires et marquage "absent"
             $tab[$id]["planning"][]=array("debut"=> $elem["debut"], "fin"=> $elem["fin"], "absent"=> $elem["absent"], "site"=> $site, "poste"=> $elem['poste']);
+
+            // UR1: 04F save status for rmq export filter
+            $tab[$id]["statut"] = $agent->statut();
         }
     
         // $perso_ids = agents qui recevront une notifications
@@ -637,8 +640,8 @@ class planning
 
         // UR1: 04E Force refresh calendars after planning validation
         // UR1: 04E Go through rabbitmq to dissociate dependency to Partage API/performance
-
-        if($_ENV['RMQ_HOST']){
+        // UR1: 04F Ignore agents with 'Moniteur étudiant' status
+        if($_ENV['RMQ_HOST'] AND !empty($perso_ids)){
             try {
                 $connection = new AMQPSSLConnection(
                     $_ENV['RMQ_HOST'],
@@ -653,6 +656,9 @@ class planning
                 $channel->exchange_declare($_ENV['RMQ_EXCHANGE'], 'fanout', false, true, false, false);
 
                 foreach ($perso_ids as $elem) {
+                    if($tab[$elem]['statut'] == "Moniteur étudiant"){
+                        continue;
+                    }
                     $timestamp = new DateTimeImmutable();
                     $timestamp = substr($timestamp->format('Y-m-d\TG:i:s.u'),0,-3);
                     $txt = '{"identifiant":"'.$tab[$elem]['login'].'","urlPrefix":"'.$_ENV['URLPREFIX'].'","producteurTimestamp":"'.$timestamp.'","operation":"synchroAgenda","producteur":"planno"}';
