@@ -793,8 +793,9 @@ function fillContextMenuLevel1(data) {
   }
 
   // Call for available agents.
+  // UR1: 01H
   if (data.call_for_help && data.cell_enabled) {
-    menu1.append(contextMenuCallForhelp(data));
+    //menu1.append(contextMenuCallForhelp(data));
   }
 
   // Disable ans enable cell.
@@ -1290,7 +1291,7 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,forcer,sit
         if(result[i]['ur1_forced'] == 1){
           console.log("FORCED");
             agent+="*";
-            title = "*Présence forcée: " + title;
+            title = "*Présence vérifiée: " + title;
         }
 
         // Création d'une balise span avec les classes cellSpan et agent_ de façon à les repérer et agir dessus 
