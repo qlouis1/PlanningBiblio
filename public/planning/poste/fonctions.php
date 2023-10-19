@@ -49,7 +49,7 @@ function cellule_poste($date, $debut, $fin, $colspan, $output, $poste, $site)
                 // UR1: 03D Display a star next to forced agents names
                 if($elem['ur1_forced'] == 1){
                     $nom_affiche .= "*";
-                    $title = "*Présence forcée: " . $title;
+                    $title = "*Présence vérifiée: " . $title;
                 }
 
                 $resultat = $nom_affiche;
