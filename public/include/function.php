@@ -1426,7 +1426,7 @@ function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
             return "Absence non validée " . $f_time . ": " . $f_comment . "\n";
 
         case '1':
-            return "Absence " . ($site ? ("à [" . $f_site . "] ") : (""))  . $f_time . ": " . $f_comment . "\n";
+            return "Agenda Partage " . ($site ? ("à [" . $f_site . "] ") : (""))  . $f_time . ": " . $f_comment . "\n";
 
         case '2':
             return "Trajet depuis [" . $f_site . "]: " . $f_comment . " " . $f_time . "\n";
