@@ -1426,7 +1426,7 @@ function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
             return "Absence non validée " . $f_time . ": " . $f_comment . "\n";
 
         case '1':
-            return "Absence " . ($site ? ("à [" . $f_site . "] ") : (""))  . $f_time . ": " . $f_comment . "\n";
+            return "Agenda Partage " . ($site ? ("à [" . $f_site . "] ") : (""))  . $f_time . ": " . $f_comment . "\n";
 
         case '2':
             return "Trajet depuis [" . $f_site . "]: " . $f_comment . " " . $f_time . "\n";
@@ -1459,7 +1459,7 @@ function isImportedTeleworking($motif){
     if(is_null($motif)){
         return false;
     }
-    $set = array("ttp", "ttr", "teletravail");
+    $set = array("ttp", "ttr", "teletravail", "tde");
     $summary = strtr($motif, array('é' => 'e', 'É' => 'E'));
     $match = '/\b(' . implode('|', $set) . ')\b/i';
     if (preg_match($match, $summary) === 1) {

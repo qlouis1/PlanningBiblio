@@ -2429,12 +2429,12 @@ div.presents-absents {
 }
 
 /* Orange */
-.orange2.tr_horaires, .orange2.tr_separation, .orange2.tr_horaires td.td_postes{
+.orange.tr_horaires, .orange.tr_separation, .orange.tr_horaires td.td_postes{
   background: #f56623;
   color: #000;
 }
 
-.orange2 td.td_postes{
+.orange td.td_postes{
   background: #ffc9aa;
   color: #000;
 }
