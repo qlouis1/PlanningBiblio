@@ -1389,6 +1389,9 @@ function filterStatus($event)
     // Returns 0 if the event is to be filtered out, 1 if it is to be imported.
     if (isset($event['X-MICROSOFT-CDO-INTENDEDSTATUS'])) {
         if ($event['X-MICROSOFT-CDO-INTENDEDSTATUS'] == "FREE") {
+            if($event['CLASS'] == "PRIVATE") {
+                return 0;
+            }
             if ($event['SUMMARY']) {
                 if (!isImportedTeleworking($event['SUMMARY'])) {
                     return 0;
