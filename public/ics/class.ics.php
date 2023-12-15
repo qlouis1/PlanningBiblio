@@ -122,9 +122,9 @@ class CJICS
         $now = date('Ymd\THis\Z');  // Current time
         $config = $GLOBALS['config'];
 
-        if ($this->logs) {
-            logs("Agent #$perso_id : Table: $table, src: $src", "ICS", $CSRFToken);
-        }
+        #if ($this->logs) {
+        #    logs("Agent #$perso_id : Table: $table, src: $src", "ICS", $CSRFToken);
+        #}
 
         // Get available absences reasons
         $reasons = array();
@@ -140,7 +140,7 @@ class CJICS
         // UR1: 04G Partage calendar has week start at sunday
         $ical   = new ICal($src);
         $events = $ical->events();
-
+       # error_log(date("[Y-m-d G:i:s]")."==|events are".print_r($events,true)." \n",3, $_ENV['CL']);
         // Récupération du nom du calendrier
         $calName = $ical->calendarName();
         $calName = removeAccents($calName);
@@ -157,12 +157,12 @@ class CJICS
             logs("Agent #$perso_id : Calendrier: $calName, Fuseau horaire: $calTimeZone", "ICS", $CSRFToken);
         }
 
-        if (!is_array($events) or empty($events)) {
-            if ($this->logs) {
-                logs("Agent #$perso_id : Aucun élément trouvé dans le fichier $src", "ICS", $CSRFToken);
-                $events = array();
-            }
-        }
+        #if (!is_array($events) or empty($events)) {
+        #    if ($this->logs) {
+        #        logs("Agent #$perso_id : Aucun élément trouvé dans le fichier $src", "ICS", $CSRFToken);
+        #        $events = array();
+        #    }
+        #}
 
         // Récupération de l'email de l'agent
         $p = new personnel();
