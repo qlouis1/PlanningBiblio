@@ -146,7 +146,9 @@ class CJICS
         $calName = removeAccents($calName);
 
         if (empty($calName)) {
-            $calName = "imported_calendar_{$this->number}_for_agent_$perso_id";
+            #$calName = "imported_calendar_{$this->number}_for_agent_$perso_id";
+            # UR1: 04I keep consistant cal name
+            $calName = "Calendar";
         }
 
         // Product ID / Product name
@@ -412,13 +414,18 @@ class CJICS
                 if ($this->pattern == '[SUMMARY]') {
                     $commentaires = !empty($elem['DESCRIPTION']) ? $elem['DESCRIPTION'] : '';
                 } else {
-                    $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
-                    if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        // UR1: 03B As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
-                        //$commentaires .= "<br/>\n";
-                    }
-                    if (!empty($elem["DESCRIPTION"])) {
-                        //$commentaires .= $elem['DESCRIPTION'];
+                    // UR1: 04I don't import private events summary
+                    if ($elem["CLASS"] == "PRIVATE") {
+                        $commentaires = '';
+                    } else {
+                        $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
+                        if ($commentaires and !empty($elem['DESCRIPTION'])) {
+                            // UR1: 03B As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                            //$commentaires .= "<br/>\n";
+                        }
+                        if (!empty($elem["DESCRIPTION"])) {
+                            //$commentaires .= $elem['DESCRIPTION'];
+                        }
                     }
                 }
 
