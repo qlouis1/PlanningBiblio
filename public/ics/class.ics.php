@@ -122,9 +122,9 @@ class CJICS
         $now = date('Ymd\THis\Z');  // Current time
         $config = $GLOBALS['config'];
 
-        if ($this->logs) {
-            logs("Agent #$perso_id : Table: $table, src: $src", "ICS", $CSRFToken);
-        }
+        #if ($this->logs) {
+        #    logs("Agent #$perso_id : Table: $table, src: $src", "ICS", $CSRFToken);
+        #}
 
         // Get available absences reasons
         $reasons = array();
@@ -140,13 +140,15 @@ class CJICS
         // UR1: 04G Partage calendar has week start at sunday
         $ical   = new ICal($src);
         $events = $ical->events();
-
+       # error_log(date("[Y-m-d G:i:s]")."==|events are".print_r($events,true)." \n",3, $_ENV['CL']);
         // Récupération du nom du calendrier
         $calName = $ical->calendarName();
         $calName = removeAccents($calName);
 
         if (empty($calName)) {
-            $calName = "imported_calendar_{$this->number}_for_agent_$perso_id";
+            #$calName = "imported_calendar_{$this->number}_for_agent_$perso_id";
+            # UR1: 04I keep consistant cal name
+            $calName = "Calendar";
         }
 
         // Product ID / Product name
@@ -157,12 +159,12 @@ class CJICS
             logs("Agent #$perso_id : Calendrier: $calName, Fuseau horaire: $calTimeZone", "ICS", $CSRFToken);
         }
 
-        if (!is_array($events) or empty($events)) {
-            if ($this->logs) {
-                logs("Agent #$perso_id : Aucun élément trouvé dans le fichier $src", "ICS", $CSRFToken);
-                $events = array();
-            }
-        }
+        #if (!is_array($events) or empty($events)) {
+        #    if ($this->logs) {
+        #        logs("Agent #$perso_id : Aucun élément trouvé dans le fichier $src", "ICS", $CSRFToken);
+        #        $events = array();
+        #    }
+        #}
 
         // Récupération de l'email de l'agent
         $p = new personnel();
@@ -412,13 +414,18 @@ class CJICS
                 if ($this->pattern == '[SUMMARY]') {
                     $commentaires = !empty($elem['DESCRIPTION']) ? $elem['DESCRIPTION'] : '';
                 } else {
-                    $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
-                    if ($commentaires and !empty($elem['DESCRIPTION'])) {
-                        // UR1: 03B As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
-                        //$commentaires .= "<br/>\n";
-                    }
-                    if (!empty($elem["DESCRIPTION"])) {
-                        //$commentaires .= $elem['DESCRIPTION'];
+                    // UR1: 04I don't import private events summary
+                    if ($elem["CLASS"] == "PRIVATE") {
+                        $commentaires = '';
+                    } else {
+                        $commentaires = !empty($elem['SUMMARY']) ? $elem['SUMMARY'] : '';
+                        if ($commentaires and !empty($elem['DESCRIPTION'])) {
+                            // UR1: 03B As we display the Summary of events in the Planning page, we keep it clean by ignoring the descriptions
+                            //$commentaires .= "<br/>\n";
+                        }
+                        if (!empty($elem["DESCRIPTION"])) {
+                            //$commentaires .= $elem['DESCRIPTION'];
+                        }
                     }
                 }
 
