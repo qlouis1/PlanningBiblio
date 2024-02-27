@@ -443,7 +443,7 @@ class ICal
                 $frequency = $rrules['FREQ'];
                 // Get Start timestamp
                 // UR1: debug
-                $logE=true;
+                $logE=false;
                 $debugDTSTART = date("w",strtotime($anEvent['DTSTART']));
 
                 $start_timestamp = $this->iCalDateToUnixTimestamp($anEvent['DTSTART']);
