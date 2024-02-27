@@ -2438,3 +2438,8 @@ div.presents-absents {
   background: #ffc9aa;
   color: #000;
 }
+
+#pl-calendar .calendar-datepicker{
+  font-size: 87%;
+}
+
