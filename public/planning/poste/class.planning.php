@@ -530,7 +530,7 @@ class planning
         // Envoi du mail
         $sujet=$notificationType=="nouveauPlanning"?"Validation du planning du ".dateFr($date):"Modification du planning du ".dateFr($date);
 
-        if($envoieMail){
+        if($envoieMail && $notificationType != "nouveauPlanning"){
         // Tous les agents qui doivent être notifiés.
         foreach ($perso_ids as $elem) {
             // Création du message avec date et nom de l'agent
