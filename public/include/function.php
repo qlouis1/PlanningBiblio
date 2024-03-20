@@ -1435,7 +1435,14 @@ function format_abs($type, $comment, $start, $end, $site=null, $wrap=40){
     $f_start = date("G\hi",strtotime($start));
     $f_end = date("G\hi",strtotime($end));
     $f_time = (date('H',strtotime($start)) == "00" and date('H',strtotime($end)) == "23") ? "toute la journée " : "de " . ($f_start . " à " . $f_end);
-    $f_site = $site == -1 ? "Ext" : $GLOBALS['config']["Multisites-site$site"];
+    # UR1: 00A fix multisite-site0 warning
+    if ($site == -1) {
+        $f_site = "Ext";
+    } else if (array_key_exists("Multisites-site$site", $GLOBALS['config'])) {
+        $f_site = $GLOBALS['config']["Multisites-site$site"];
+    } else {
+        $f_site = "";
+    }
     $f_comment = explode("|||",wordwrap($comment,$wrap,"|||",true))[0];
     $f_comment .= strlen($comment) >= $wrap ? "..." : "";
 
