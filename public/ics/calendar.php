@@ -252,6 +252,13 @@ if (isset($planning)) {
     foreach ($tab as $elem) {
         $debut = date("Ymd\THis", strtotime($elem['date']." ".$elem['debut']));
         $fin = date("Ymd\THis", strtotime($elem['date']." ".$elem['fin']));
+        # UR1: 00B fix unknow poste key
+        if (!array_key_exists($elem['poste'],$postes)){
+            $postes[$elem['poste']] = array(
+                "nom" => "Poste supprimé",
+                "bloquant" => 1
+            );
+        }
         // Nom du poste pour SUMMARY
         $poste = html_entity_decode($postes[$elem['poste']]['nom'], ENT_QUOTES|ENT_IGNORE, 'UTF-8');
         // Site et étage pour LOCATION
