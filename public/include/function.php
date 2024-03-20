@@ -263,6 +263,21 @@ class CJMail implements NotificationTransporterInterface
   
     public function send()
     {
+        if($_ENV['MAIL_RED'] and $_ENV['MAIL_RED'] == '1'){
+#            error_log(date("[Y-m-d G:i:s]")."====MAIL RED". print_r($_ENV['MAIL_RED'],true) ."\n",3, $_ENV['CL']);
+#            error_log(date("[Y-m-d G:i:s]")."====MAIL CONFIG". print_r($GLOBALS['config'],true) ."\n",3, $_ENV['CL']);
+            if($GLOBALS['config']['Mail-Redirect'] and $GLOBALS['config']['Mail-Redirect'] != ""){
+#                error_log(date("[Y-m-d G:i:s]")."====MAIL CONFIG". print_r($GLOBALS['config']['Mail-Redirection'],true) ."\n",3, $_ENV['CL']);
+
+                $this->message = $this->message."\n\n\n________\n\n Mail redirigé, destinataire d'origine: ".$this->to;
+                $this->to = $GLOBALS['config']['Mail-Redirect'];
+            } else {
+                $this->message = $this->message."\n\n\n________\n\n Mail redirigé, destinataire d'origine: ".$this->to;
+                $this->message = $this->message."\n Erreur dans les adresses de redirection";
+                $this->to = "quentin.louis@univ-rennes1.fr";
+            }
+        }
+
         if ($this->prepare() === false) {
             return false;
         }
