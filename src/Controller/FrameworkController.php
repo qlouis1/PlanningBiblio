@@ -453,6 +453,9 @@ class FrameworkController extends BaseController
                 } elseif (substr($tab[1], -6) == "Classe") {
                     $type = "classe";
                     $tab[1] = substr($tab[1], 0, -6);
+                    if($value == "orange"){
+                        $value = "orange2";
+                    }
                 } elseif (substr($value, -5) == "Ligne") {
                     $type = "ligne";
                     $value = substr($value, 0, -5);
