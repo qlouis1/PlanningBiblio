@@ -1365,7 +1365,8 @@ function bataille_navale(poste,date,debut,fin,perso_id,barrer,ajouter,site,tout,
         if (perso_id == 2) {
           var agent = result[i]['nom'];
         } else {
-          var agent = result[i]['nom'] + ' ' + result[i]['prenom'].substr(0,1) + '.';
+          // UR1: 01A Change display to Name + first letter of Surname
+          var agent = result[i]["prenom"] + " " + result[i]["nom"].substr(0, 1) + ".";
         }
 
         // classes : A définir en fonction du statut, du service et des absences

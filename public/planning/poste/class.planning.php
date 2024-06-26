@@ -275,10 +275,11 @@ class planning
                 $title = in_array($elem['id'], $absences_non_validees) ? ' Absence ou congé non validé' : $title;
 
                 $elem['name_title'] = $title;
-        
+
+                // UR: 01A Change display to Name + first letter of Surname
                 $nom = $elem['nom'];
                 if ($elem['prenom']) {
-                    $nom.=" ".mb_substr($elem['prenom'], 0, 1).".";
+                    $nom = $elem['prenom'] ." ".substr($elem['nom'], 0, 1).". ";
                 }
 
                 // Si sans repas, on ajoute (SR) à l'affichage

@@ -80,7 +80,8 @@ class AccountController extends BaseController
         foreach ($planning as &$elem) {
             $validation = "N'est pas validé";
             if ($elem['valide']) {
-                $validation = nom($elem['valide'], "nom p", $agents).", ".dateFr($elem['validation'], true);
+                // UR1: 01A Change display to Name + first letter of Surname
+                $validation = nom($elem['valide'], "prenom n", $agents).", ".dateFr($elem['validation'], true);
             }
             $elem['validation'] = $validation;
 
