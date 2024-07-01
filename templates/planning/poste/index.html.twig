@@ -59,7 +59,7 @@
         <table id='tabsemaine1' cellspacing='0' cellpadding='0' class='text tabsemaine1'>
 
           {% for t in tabs %}
-            <tr class='tr_horaires tableau{{ t.j }} {{ t.classe }} {{ t.hiddenTable }}'>
+            <tr class='tr_horaires tableau{{ t.j }}  {{ t.hiddenTable }}' style='background-color:{{ t.classe }}'>
               <td class='td_postes sticky td_sep' data-id='{{ t.j }}' data-title='{{ t.titre2 }}'>
                 {{ t.titre }} {{ t.masqueTableaux | raw }}
               </td>

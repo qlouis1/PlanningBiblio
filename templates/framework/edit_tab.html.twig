@@ -222,8 +222,7 @@
                 <tr class='tr_horaires' style='text-align:center;'>
                   <td style='white-space:nowrap;text-align:left;'>
                     Titre <input type='text' name='select_{{ tab.nom }}Titre_0' class='tr_horaires select_titre' style='text-align:center;white-space:nowrap;' value="{{ tab.titre | raw }}"/>&nbsp;
-                    Classe<sup>*</sup>
-                    <input type='text' name='select_{{ tab.nom }}Classe_0' class='tr_horaires select_titre' style='text-align:center;width:120px;' value="{{ tab.classe | raw }}"/>
+                    Couleur <input type='color' name='select_{{ tab.nom }}Classe_0' class='tr_horaires select_titre' style='width:180px;' value="{{tab.classe is null ? "#29495C" : tab.classe | raw }}"/>
                     <a href="javascript:ajout('select_{{ tab.nom }}_',-1);">
                       <span class='pl-icon pl-icon-add-white' title='Ajouter'></span>
                     </a>
