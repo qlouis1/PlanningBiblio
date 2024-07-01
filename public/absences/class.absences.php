@@ -717,7 +717,7 @@ class absences
         $filter.=" AND `{$dbprefix}personnel`.`supprime` IN ('$deletedAgents') ";
 
         // Sort
-        $sort=$sort?$sort:"`debut`,`fin`,`nom`,`prenom`";
+        $sort=$sort?$sort:"`debut`,`fin`,`prenom`,`nom`";
 
 	if (is_numeric($agent) and $agent !=0) {
             $filter.=" AND `{$dbprefix}personnel`.`id` = '$agent' ";
@@ -802,7 +802,7 @@ class absences
                         $groupe2 = $elem2['groupe'].$elem2['debut'].$elem2['fin'];
                         if ($groupe2 == $groupe) {
                             $perso_ids[]=$elem2['perso_id'];
-                            $agents[]=$elem2['nom']." ".$elem2['prenom'];
+                            $agents[]=$elem2['prenom']." ".$elem2['nom'];
 
                             // Set $absence->documents to false
                             // to prevent loading documents
@@ -821,7 +821,7 @@ class absences
                     $elem['agents']=$agents;
                 } else {
                     $elem['perso_ids'][]=$elem['perso_id'];
-                    $elem['agents'][]=$elem['nom']." ".$elem['prenom'];
+                    $elem['agents'][]=$elem['prenom']." ".$elem['nom'];
                 }
 
                 // Le champ commentaires peut comporter des <br/> ou équivalents HTML lorsqu'il est importé depuis un fichier ICS. On les remplace par \n

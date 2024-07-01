@@ -146,10 +146,10 @@ class AbsenceController extends BaseController
 
                 $id=$elem['id'];
 
-                $elem['nom_n1a'] = $elem['valide_n1'] != 99999 ? nom($elem['valide_n1'], 'nom p', $agents).", " : null;
-                $elem['nom_n1b'] = $elem['valide_n1'] != -99999 ? nom(-$elem['valide_n1'], 'nom p', $agents).", " : null;
-                $elem['nom_n2a'] = $elem['valide'] != 99999 ? nom($elem['valide'], 'nom p', $agents).", " : null;
-                $elem['nom_n2b'] = $elem['valide'] != -99999 ? nom(-$elem['valide'], 'nom p', $agents).", " : null;
+                $elem['nom_n1a'] = $elem['valide_n1'] != 99999 ? nom($elem['valide_n1'], 'prenom n', $agents).", " : null;
+                $elem['nom_n1b'] = $elem['valide_n1'] != -99999 ? nom(-$elem['valide_n1'], 'prenom n', $agents).", " : null;
+                $elem['nom_n2a'] = $elem['valide'] != 99999 ? nom($elem['valide'], 'prenom n', $agents).", " : null;
+                $elem['nom_n2b'] = $elem['valide'] != -99999 ? nom(-$elem['valide'], 'prenom n', $agents).", " : null;
                 $etat="Demandée";
                 $etat=$elem['valide_n1']>0?"En attente de validation hiérarchique, {$elem['nom_n1a']}".dateFr($elem['validation_n1'], true):$etat;
                 $etat=$elem['valide_n1']<0?"En attente de validation hiérarchique, {$elem['nom_n1b']}".dateFr($elem['validation_n1'], true):$etat;

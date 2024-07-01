@@ -576,7 +576,7 @@ function updateAgentsList(me,select_id){
       result=JSON.parse(result);
       $("#"+select_id).html("<option value='0'>Tous</option>");
       for(key in result){
-	$("#"+select_id).append("<option value='"+result[key]["id"]+"'>"+result[key]["nom"]+" "+result[key]["prenom"]+"</option>");
+	$("#"+select_id).append("<option value='"+result[key]["id"]+"'>"+result[key]["prenom"]+" "+result[key]["nom"]+"</option>");
 	if(result[key]["id"]==index){
 	  in_array=true;
 	}

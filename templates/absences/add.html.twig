@@ -76,18 +76,18 @@
                       {% for a in agents %}
                         {% if a.id == loggedin_id and agent_preselection %}
                           <option value='{{ a.id }}' id='option{{ a.id }}' style="display:none;">
-                            {{ a.nom }} {{ a.prenom }}
+                            {{ a.prenom }} {{ a.nom }}
                           </option>
                         {% else %}
                           <option value='{{ a.id }}' id='option{{ a.id }}'>
-                            {{ a.nom }} {{ a.prenom }}
+                            {{ a.prenom }} {{ a.nom }}
                           </option>
                         {% endif %}
                       {% endfor %}
                     </select>
                     {% else %}
                       <input type='hidden' name='perso_id' value='{{ loggedin_id }}' class='perso_ids_hidden' />
-                      {{ loggedin_name }} {{ loggedin_firstname }}
+                      {{ loggedin_firstname }} {{ loggedin_name }}
 
                     {% endif %}
                   </td>
