@@ -219,8 +219,15 @@ class planningHebdo
         // Recherche des services
         $p=new personnel();
         $p->fetch();
+        // UR1: 01B Display sites instead of services
+        // fetch already gets everything from db so we have the site data available
+        // foreach ($p->elements as $elem) {
+        //     $services[$elem['id']]=$elem['service'];
+        // }
         foreach ($p->elements as $elem) {
-            $services[$elem['id']]=$elem['service'];
+            foreach($elem['sites'] as $s){
+                $sites[$elem['id']][] = $GLOBALS['config']["Multisites-site$s"];
+            }
         }
 
         // Filtre de recherche
@@ -298,7 +305,9 @@ class planningHebdo
                 $elem['temps'] = json_decode(html_entity_decode($elem['temps'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['breaktime'] = json_decode(html_entity_decode($elem['breaktime'], ENT_QUOTES|ENT_IGNORE, 'UTF-8'), true);
                 $elem['nom'] = $elem['perso_id']!=0 ? nom($elem['perso_id'], 'nom p', $agents) : "";
-                $elem['service']= $elem['perso_id']!=0 ? $services[$elem['perso_id']] : "";
+                // UR1: 01B Display sites instead of services
+                //$elem['service']=$services[$elem['perso_id']];
+                $elem['sites']=!empty($sites[$elem['perso_id']]) ? implode(", ",$sites[$elem['perso_id']]) : "";
                 $this->elements[]=$elem;
             }
         }
