@@ -1484,9 +1484,9 @@ function isImportedTeleworking($motif){
     if(is_null($motif)){
         return false;
     }
-    $set = array("ttp", "ttr", "teletravail", "tde");
+    $set = array("ttp", "ttr", "teletravail", "tde", "ttfx", "ttfl");
     $summary = strtr($motif, array('é' => 'e', 'É' => 'E'));
-    $match = '/\b(' . implode('|', $set) . ')\b/i';
+    $match = '/\b^(' . implode('|', $set) . ')$\b/i';
     if (preg_match($match, $summary) === 1) {
         return true;
     }
